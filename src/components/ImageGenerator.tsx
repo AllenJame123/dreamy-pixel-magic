@@ -19,16 +19,29 @@ const ImageGenerator = () => {
 
   const initializeModel = async () => {
     try {
+      // Access token is required for this model
+      const accessToken = process.env.HUGGING_FACE_TOKEN;
+      
+      if (!accessToken) {
+        toast.error('Hugging Face API token is required');
+        return;
+      }
+
       const pipe = await pipeline(
         'image-to-image',
         'Xenova/sd-turbo',
-        { device: 'webgpu' }
+        { 
+          device: 'webgpu',
+          credentials: {
+            accessToken: accessToken
+          }
+        }
       );
       setModel(pipe);
       toast.success('Model loaded successfully!');
     } catch (error) {
       console.error('Model initialization error:', error);
-      toast.error('Failed to load the model. Please ensure your browser supports WebGPU.');
+      toast.error('Failed to load the model. Please ensure your browser supports WebGPU and you have provided a valid API token.');
     }
   };
 
