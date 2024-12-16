@@ -4,6 +4,12 @@ import './index.css';
 import { supabase } from './lib/supabase';
 
 // Make supabase available in console for debugging
+declare global {
+  interface Window {
+    supabase: typeof supabase;
+  }
+}
+
 if (import.meta.env.DEV) {
   window.supabase = supabase;
 }

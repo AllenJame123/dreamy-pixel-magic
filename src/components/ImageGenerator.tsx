@@ -19,8 +19,7 @@ const ImageGenerator = () => {
 
   const initializeModel = async () => {
     try {
-      // Access token is required for this model
-      const accessToken = process.env.HUGGING_FACE_TOKEN;
+      const accessToken = import.meta.env.VITE_HUGGING_FACE_TOKEN;
       
       if (!accessToken) {
         toast.error('Hugging Face API token is required');
@@ -31,10 +30,7 @@ const ImageGenerator = () => {
         'image-to-image',
         'Xenova/sd-turbo',
         { 
-          device: 'webgpu',
-          credentials: {
-            accessToken: accessToken
-          }
+          device: 'webgpu'
         }
       );
       setModel(pipe);
@@ -64,7 +60,6 @@ const ImageGenerator = () => {
       setIsGenerating(true);
       const result = await model(prompt);
       
-      // Convert the generated image tensor to a blob URL
       const blob = new Blob([result], { type: 'image/png' });
       const imageURL = URL.createObjectURL(blob);
       
