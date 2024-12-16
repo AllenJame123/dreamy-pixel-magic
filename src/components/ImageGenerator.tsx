@@ -20,8 +20,8 @@ const ImageGenerator = () => {
   const initializeModel = async () => {
     try {
       const pipe = await pipeline(
-        'image-to-image',
-        'stabilityai/stable-diffusion-2-1',
+        'text-to-image',
+        'Xenova/sd-turbo',
         { device: 'webgpu' }
       );
       setModel(pipe);
