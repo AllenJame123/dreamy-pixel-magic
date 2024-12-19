@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Loader2, Sparkles } from "lucide-react";
 import { toast } from 'sonner';
 import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
 import GeneratedImage from './image-display/GeneratedImage';
-import { Progress } from "@/components/ui/progress";
+import PromptInput from './image-generator/PromptInput';
+import ProgressIndicator from './image-generator/ProgressIndicator';
+import GenerateButton from './image-generator/GenerateButton';
 
 interface GeneratedImage {
   imageURL: string;
@@ -103,12 +102,6 @@ const ImageGenerator = () => {
     handleGenerateImage();
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && !isGenerating) {
-      handleGenerate();
-    }
-  };
-
   const handleDownload = async () => {
     if (!generatedImage?.imageURL) return;
     
@@ -139,42 +132,24 @@ const ImageGenerator = () => {
         </div>
 
         <Card className="p-6 glass-panel space-y-4">
-          <div className="relative">
-            <Input
-              placeholder="Describe the image you want to generate..."
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="glass-panel pr-12"
-              disabled={isGenerating}
-            />
-            <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-          </div>
+          <PromptInput
+            prompt={prompt}
+            setPrompt={setPrompt}
+            isGenerating={isGenerating}
+            onEnterPress={handleGenerate}
+          />
 
-          {isGenerating && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Generating...</span>
-                <span>{timer.toFixed(1)}s</span>
-              </div>
-              <Progress value={progress} className="h-1" />
-            </div>
-          )}
+          <ProgressIndicator
+            isGenerating={isGenerating}
+            timer={timer}
+            progress={progress}
+          />
 
-          <Button
+          <GenerateButton
             onClick={handleGenerate}
+            isGenerating={isGenerating}
             disabled={isGenerating || !prompt.trim()}
-            className="w-full"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              'Generate Image'
-            )}
-          </Button>
+          />
         </Card>
 
         {generatedImage && (
