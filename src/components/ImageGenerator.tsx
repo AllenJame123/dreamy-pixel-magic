@@ -29,23 +29,23 @@ const ImageGenerator = () => {
     };
   }, []);
 
-  const resetProgress = () => {
+  const cleanupInterval = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-    setTimer(0);
-    setProgress(0);
   };
 
-  const startProgress = () => {
-    resetProgress();
-    const startTime = Date.now();
+  const initializeProgress = () => {
+    cleanupInterval();
+    setTimer(0);
+    setProgress(0);
     
+    const startTime = Date.now();
     intervalRef.current = setInterval(() => {
       const elapsed = (Date.now() - startTime) / 1000;
       setTimer(elapsed);
-      setProgress(Math.min(elapsed * 3.33, 100)); // Complete in ~30 seconds
+      setProgress(Math.min(elapsed * 3.33, 100));
     }, 100);
   };
 
@@ -71,33 +71,29 @@ const ImageGenerator = () => {
       return;
     }
 
+    cleanupInterval();
+    setIsGenerating(true);
+    setProgress(0);
+    setTimer(0);
+
     try {
-      resetProgress();
-      setIsGenerating(true);
-      startProgress();
-      
+      initializeProgress();
       const imageUrl = await generateImage(prompt);
+      const currentTime = timer;
       
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+      cleanupInterval();
       
-      const finalTime = timer;
       setGeneratedImage({
         imageURL: imageUrl,
         prompt: prompt
       });
       
-      toast.success(`Image generated in ${finalTime.toFixed(1)} seconds!`);
+      toast.success(`Image generated in ${currentTime.toFixed(1)} seconds!`);
     } catch (error) {
       console.error('Generation error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to generate image. Please try again.');
     } finally {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+      cleanupInterval();
       setIsGenerating(false);
       setProgress(100);
     }
