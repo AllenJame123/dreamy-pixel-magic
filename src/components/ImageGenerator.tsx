@@ -5,17 +5,65 @@ import { Card } from "@/components/ui/card";
 import { Loader2, Download, Sparkles, Type } from "lucide-react";
 import { toast } from 'sonner';
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface GeneratedImage {
   imageURL: string;
   prompt: string;
 }
 
+interface TextStyle {
+  content: string;
+  position: string;
+  font: string;
+  color: string;
+  size: string;
+}
+
 const ImageGenerator = () => {
   const [prompt, setPrompt] = useState('');
-  const [overlayText, setOverlayText] = useState('');
+  const [textStyle, setTextStyle] = useState<TextStyle>({
+    content: '',
+    position: 'center',
+    font: 'Arial',
+    color: '#000000',
+    size: 'medium'
+  });
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<GeneratedImage | null>(null);
+
+  const positions = [
+    { value: 'top-left', label: 'Top Left' },
+    { value: 'top-center', label: 'Top Center' },
+    { value: 'top-right', label: 'Top Right' },
+    { value: 'center-left', label: 'Center Left' },
+    { value: 'center', label: 'Center' },
+    { value: 'center-right', label: 'Center Right' },
+    { value: 'bottom-left', label: 'Bottom Left' },
+    { value: 'bottom-center', label: 'Bottom Center' },
+    { value: 'bottom-right', label: 'Bottom Right' },
+  ];
+
+  const fonts = [
+    { value: 'Arial', label: 'Arial' },
+    { value: 'Times New Roman', label: 'Times New Roman' },
+    { value: 'Helvetica', label: 'Helvetica' },
+    { value: 'Georgia', label: 'Georgia' },
+    { value: 'Verdana', label: 'Verdana' },
+  ];
+
+  const sizes = [
+    { value: 'small', label: 'Small' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'large', label: 'Large' },
+    { value: 'x-large', label: 'Extra Large' },
+  ];
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -25,9 +73,10 @@ const ImageGenerator = () => {
 
     try {
       setIsGenerating(true);
-      const finalPrompt = overlayText.trim() 
-        ? `${prompt}. Include the text "${overlayText}" integrated naturally in the image, with clear readable typography`
-        : prompt;
+      const textDetails = textStyle.content ? 
+        `Include the text "${textStyle.content}" in ${textStyle.size} size, using ${textStyle.font} font, in ${textStyle.color} color, positioned at the ${textStyle.position} of the image. Make sure the text is clear and readable.` 
+        : '';
+      const finalPrompt = textStyle.content ? `${prompt}. ${textDetails}` : prompt;
 
       const { data, error } = await supabase.functions.invoke('generate-image', {
         body: { prompt: finalPrompt }
@@ -99,16 +148,76 @@ const ImageGenerator = () => {
               <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             </div>
 
-            <div className="relative">
-              <Input
-                placeholder="Add text to include in the image (optional)..."
-                value={overlayText}
-                onChange={(e) => setOverlayText(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="glass-panel pr-12"
-                disabled={isGenerating}
-              />
-              <Type className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <div className="space-y-4">
+              <div className="relative">
+                <Input
+                  placeholder="Add text to include in the image..."
+                  value={textStyle.content}
+                  onChange={(e) => setTextStyle({ ...textStyle, content: e.target.value })}
+                  className="glass-panel pr-12"
+                  disabled={isGenerating}
+                />
+                <Type className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              </div>
+
+              {textStyle.content && (
+                <div className="grid grid-cols-2 gap-4">
+                  <Select
+                    value={textStyle.position}
+                    onValueChange={(value) => setTextStyle({ ...textStyle, position: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Position" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {positions.map((pos) => (
+                        <SelectItem key={pos.value} value={pos.value}>
+                          {pos.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={textStyle.font}
+                    onValueChange={(value) => setTextStyle({ ...textStyle, font: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Font" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {fonts.map((font) => (
+                        <SelectItem key={font.value} value={font.value}>
+                          {font.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Input
+                    type="color"
+                    value={textStyle.color}
+                    onChange={(e) => setTextStyle({ ...textStyle, color: e.target.value })}
+                    className="h-10"
+                  />
+
+                  <Select
+                    value={textStyle.size}
+                    onValueChange={(value) => setTextStyle({ ...textStyle, size: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Size" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sizes.map((size) => (
+                        <SelectItem key={size.value} value={size.value}>
+                          {size.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           </div>
 
