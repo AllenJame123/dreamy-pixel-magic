@@ -17,39 +17,35 @@ const ImageGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<GeneratedImage | null>(null);
   const [timer, setTimer] = useState(0);
-  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
-  }, [intervalId]);
+    let intervalId: NodeJS.Timeout | null = null;
 
-  const startTimer = () => {
-    if (intervalId) clearInterval(intervalId);
+    if (isGenerating) {
+      intervalId = setInterval(() => {
+        setTimer(prev => prev + 0.1);
+        setProgress(prev => Math.min(prev + 0.333, 100));
+      }, 100);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isGenerating]);
+
+  const resetState = () => {
     setTimer(0);
     setProgress(0);
-    const id = setInterval(() => {
-      setTimer(prev => prev + 0.1);
-      setProgress(prev => Math.min(prev + 0.333, 100));
-    }, 100);
-    setIntervalId(id);
-  };
-
-  const stopTimer = () => {
-    if (intervalId) {
-      clearInterval(intervalId);
-      setIntervalId(null);
-    }
+    setIsGenerating(false);
   };
 
   const handleGenerateImage = async () => {
     if (!prompt.trim()) {
       toast.error('Please enter a prompt');
-      setIsGenerating(false);
-      stopTimer();
-      setProgress(0);
+      resetState();
       return;
     }
 
@@ -59,7 +55,6 @@ const ImageGenerator = () => {
       });
 
       if (error) {
-        console.error('Supabase function error:', error);
         throw new Error(`Function error: ${error.message}`);
       }
 
@@ -80,9 +75,7 @@ const ImageGenerator = () => {
       console.error('Generation error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to generate image. Please try again.');
     } finally {
-      stopTimer();
-      setIsGenerating(false);
-      setProgress(0);
+      resetState();
     }
   };
 
@@ -92,7 +85,8 @@ const ImageGenerator = () => {
       return;
     }
     setIsGenerating(true);
-    startTimer();
+    setTimer(0);
+    setProgress(0);
     handleGenerateImage();
   };
 
