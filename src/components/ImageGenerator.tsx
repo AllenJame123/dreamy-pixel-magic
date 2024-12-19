@@ -19,6 +19,7 @@ const ImageGenerator = () => {
   const [generatedImage, setGeneratedImage] = useState<GeneratedImage | null>(null);
   const [timer, setTimer] = useState(0);
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     return () => {
@@ -26,11 +27,19 @@ const ImageGenerator = () => {
     };
   }, [intervalId]);
 
+  useEffect(() => {
+    if (progress >= 100 && isGenerating) {
+      handleGenerateImage();
+    }
+  }, [progress]);
+
   const startTimer = () => {
     if (intervalId) clearInterval(intervalId);
     setTimer(0);
+    setProgress(0);
     const id = setInterval(() => {
       setTimer(prev => prev + 0.1);
+      setProgress(prev => Math.min(prev + 2, 100));
     }, 100);
     setIntervalId(id);
   };
@@ -42,15 +51,8 @@ const ImageGenerator = () => {
     }
   };
 
-  const handleGenerate = async () => {
-    if (!prompt.trim()) {
-      toast.error('Please enter a prompt');
-      return;
-    }
-
+  const handleGenerateImage = async () => {
     try {
-      setIsGenerating(true);
-      startTimer();
       console.log('Sending prompt to edge function:', prompt);
       const { data, error } = await supabase.functions.invoke('generate-image', {
         body: { prompt }
@@ -78,7 +80,17 @@ const ImageGenerator = () => {
     } finally {
       stopTimer();
       setIsGenerating(false);
+      setProgress(0);
     }
+  };
+
+  const handleGenerate = () => {
+    if (!prompt.trim()) {
+      toast.error('Please enter a prompt');
+      return;
+    }
+    setIsGenerating(true);
+    startTimer();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -135,7 +147,7 @@ const ImageGenerator = () => {
                 <span>Generating...</span>
                 <span>{timer.toFixed(1)}s</span>
               </div>
-              <Progress value={timer * 10} className="h-1" />
+              <Progress value={progress} className="h-1" />
             </div>
           )}
 
