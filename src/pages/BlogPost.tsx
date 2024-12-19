@@ -2,16 +2,25 @@ import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
-const blogPosts = {
-  1: {
+type BlogPost = {
+  title: string;
+  content: string;
+};
+
+type BlogPosts = {
+  [key: string]: BlogPost;
+};
+
+const blogPosts: BlogPosts = {
+  "1": {
     title: "Getting Started with AI Image Generation",
     content: "This is a detailed guide about getting started with AI image generation...",
   },
-  2: {
+  "2": {
     title: "Best Practices for Prompt Engineering",
     content: "Learn about the best practices for writing effective prompts...",
   },
-  3: {
+  "3": {
     title: "Understanding Image Generation Models",
     content: "Explore the technical details behind AI image generation models...",
   },
@@ -19,7 +28,7 @@ const blogPosts = {
 
 const BlogPost = () => {
   const { id } = useParams();
-  const post = blogPosts[id as keyof typeof blogPosts];
+  const post = id ? blogPosts[id] : null;
 
   if (!post) {
     return <div>Post not found</div>;
