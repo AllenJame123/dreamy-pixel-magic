@@ -127,7 +127,8 @@ const ImageGenerator = () => {
       <div className="w-full max-w-2xl space-y-4">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold tracking-tight">AI Image Generator</h1>
-          <p className="text-muted-foreground">Transform your ideas into stunning visuals</p>
+          <p className="text-xl text-muted-foreground">Create stunning AI-generated images in seconds</p>
+          <p className="text-muted-foreground">Free to use • No signup required • Instant results</p>
         </div>
 
         <Card className="p-6 glass-panel space-y-4">
