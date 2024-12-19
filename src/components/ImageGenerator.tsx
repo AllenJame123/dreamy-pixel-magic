@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Loader2, Download, Sparkles } from "lucide-react";
+import { Loader2, Download, Sparkles, Type } from "lucide-react";
 import { toast } from 'sonner';
 import { supabase } from "@/integrations/supabase/client";
 
@@ -14,6 +13,7 @@ interface GeneratedImage {
 
 const ImageGenerator = () => {
   const [prompt, setPrompt] = useState('');
+  const [overlayText, setOverlayText] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<GeneratedImage | null>(null);
 
@@ -25,8 +25,12 @@ const ImageGenerator = () => {
 
     try {
       setIsGenerating(true);
+      const finalPrompt = overlayText.trim() 
+        ? `${prompt}. Include the text "${overlayText}" integrated naturally in the image, with clear readable typography`
+        : prompt;
+
       const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: { prompt: prompt }
+        body: { prompt: finalPrompt }
       });
 
       if (error) throw error;
@@ -34,7 +38,7 @@ const ImageGenerator = () => {
       if (data?.image) {
         setGeneratedImage({
           imageURL: data.image,
-          prompt: prompt
+          prompt: finalPrompt
         });
         toast.success('Image generated successfully!');
       }
@@ -82,7 +86,7 @@ const ImageGenerator = () => {
         </div>
 
         <Card className="p-6 glass-panel space-y-4">
-          <div className="space-y-2">
+          <div className="space-y-4">
             <div className="relative">
               <Input
                 placeholder="Describe the image you want to generate..."
@@ -93,6 +97,18 @@ const ImageGenerator = () => {
                 disabled={isGenerating}
               />
               <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            </div>
+
+            <div className="relative">
+              <Input
+                placeholder="Add text to include in the image (optional)..."
+                value={overlayText}
+                onChange={(e) => setOverlayText(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="glass-panel pr-12"
+                disabled={isGenerating}
+              />
+              <Type className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             </div>
           </div>
 
