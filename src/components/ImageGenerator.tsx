@@ -27,19 +27,16 @@ const ImageGenerator = () => {
     };
   }, [intervalId]);
 
-  useEffect(() => {
-    if (progress >= 100 && isGenerating) {
-      handleGenerateImage();
-    }
-  }, [progress]);
-
   const startTimer = () => {
     if (intervalId) clearInterval(intervalId);
     setTimer(0);
     setProgress(0);
     const id = setInterval(() => {
       setTimer(prev => prev + 0.1);
-      setProgress(prev => Math.min(prev + 2, 100));
+      setProgress(prev => {
+        const newProgress = Math.min(prev + 2, 100);
+        return newProgress;
+      });
     }, 100);
     setIntervalId(id);
   };
@@ -52,6 +49,14 @@ const ImageGenerator = () => {
   };
 
   const handleGenerateImage = async () => {
+    if (!prompt.trim()) {
+      toast.error('Please enter a prompt');
+      setIsGenerating(false);
+      stopTimer();
+      setProgress(0);
+      return;
+    }
+
     try {
       console.log('Sending prompt to edge function:', prompt);
       const { data, error } = await supabase.functions.invoke('generate-image', {
@@ -91,6 +96,13 @@ const ImageGenerator = () => {
     }
     setIsGenerating(true);
     startTimer();
+    // Start the actual generation when progress reaches 100%
+    const checkProgress = setInterval(() => {
+      if (progress >= 100) {
+        clearInterval(checkProgress);
+        handleGenerateImage();
+      }
+    }, 100);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
