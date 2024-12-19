@@ -13,7 +13,7 @@ const GenerateButton = ({ onClick, isGenerating, disabled }: GenerateButtonProps
     <Button
       onClick={onClick}
       disabled={disabled}
-      className="w-full font-bold text-lg tracking-wider transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
+      className="w-full font-bold text-lg tracking-wider transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:bg-primary/80 active:scale-95"
     >
       {isGenerating ? (
         <>
