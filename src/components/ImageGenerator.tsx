@@ -46,6 +46,12 @@ const ImageGenerator = () => {
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !isGenerating) {
+      handleGenerate();
+    }
+  };
+
   const handleDownload = async () => {
     if (!generatedImage?.imageURL) return;
     
@@ -82,6 +88,7 @@ const ImageGenerator = () => {
                 placeholder="Describe the image you want to generate..."
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
+                onKeyPress={handleKeyPress}
                 className="glass-panel pr-12"
                 disabled={isGenerating}
               />
