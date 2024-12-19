@@ -24,8 +24,8 @@ const ImageGenerator = () => {
 
     if (isGenerating) {
       intervalId = setInterval(() => {
-        setTimer(prev => prev + 0.1);
-        setProgress(prev => Math.min(prev + 0.333, 100));
+        setTimer((prevTimer) => prevTimer + 0.1);
+        setProgress((prevProgress) => Math.min(prevProgress + 0.333, 100));
       }, 100);
     }
 
@@ -36,22 +36,10 @@ const ImageGenerator = () => {
     };
   }, [isGenerating]);
 
-  const resetState = () => {
-    setTimer(0);
-    setProgress(0);
-    setIsGenerating(false);
-  };
-
-  const handleGenerateImage = async () => {
-    if (!prompt.trim()) {
-      toast.error('Please enter a prompt');
-      resetState();
-      return;
-    }
-
+  const generateImage = async (userPrompt: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: { prompt }
+        body: { prompt: userPrompt }
       });
 
       if (error) {
@@ -66,8 +54,26 @@ const ImageGenerator = () => {
         throw new Error('No image data received from the server');
       }
 
+      return data.image;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const handleGenerate = async () => {
+    if (!prompt.trim()) {
+      toast.error('Please enter a prompt');
+      return;
+    }
+
+    setIsGenerating(true);
+    setTimer(0);
+    setProgress(0);
+
+    try {
+      const imageUrl = await generateImage(prompt);
       setGeneratedImage({
-        imageURL: data.image,
+        imageURL: imageUrl,
         prompt: prompt
       });
       toast.success(`Image generated in ${timer.toFixed(1)} seconds!`);
@@ -75,19 +81,10 @@ const ImageGenerator = () => {
       console.error('Generation error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to generate image. Please try again.');
     } finally {
-      resetState();
+      setIsGenerating(false);
+      setProgress(0);
+      setTimer(0);
     }
-  };
-
-  const handleGenerate = () => {
-    if (!prompt.trim()) {
-      toast.error('Please enter a prompt');
-      return;
-    }
-    setIsGenerating(true);
-    setTimer(0);
-    setProgress(0);
-    handleGenerateImage();
   };
 
   const handleDownload = async () => {
