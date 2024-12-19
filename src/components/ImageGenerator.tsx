@@ -63,9 +63,7 @@ const ImageGenerator = () => {
       // Start image generation immediately without waiting for progress
       console.log('Sending prompt to edge function:', prompt);
       const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: { prompt },
-        abortSignal: new AbortController().signal,
-        responseType: 'json'
+        body: { prompt }
       });
 
       console.log('Response from edge function:', { data, error });
