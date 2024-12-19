@@ -31,8 +31,8 @@ const ImageGenerator = () => {
 
       setIsModelLoading(true);
       const pipe = await pipeline(
-        'image-to-image',
-        'Xenova/sd-turbo',
+        'text-to-image',
+        'stabilityai/stable-diffusion-2-1',
         { 
           progress_callback: ((progressInfo) => {
             if ('progress' in progressInfo) {
