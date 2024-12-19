@@ -121,7 +121,7 @@ const ImageGenerator = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 flex flex-col items-center justify-center space-y-6">
+    <div className="p-4 flex flex-col items-center justify-start mt-4 space-y-6">
       <div className="w-full max-w-2xl space-y-4">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold tracking-tight">AI Image Generator</h1>
