@@ -13,15 +13,15 @@ const GenerateButton = ({ onClick, isGenerating, disabled }: GenerateButtonProps
     <Button
       onClick={onClick}
       disabled={disabled}
-      className="w-full"
+      className="w-full font-semibold tracking-wide text-base"
     >
       {isGenerating ? (
         <>
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Generating...
+          <span className="tracking-wider">Generating...</span>
         </>
       ) : (
-        'Generate Image'
+        <span className="tracking-wider">Generate Image</span>
       )}
     </Button>
   );
