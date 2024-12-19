@@ -34,10 +34,10 @@ const ImageGenerator = () => {
     const id = setInterval(() => {
       setTimer(prev => prev + 0.1);
       setProgress(prev => {
-        const newProgress = Math.min(prev + 2, 100);
+        const newProgress = Math.min(prev + 5, 100); // Increased from 2 to 5 for faster progress
         return newProgress;
       });
-    }, 100);
+    }, 50); // Reduced from 100ms to 50ms for faster updates
     setIntervalId(id);
   };
 
@@ -102,7 +102,7 @@ const ImageGenerator = () => {
         clearInterval(checkProgress);
         handleGenerateImage();
       }
-    }, 100);
+    }, 50); // Reduced from 100ms to 50ms for faster checking
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
