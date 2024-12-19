@@ -8,6 +8,7 @@ import PromptInput from './image-generator/PromptInput';
 import ProgressIndicator from './image-generator/ProgressIndicator';
 import GenerateButton from './image-generator/GenerateButton';
 import SpecialFeatures from './image-generator/SpecialFeatures';
+import FAQ from './image-generator/FAQ';
 
 interface GeneratedImage {
   imageURL: string;
@@ -185,6 +186,8 @@ const ImageGenerator = () => {
             onDownload={handleDownload}
           />
         )}
+
+        <FAQ />
       </div>
     </div>
   );
