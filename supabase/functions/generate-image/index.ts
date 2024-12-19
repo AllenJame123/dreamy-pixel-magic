@@ -28,9 +28,8 @@ serve(async (req) => {
     console.log('Starting image generation with prompt:', prompt)
     const image = await hf.textToImage({
       inputs: prompt,
-      model: 'stabilityai/stable-diffusion-2',
+      model: 'black-forest-labs/FLUX.1-schnell', // Using a faster model
       parameters: {
-        num_inference_steps: 30,
         guidance_scale: 7.5,
       }
     })
@@ -56,7 +55,6 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in generate-image function:', error)
     
-    // Determine if it's an API error or other type
     const errorMessage = error.message?.includes('API configuration') 
       ? error.message 
       : 'Failed to generate image. Please try again.'

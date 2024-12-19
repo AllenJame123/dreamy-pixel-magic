@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { Loader2, Sparkles } from "lucide-react";
 import { toast } from 'sonner';
 import { supabase } from "@/integrations/supabase/client";
 import GeneratedImage from './image-display/GeneratedImage';
+import { Progress } from "@/components/ui/progress";
 
 interface GeneratedImage {
   imageURL: string;
@@ -16,6 +17,30 @@ const ImageGenerator = () => {
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<GeneratedImage | null>(null);
+  const [timer, setTimer] = useState(0);
+  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [intervalId]);
+
+  const startTimer = () => {
+    if (intervalId) clearInterval(intervalId);
+    setTimer(0);
+    const id = setInterval(() => {
+      setTimer(prev => prev + 0.1);
+    }, 100);
+    setIntervalId(id);
+  };
+
+  const stopTimer = () => {
+    if (intervalId) {
+      clearInterval(intervalId);
+      setIntervalId(null);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!prompt.trim()) {
@@ -25,6 +50,7 @@ const ImageGenerator = () => {
 
     try {
       setIsGenerating(true);
+      startTimer();
       console.log('Sending prompt to edge function:', prompt);
       const { data, error } = await supabase.functions.invoke('generate-image', {
         body: { prompt }
@@ -45,11 +71,12 @@ const ImageGenerator = () => {
         imageURL: data.image,
         prompt: prompt
       });
-      toast.success('Image generated successfully!');
+      toast.success(`Image generated in ${timer.toFixed(1)} seconds!`);
     } catch (error) {
       console.error('Generation error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to generate image. Please try again.');
     } finally {
+      stopTimer();
       setIsGenerating(false);
     }
   };
@@ -101,6 +128,16 @@ const ImageGenerator = () => {
             />
             <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           </div>
+
+          {isGenerating && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Generating...</span>
+                <span>{timer.toFixed(1)}s</span>
+              </div>
+              <Progress value={timer * 10} className="h-1" />
+            </div>
+          )}
 
           <Button
             onClick={handleGenerate}
