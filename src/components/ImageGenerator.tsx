@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Loader2, Download, Sparkles } from "lucide-react";
 import { toast } from 'sonner';
-import { pipeline } from '@huggingface/transformers';
+import { pipeline, type ProgressCallback } from '@huggingface/transformers';
 
 interface GeneratedImage {
   imageURL: string;
@@ -34,10 +34,11 @@ const ImageGenerator = () => {
         'image-to-image',
         'Xenova/sd-turbo',
         { 
-          progress_callback: (progress: number | { progress: number }) => {
-            const progressValue = typeof progress === 'number' ? progress : progress.progress;
-            setLoadingProgress(Math.round(progressValue * 100));
-          }
+          progress_callback: ((progressInfo) => {
+            if ('progress' in progressInfo) {
+              setLoadingProgress(Math.round(progressInfo.progress * 100));
+            }
+          }) as ProgressCallback
         }
       );
       setModel(pipe);
