@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import { Loader2, Download, Sparkles } from "lucide-react";
 import { toast } from 'sonner';
 import { pipeline } from '@huggingface/transformers';
@@ -14,6 +15,8 @@ interface GeneratedImage {
 const ImageGenerator = () => {
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isModelLoading, setIsModelLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [generatedImage, setGeneratedImage] = useState<GeneratedImage | null>(null);
   const [model, setModel] = useState<any>(null);
 
@@ -26,18 +29,23 @@ const ImageGenerator = () => {
         return;
       }
 
+      setIsModelLoading(true);
       const pipe = await pipeline(
         'image-to-image',
         'Xenova/sd-turbo',
         { 
-          device: 'webgpu'
+          progress_callback: (progress) => {
+            setLoadingProgress(Math.round(progress * 100));
+          }
         }
       );
       setModel(pipe);
+      setIsModelLoading(false);
       toast.success('Model loaded successfully!');
     } catch (error) {
       console.error('Model initialization error:', error);
-      toast.error('Failed to load the model. Please ensure your browser supports WebGPU and you have provided a valid API token.');
+      setIsModelLoading(false);
+      toast.error('Failed to load the model. Please ensure your browser supports WebGPU.');
     }
   };
 
@@ -105,6 +113,18 @@ const ImageGenerator = () => {
           <p className="text-muted-foreground">Transform your ideas into stunning visuals - Runs in your browser!</p>
         </div>
 
+        {isModelLoading && (
+          <Card className="p-6 glass-panel space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span>Loading AI Model...</span>
+                <span>{loadingProgress}%</span>
+              </div>
+              <Progress value={loadingProgress} className="h-2" />
+            </div>
+          </Card>
+        )}
+
         <Card className="p-6 glass-panel space-y-4">
           <div className="space-y-2">
             <div className="relative">
@@ -113,7 +133,7 @@ const ImageGenerator = () => {
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 className="glass-panel pr-12"
-                disabled={isGenerating || !model}
+                disabled={isGenerating || isModelLoading}
               />
               <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             </div>
@@ -121,7 +141,7 @@ const ImageGenerator = () => {
 
           <Button
             onClick={handleGenerate}
-            disabled={isGenerating || !prompt.trim() || !model}
+            disabled={isGenerating || !prompt.trim() || isModelLoading}
             className="w-full"
           >
             {isGenerating ? (
@@ -129,7 +149,7 @@ const ImageGenerator = () => {
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Generating...
               </>
-            ) : !model ? (
+            ) : isModelLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Loading Model...
