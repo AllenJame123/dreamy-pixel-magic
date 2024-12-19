@@ -38,33 +38,32 @@ const ImageGenerator = () => {
         : '';
       const finalPrompt = textStyle.content ? `${prompt}. ${textDetails}` : prompt;
 
+      console.log('Sending prompt to edge function:', finalPrompt);
       const { data, error } = await supabase.functions.invoke('generate-image', {
         body: { prompt: finalPrompt }
       });
 
-      if (error) throw error;
+      console.log('Response from edge function:', { data, error });
 
-      if (data?.image) {
-        setGeneratedImage({
-          imageURL: data.image,
-          prompt: finalPrompt
-        });
-        toast.success('Image generated successfully!');
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(`Function error: ${error.message}`);
       }
+
+      if (!data?.image) {
+        throw new Error('No image data received from the server');
+      }
+
+      setGeneratedImage({
+        imageURL: data.image,
+        prompt: finalPrompt
+      });
+      toast.success('Image generated successfully!');
     } catch (error) {
       console.error('Generation error:', error);
-      toast.error('Failed to generate image. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Failed to generate image. Please try again.');
     } finally {
       setIsGenerating(false);
-      // Reset the form after generation
-      setPrompt('');
-      setTextStyle({
-        content: '',
-        position: 'center',
-        font: 'Arial',
-        color: '#000000',
-        size: 'medium'
-      });
     }
   };
 
