@@ -13,15 +13,15 @@ const GenerateButton = ({ onClick, isGenerating, disabled }: GenerateButtonProps
     <Button
       onClick={onClick}
       disabled={disabled}
-      className="w-full font-semibold tracking-wide text-base"
+      className="w-full font-bold text-lg tracking-wider transition-all duration-300 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
     >
       {isGenerating ? (
         <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          <span className="tracking-wider">Generating...</span>
+          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          <span className="font-medium">Generating...</span>
         </>
       ) : (
-        <span className="tracking-wider">Generate Image</span>
+        <span className="font-medium">Generate Image</span>
       )}
     </Button>
   );
