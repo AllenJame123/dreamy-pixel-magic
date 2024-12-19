@@ -20,6 +20,12 @@ const blogPosts = [
     excerpt: "A deep dive into how AI models create images from text descriptions.",
     thumbnail: "/placeholder.svg",
   },
+  {
+    id: 4,
+    title: "How to Make AI-Generated Images More Realistic",
+    excerpt: "Expert tips and techniques for creating more lifelike and authentic AI-generated images.",
+    thumbnail: "/placeholder.svg",
+  },
 ];
 
 const Blog = () => {
