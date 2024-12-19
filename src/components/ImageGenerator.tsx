@@ -34,8 +34,6 @@ const ImageGenerator = () => {
     const id = setInterval(() => {
       setTimer(prev => prev + 0.1);
       setProgress(prev => {
-        // Calculate progress to complete in exactly 30 seconds
-        // 100% / (30 seconds * 10 intervals per second) = 0.333...% per interval
         const newProgress = Math.min(prev + 0.333, 100);
         return newProgress;
       });
@@ -60,7 +58,6 @@ const ImageGenerator = () => {
     }
 
     try {
-      // Start image generation immediately without waiting for progress
       console.log('Sending prompt to edge function:', prompt);
       const { data, error } = await supabase.functions.invoke('generate-image', {
         body: { prompt }
@@ -71,6 +68,10 @@ const ImageGenerator = () => {
       if (error) {
         console.error('Supabase function error:', error);
         throw new Error(`Function error: ${error.message}`);
+      }
+
+      if (!data?.success) {
+        throw new Error(data?.error || 'Failed to generate image');
       }
 
       if (!data?.image) {
@@ -99,7 +100,6 @@ const ImageGenerator = () => {
     }
     setIsGenerating(true);
     startTimer();
-    // Start generation immediately
     handleGenerateImage();
   };
 

@@ -25,22 +25,26 @@ serve(async (req) => {
     console.log('Initializing HuggingFace client...')
     const hf = new HfInference(token)
 
-    console.log('Starting image generation with prompt:', prompt)
+    console.log('Starting image generation...')
     const image = await hf.textToImage({
       inputs: prompt,
-      model: 'black-forest-labs/FLUX.1-schnell', // Using a faster model
+      model: 'black-forest-labs/FLUX.1-schnell',
       parameters: {
         guidance_scale: 7.5,
-        num_inference_steps: 20, // Reduced from default for faster generation
+        num_inference_steps: 20,
       }
     })
-    console.log('Image generation completed successfully')
 
-    // Convert the blob to a base64 string
+    if (!image) {
+      console.error('No image generated')
+      throw new Error('Failed to generate image')
+    }
+
+    console.log('Image generated successfully, converting to base64...')
     const arrayBuffer = await image.arrayBuffer()
     const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
-    console.log('Image converted to base64')
-
+    
+    console.log('Sending response...')
     return new Response(
       JSON.stringify({ 
         success: true,
@@ -56,19 +60,14 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in generate-image function:', error)
     
-    const errorMessage = error.message?.includes('API configuration') 
-      ? error.message 
-      : 'Failed to generate image. Please try again.'
-
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: errorMessage,
-        details: error.message,
+        error: error.message || 'Failed to generate image',
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 // Return 200 even for errors to handle them gracefully
+        status: 200 // Keep 200 to handle the error in the frontend
       }
     )
   }
