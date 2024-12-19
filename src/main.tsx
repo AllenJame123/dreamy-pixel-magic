@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
-import { supabase } from './lib/supabase';
+import { supabase } from './integrations/supabase/client';
 
 // Make supabase available in console for debugging
 declare global {
