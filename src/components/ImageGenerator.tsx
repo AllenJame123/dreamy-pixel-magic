@@ -32,10 +32,7 @@ const ImageGenerator = () => {
     setProgress(0);
     const id = setInterval(() => {
       setTimer(prev => prev + 0.1);
-      setProgress(prev => {
-        const newProgress = Math.min(prev + 0.333, 100);
-        return newProgress;
-      });
+      setProgress(prev => Math.min(prev + 0.333, 100));
     }, 100);
     setIntervalId(id);
   };
@@ -57,12 +54,9 @@ const ImageGenerator = () => {
     }
 
     try {
-      console.log('Sending prompt to edge function:', prompt);
       const { data, error } = await supabase.functions.invoke('generate-image', {
         body: { prompt }
       });
-
-      console.log('Response from edge function:', { data, error });
 
       if (error) {
         console.error('Supabase function error:', error);
