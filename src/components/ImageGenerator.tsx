@@ -31,7 +31,7 @@ const ImageGenerator = () => {
 
       setIsModelLoading(true);
       const pipe = await pipeline(
-        'text-to-image',
+        "text-generation",
         'stabilityai/stable-diffusion-2-1',
         { 
           progress_callback: ((progressInfo) => {
