@@ -12,8 +12,8 @@ const BlogPost = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <article className="prose prose-slate max-w-none">
+    <div className="container mx-auto px-4 py-8 max-w-4xl">
+      <article className="space-y-6">
         <BlogHeader title={post.title} featuredImage={post.featuredImage} />
         <BlogContent content={post.content} />
       </article>

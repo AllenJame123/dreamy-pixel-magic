@@ -4,8 +4,10 @@ interface BlogContentProps {
 
 const BlogContent = ({ content }: BlogContentProps) => {
   return (
-    <div className="text-lg text-muted-foreground whitespace-pre-wrap">
-      {content}
+    <div className="prose prose-slate lg:prose-lg max-w-none">
+      <div className="text-lg text-muted-foreground whitespace-pre-wrap leading-relaxed">
+        {content}
+      </div>
     </div>
   );
 };
