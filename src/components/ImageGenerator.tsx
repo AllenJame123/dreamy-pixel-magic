@@ -19,39 +19,34 @@ const ImageGenerator = () => {
   const [timer, setTimer] = useState(0);
   const [progress, setProgress] = useState(0);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const startTimeRef = useRef<number>(0);
 
+  // Cleanup interval on component unmount
   useEffect(() => {
-    // Cleanup function to ensure intervals are cleared
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
-        intervalRef.current = null;
       }
     };
   }, []);
 
-  const startProgress = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-    
-    startTimeRef.current = Date.now();
-    setTimer(0);
-    setProgress(0);
-    
-    intervalRef.current = setInterval(() => {
-      const elapsed = (Date.now() - startTimeRef.current) / 1000;
-      setTimer(elapsed);
-      setProgress(Math.min(elapsed * 3.33, 100)); // Complete in ~30 seconds
-    }, 100);
-  };
-
-  const stopProgress = () => {
+  const resetProgress = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+    setTimer(0);
+    setProgress(0);
+  };
+
+  const startProgress = () => {
+    resetProgress();
+    const startTime = Date.now();
+    
+    intervalRef.current = setInterval(() => {
+      const elapsed = (Date.now() - startTime) / 1000;
+      setTimer(elapsed);
+      setProgress(Math.min(elapsed * 3.33, 100)); // Complete in ~30 seconds
+    }, 100);
   };
 
   const generateImage = async (userPrompt: string) => {
@@ -77,15 +72,18 @@ const ImageGenerator = () => {
     }
 
     try {
+      resetProgress();
       setIsGenerating(true);
       startProgress();
       
       const imageUrl = await generateImage(prompt);
       
-      stopProgress();
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
       
-      const finalTime = (Date.now() - startTimeRef.current) / 1000;
-      
+      const finalTime = timer;
       setGeneratedImage({
         imageURL: imageUrl,
         prompt: prompt
@@ -96,7 +94,10 @@ const ImageGenerator = () => {
       console.error('Generation error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to generate image. Please try again.');
     } finally {
-      stopProgress();
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
       setIsGenerating(false);
       setProgress(100);
     }
