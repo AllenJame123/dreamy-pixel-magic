@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { toast } from 'sonner';
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
@@ -18,22 +18,22 @@ const ImageGenerator = () => {
   const [generatedImage, setGeneratedImage] = useState<GeneratedImage | null>(null);
   const [timer, setTimer] = useState(0);
   const [progress, setProgress] = useState(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    let intervalId: NodeJS.Timeout | null = null;
-
     if (isGenerating) {
-      intervalId = setInterval(() => {
-        setTimer((prevTimer) => prevTimer + 0.1);
-        setProgress((prevProgress) => Math.min(prevProgress + 0.333, 100));
+      intervalRef.current = setInterval(() => {
+        setTimer(t => t + 0.1);
+        setProgress(p => Math.min(p + 0.333, 100));
       }, 100);
-    }
 
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
+      return () => {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      };
+    }
   }, [isGenerating]);
 
   const generateImage = async (userPrompt: string) => {
@@ -42,22 +42,24 @@ const ImageGenerator = () => {
         body: { prompt: userPrompt }
       });
 
-      if (error) {
-        throw new Error(`Function error: ${error.message}`);
-      }
-
-      if (!data?.success) {
-        throw new Error(data?.error || 'Failed to generate image');
-      }
-
-      if (!data?.image) {
-        throw new Error('No image data received from the server');
-      }
+      if (error) throw new Error(`Function error: ${error.message}`);
+      if (!data?.success) throw new Error(data?.error || 'Failed to generate image');
+      if (!data?.image) throw new Error('No image data received from the server');
 
       return data.image;
     } catch (error) {
       throw error;
     }
+  };
+
+  const resetState = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setIsGenerating(false);
+    setProgress(0);
+    setTimer(0);
   };
 
   const handleGenerate = async () => {
@@ -66,24 +68,25 @@ const ImageGenerator = () => {
       return;
     }
 
-    setIsGenerating(true);
-    setTimer(0);
-    setProgress(0);
-
     try {
+      setIsGenerating(true);
+      setTimer(0);
+      setProgress(0);
+      
       const imageUrl = await generateImage(prompt);
+      
       setGeneratedImage({
         imageURL: imageUrl,
         prompt: prompt
       });
-      toast.success(`Image generated in ${timer.toFixed(1)} seconds!`);
+      
+      const finalTime = timer;
+      toast.success(`Image generated in ${finalTime.toFixed(1)} seconds!`);
     } catch (error) {
       console.error('Generation error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to generate image. Please try again.');
     } finally {
-      setIsGenerating(false);
-      setProgress(0);
-      setTimer(0);
+      resetState();
     }
   };
 
