@@ -34,8 +34,9 @@ const ImageGenerator = () => {
         'image-to-image',
         'Xenova/sd-turbo',
         { 
-          progress_callback: (progress) => {
-            setLoadingProgress(Math.round(progress * 100));
+          progress_callback: (progress: number | { progress: number }) => {
+            const progressValue = typeof progress === 'number' ? progress : progress.progress;
+            setLoadingProgress(Math.round(progressValue * 100));
           }
         }
       );
