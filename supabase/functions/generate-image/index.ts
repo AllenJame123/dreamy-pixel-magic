@@ -31,6 +31,7 @@ serve(async (req) => {
       model: 'black-forest-labs/FLUX.1-schnell', // Using a faster model
       parameters: {
         guidance_scale: 7.5,
+        num_inference_steps: 20, // Reduced from default for faster generation
       }
     })
     console.log('Image generation completed successfully')

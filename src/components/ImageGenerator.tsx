@@ -34,10 +34,12 @@ const ImageGenerator = () => {
     const id = setInterval(() => {
       setTimer(prev => prev + 0.1);
       setProgress(prev => {
-        const newProgress = Math.min(prev + 0.25, 100); // Adjusted to take ~40 seconds (middle of 30-50 second range)
+        // Calculate progress to complete in exactly 30 seconds
+        // 100% / (30 seconds * 10 intervals per second) = 0.333...% per interval
+        const newProgress = Math.min(prev + 0.333, 100);
         return newProgress;
       });
-    }, 100); // Back to 100ms for smoother progress
+    }, 100);
     setIntervalId(id);
   };
 
@@ -58,9 +60,13 @@ const ImageGenerator = () => {
     }
 
     try {
+      // Start image generation immediately without waiting for progress
       console.log('Sending prompt to edge function:', prompt);
       const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: { prompt }
+        body: { prompt },
+        options: {
+          deadline: 20000 // Set a 20-second timeout
+        }
       });
 
       console.log('Response from edge function:', { data, error });
@@ -96,13 +102,8 @@ const ImageGenerator = () => {
     }
     setIsGenerating(true);
     startTimer();
-    // Start the actual generation when progress reaches 100%
-    const checkProgress = setInterval(() => {
-      if (progress >= 100) {
-        clearInterval(checkProgress);
-        handleGenerateImage();
-      }
-    }, 100); // Back to 100ms for consistency
+    // Start generation immediately
+    handleGenerateImage();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
