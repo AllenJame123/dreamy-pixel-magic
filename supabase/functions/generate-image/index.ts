@@ -18,7 +18,7 @@ serve(async (req) => {
 
     const image = await hf.textToImage({
       inputs: prompt,
-      model: 'stabilityai/stable-diffusion-2-1',
+      model: 'black-forest-labs/FLUX.1-schnell', // Using a faster model
     })
 
     // Convert the blob to a base64 string
