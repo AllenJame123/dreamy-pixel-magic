@@ -16,19 +16,25 @@ serve(async (req) => {
     const { prompt } = await req.json()
     console.log('Received prompt:', prompt)
 
-    if (!Deno.env.get('HUGGING_FACE_ACCESS_TOKEN')) {
-      throw new Error('HUGGING_FACE_ACCESS_TOKEN is not set')
+    const token = Deno.env.get('HUGGING_FACE_ACCESS_TOKEN')
+    if (!token) {
+      console.error('HUGGING_FACE_ACCESS_TOKEN is not set')
+      throw new Error('API configuration error. Please contact support.')
     }
 
-    const hf = new HfInference(Deno.env.get('HUGGING_FACE_ACCESS_TOKEN'))
-    console.log('Initialized HuggingFace client')
+    console.log('Initializing HuggingFace client...')
+    const hf = new HfInference(token)
 
-    console.log('Starting image generation...')
+    console.log('Starting image generation with prompt:', prompt)
     const image = await hf.textToImage({
       inputs: prompt,
-      model: 'black-forest-labs/FLUX.1-schnell',
+      model: 'stabilityai/stable-diffusion-2',
+      parameters: {
+        num_inference_steps: 30,
+        guidance_scale: 7.5,
+      }
     })
-    console.log('Image generation completed')
+    console.log('Image generation completed successfully')
 
     // Convert the blob to a base64 string
     const arrayBuffer = await image.arrayBuffer()
@@ -36,20 +42,34 @@ serve(async (req) => {
     console.log('Image converted to base64')
 
     return new Response(
-      JSON.stringify({ image: `data:image/png;base64,${base64}` }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        success: true,
+        image: `data:image/png;base64,${base64}` 
+      }),
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        } 
+      }
     )
   } catch (error) {
     console.error('Error in generate-image function:', error)
+    
+    // Determine if it's an API error or other type
+    const errorMessage = error.message?.includes('API configuration') 
+      ? error.message 
+      : 'Failed to generate image. Please try again.'
+
     return new Response(
       JSON.stringify({ 
-        error: 'Failed to generate image', 
+        success: false,
+        error: errorMessage,
         details: error.message,
-        stack: error.stack 
       }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
-        status: 500 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 // Return 200 even for errors to handle them gracefully
       }
     )
   }
