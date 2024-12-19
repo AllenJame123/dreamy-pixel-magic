@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/card";
 import { Loader2, Sparkles } from "lucide-react";
 import { toast } from 'sonner';
 import { supabase } from "@/integrations/supabase/client";
-import TextStyleControls, { TextStyle } from './text-overlay/TextStyleControls';
 import GeneratedImage from './image-display/GeneratedImage';
 
 interface GeneratedImage {
@@ -15,13 +14,6 @@ interface GeneratedImage {
 
 const ImageGenerator = () => {
   const [prompt, setPrompt] = useState('');
-  const [textStyle, setTextStyle] = useState<TextStyle>({
-    content: '',
-    position: 'center',
-    font: 'Arial',
-    color: '#000000',
-    size: 'medium'
-  });
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<GeneratedImage | null>(null);
 
@@ -33,14 +25,9 @@ const ImageGenerator = () => {
 
     try {
       setIsGenerating(true);
-      const textDetails = textStyle.content ? 
-        `The image MUST include the exact text "${textStyle.content}" in ${textStyle.size} size, using ${textStyle.font} font, in ${textStyle.color} color, positioned at the ${textStyle.position} of the image. The text must be clearly visible and exactly match these specifications.` 
-        : '';
-      const finalPrompt = textStyle.content ? `${prompt}. ${textDetails}` : prompt;
-
-      console.log('Sending prompt to edge function:', finalPrompt);
+      console.log('Sending prompt to edge function:', prompt);
       const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: { prompt: finalPrompt }
+        body: { prompt }
       });
 
       console.log('Response from edge function:', { data, error });
@@ -56,7 +43,7 @@ const ImageGenerator = () => {
 
       setGeneratedImage({
         imageURL: data.image,
-        prompt: finalPrompt
+        prompt: prompt
       });
       toast.success('Image generated successfully!');
     } catch (error) {
@@ -103,24 +90,16 @@ const ImageGenerator = () => {
         </div>
 
         <Card className="p-6 glass-panel space-y-4">
-          <div className="space-y-4">
-            <div className="relative">
-              <Input
-                placeholder="Describe the image you want to generate..."
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                onKeyPress={handleKeyPress}
-                className="glass-panel pr-12"
-                disabled={isGenerating}
-              />
-              <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-            </div>
-
-            <TextStyleControls
-              textStyle={textStyle}
-              onTextStyleChange={setTextStyle}
-              isGenerating={isGenerating}
+          <div className="relative">
+            <Input
+              placeholder="Describe the image you want to generate..."
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="glass-panel pr-12"
+              disabled={isGenerating}
             />
+            <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
           </div>
 
           <Button
