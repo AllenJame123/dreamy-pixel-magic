@@ -10,17 +10,7 @@ import GenerateButton from './image-generator/GenerateButton';
 import SpecialFeatures from './image-generator/SpecialFeatures';
 import FAQ from './image-generator/FAQ';
 import ErrorMessage from './image-generator/ErrorMessage';
-
-const LOADING_MESSAGES = [
-  "Channeling creative energy...",
-  "Painting with digital dreams...",
-  "Bringing imagination to life...",
-  "Crafting pixels with precision...",
-  "Weaving visual stories...",
-  "Blending reality with AI magic...",
-  "Creating something unique...",
-  "Transforming words into art..."
-];
+import { AI_QUOTES } from './image-generator/AIQuotes';
 
 interface GeneratedImage {
   imageURL: string;
@@ -33,7 +23,7 @@ const ImageGenerator = () => {
   const [generatedImage, setGeneratedImage] = useState<GeneratedImage | null>(null);
   const [timer, setTimer] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
+  const [loadingMessage, setLoadingMessage] = useState(AI_QUOTES[0]);
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const messageIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -59,12 +49,12 @@ const ImageGenerator = () => {
 
   const startLoadingMessages = () => {
     let index = 0;
-    setLoadingMessage(LOADING_MESSAGES[0]);
+    setLoadingMessage(AI_QUOTES[0]);
     
     messageIntervalRef.current = setInterval(() => {
-      index = (index + 1) % LOADING_MESSAGES.length;
-      setLoadingMessage(LOADING_MESSAGES[index]);
-    }, 3000);
+      index = Math.floor(Math.random() * AI_QUOTES.length); // Random quote instead of sequential
+      setLoadingMessage(AI_QUOTES[index]);
+    }, 5000); // Changed to 5 seconds to give more time to read the longer quotes
   };
 
   const initializeProgress = () => {
