@@ -5,11 +5,11 @@ export const perfectPrompts: BlogPost = {
   title: "Mastering AI Image Generation: A Beginner's Guide to Perfect Prompts",
   slug: "ai-prompt-guide",
   metaDescription: "Master AI image generation with proven prompt techniques. Learn step-by-step strategies, examples, and expert tips to create stunning visuals.",
-  featuredImage: "https://images.unsplash.com/photo-1518770660439-4636190af475",
+  featuredImage: "/lovable-uploads/5e684708-15e0-4c98-9b66-46bb472e7599.png",
   content: `
     <article>
       <img 
-        src="https://images.unsplash.com/photo-1518770660439-4636190af475" 
+        src="/lovable-uploads/5e684708-15e0-4c98-9b66-46bb472e7599.png" 
         alt="AI Image Generation Guide" 
         class="w-full h-[400px] rounded-lg mb-8 object-cover"
       />
