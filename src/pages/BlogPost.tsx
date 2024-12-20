@@ -21,9 +21,7 @@ const BlogPost = () => {
             <BlogContent content={post.content} />
           </article>
           <aside className="lg:col-span-3">
-            <div className="sticky top-24">
-              <RecentPosts />
-            </div>
+            <RecentPosts />
           </aside>
         </div>
       </div>

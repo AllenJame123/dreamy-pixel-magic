@@ -19,7 +19,7 @@ const RecentPosts = () => {
           {recentPosts.map((post) => (
             <li key={post.id}>
               <Link
-                to={`/blog/${post.slug}`}
+                to={`/${post.slug}`}
                 className="text-sm text-muted-foreground hover:text-primary transition-colors line-clamp-2"
               >
                 {post.title}

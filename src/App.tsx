@@ -20,7 +20,7 @@ const App = () => (
           <Route element={<Layout />}>
             <Route path="/" element={<Index />} />
             <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:slug" element={<BlogPost />} />
+            <Route path="/:slug" element={<BlogPost />} />
           </Route>
         </Routes>
       </BrowserRouter>
