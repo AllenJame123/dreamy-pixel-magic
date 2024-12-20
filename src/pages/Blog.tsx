@@ -23,7 +23,7 @@ const BlogCard = ({ post, isLoading }: { post: any, isLoading: boolean }) => {
   }
 
   return (
-    <Link key={post.id} to={`/blog/${post.slug}`}>
+    <Link key={post.id} to={`/${post.slug}`}>
       <Card className="h-full hover:shadow-lg transition-shadow">
         <CardHeader className="relative overflow-hidden" style={{ minHeight: '12rem' }}>
           {!imageLoaded && (
