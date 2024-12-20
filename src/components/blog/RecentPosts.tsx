@@ -1,10 +1,13 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { blogPosts } from "@/data/blogPosts";
 import { Card, CardContent } from "@/components/ui/card";
 import { Menu } from "lucide-react";
 
 const RecentPosts = () => {
+  const { slug } = useParams();
+
   const recentPosts = Object.values(blogPosts)
+    .filter(post => post.slug !== slug) // Filter out current post
     .sort((a, b) => Number(b.id) - Number(a.id))
     .slice(0, 5);
 
