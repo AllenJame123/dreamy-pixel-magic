@@ -8,11 +8,6 @@ export const perfectPrompts: BlogPost = {
   featuredImage: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e",
   content: `
     <article>
-      <img 
-        src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e" 
-        alt="AI Image Generation Guide" 
-        class="w-full h-[400px] rounded-lg mb-8 object-cover"
-      />
       <h2 class="text-3xl font-bold mb-6">Understanding AI Image Prompts</h2>
       <p class="mb-6">AI image generation success depends 85% on prompt quality. Your prompt is the blueprint that guides the AI in creating exactly what you envision.</p>
 
