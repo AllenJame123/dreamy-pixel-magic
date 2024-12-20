@@ -7,6 +7,15 @@ import { blogPosts } from "@/data/blogPosts";
 const BlogCard = ({ post, isLoading }: { post: any, isLoading: boolean }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  // Preload image
+  useEffect(() => {
+    if (!isLoading) {
+      const img = new Image();
+      img.src = post.featuredImage;
+      img.onload = () => setImageLoaded(true);
+    }
+  }, [isLoading, post?.featuredImage]);
+
   if (isLoading) {
     return (
       <Card className="h-full">
@@ -27,7 +36,7 @@ const BlogCard = ({ post, isLoading }: { post: any, isLoading: boolean }) => {
       <Card className="h-full hover:shadow-lg transition-shadow">
         <CardHeader className="relative overflow-hidden" style={{ minHeight: '12rem' }}>
           {!imageLoaded && (
-            <Skeleton className="absolute inset-0 w-full h-48" />
+            <div className="absolute inset-0 bg-gray-100 animate-pulse" />
           )}
           <img
             src={post.featuredImage}
@@ -35,8 +44,8 @@ const BlogCard = ({ post, isLoading }: { post: any, isLoading: boolean }) => {
             className={`w-full h-48 object-cover rounded-t-lg transition-opacity duration-300 ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
-            onLoad={() => setImageLoaded(true)}
             loading="lazy"
+            decoding="async"
           />
         </CardHeader>
         <CardContent>
