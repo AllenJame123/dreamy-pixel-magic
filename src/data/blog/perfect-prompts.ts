@@ -5,7 +5,7 @@ export const perfectPrompts: BlogPost = {
   title: "Mastering AI Image Generation: A Beginner's Guide to Perfect Prompts",
   slug: "ai-prompt-guide",
   metaDescription: "Master AI image generation with proven prompt techniques. Learn step-by-step strategies, examples, and expert tips to create stunning visuals.",
-  featuredImage: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e",
+  featuredImage: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7",
   content: `
     <article>
       <h2 class="text-3xl font-bold mb-6">Understanding AI Image Prompts</h2>
