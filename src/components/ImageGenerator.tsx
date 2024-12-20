@@ -10,6 +10,17 @@ import GenerateButton from './image-generator/GenerateButton';
 import SpecialFeatures from './image-generator/SpecialFeatures';
 import FAQ from './image-generator/FAQ';
 
+const LOADING_MESSAGES = [
+  "Channeling creative energy...",
+  "Painting with digital dreams...",
+  "Bringing imagination to life...",
+  "Crafting pixels with precision...",
+  "Weaving visual stories...",
+  "Blending reality with AI magic...",
+  "Creating something unique...",
+  "Transforming words into art..."
+];
+
 interface GeneratedImage {
   imageURL: string;
   prompt: string;
@@ -21,13 +32,18 @@ const ImageGenerator = () => {
   const [generatedImage, setGeneratedImage] = useState<GeneratedImage | null>(null);
   const [timer, setTimer] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const messageIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Cleanup interval on component unmount
+  // Cleanup intervals on component unmount
   useEffect(() => {
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+      }
+      if (messageIntervalRef.current) {
+        clearInterval(messageIntervalRef.current);
       }
     };
   }, []);
@@ -37,12 +53,27 @@ const ImageGenerator = () => {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+    if (messageIntervalRef.current) {
+      clearInterval(messageIntervalRef.current);
+      messageIntervalRef.current = null;
+    }
+  };
+
+  const startLoadingMessages = () => {
+    let index = 0;
+    setLoadingMessage(LOADING_MESSAGES[0]);
+    
+    messageIntervalRef.current = setInterval(() => {
+      index = (index + 1) % LOADING_MESSAGES.length;
+      setLoadingMessage(LOADING_MESSAGES[index]);
+    }, 3000);
   };
 
   const initializeProgress = () => {
     cleanupInterval();
     setTimer(0);
     setProgress(0);
+    startLoadingMessages();
     
     const startTime = Date.now();
     intervalRef.current = setInterval(() => {
@@ -138,6 +169,12 @@ const ImageGenerator = () => {
             isGenerating={isGenerating}
             onEnterPress={handleGenerate}
           />
+
+          {isGenerating && (
+            <p className="text-center text-muted-foreground animate-pulse">
+              {loadingMessage}
+            </p>
+          )}
 
           <ProgressIndicator
             isGenerating={isGenerating}
