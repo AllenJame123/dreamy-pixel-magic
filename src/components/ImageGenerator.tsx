@@ -1,6 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { toast } from 'sonner';
-import { supabase } from "@/integrations/supabase/client";
+import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Image, Play, RefreshCw } from "lucide-react";
 import GeneratedImage from './image-display/GeneratedImage';
@@ -10,138 +8,21 @@ import GenerateButton from './image-generator/GenerateButton';
 import SpecialFeatures from './image-generator/SpecialFeatures';
 import FAQ from './image-generator/FAQ';
 import ErrorMessage from './image-generator/ErrorMessage';
-import { AI_QUOTES } from './image-generator/AIQuotes';
-
-interface GeneratedImage {
-  imageURL: string;
-  prompt: string;
-}
+import { useImageGeneration } from './image-generator/useImageGeneration';
 
 const ImageGenerator = () => {
-  const [prompt, setPrompt] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedImage, setGeneratedImage] = useState<GeneratedImage | null>(null);
-  const [timer, setTimer] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [loadingMessage, setLoadingMessage] = useState(AI_QUOTES[0]);
-  const [error, setError] = useState<string | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const messageIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Cleanup intervals on component unmount
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (messageIntervalRef.current) clearInterval(messageIntervalRef.current);
-    };
-  }, []);
-
-  const cleanupInterval = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    if (messageIntervalRef.current) {
-      clearInterval(messageIntervalRef.current);
-      messageIntervalRef.current = null;
-    }
-  };
-
-  const startLoadingMessages = () => {
-    let index = 0;
-    setLoadingMessage(AI_QUOTES[0]);
-    
-    messageIntervalRef.current = setInterval(() => {
-      index = Math.floor(Math.random() * AI_QUOTES.length); // Random quote instead of sequential
-      setLoadingMessage(AI_QUOTES[index]);
-    }, 5000); // Changed to 5 seconds to give more time to read the longer quotes
-  };
-
-  const initializeProgress = () => {
-    cleanupInterval();
-    setTimer(0);
-    setProgress(0);
-    startLoadingMessages();
-    
-    const startTime = Date.now();
-    intervalRef.current = setInterval(() => {
-      const elapsed = (Date.now() - startTime) / 1000;
-      setTimer(elapsed);
-      setProgress(Math.min(elapsed * 3.33, 100));
-    }, 100);
-  };
-
-  const generateImage = async (userPrompt: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: { prompt: userPrompt }
-      });
-
-      if (error) throw new Error(`Function error: ${error.message}`);
-      if (!data?.success) throw new Error(data?.error || 'Failed to generate image');
-      if (!data?.image) throw new Error('No image data received from the server');
-
-      return data.image;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const handleGenerate = async () => {
-    if (!prompt.trim()) {
-      toast.error('Please enter a prompt');
-      return;
-    }
-
-    setError(null);
-    cleanupInterval();
-    setIsGenerating(true);
-    setProgress(0);
-    setTimer(0);
-
-    try {
-      initializeProgress();
-      const imageUrl = await generateImage(prompt);
-      
-      cleanupInterval();
-      
-      setGeneratedImage({
-        imageURL: imageUrl,
-        prompt: prompt
-      });
-      
-      toast.success('Image generated');
-    } catch (error) {
-      console.error('Generation error:', error);
-      setError('Failed to generate image. Please try editing your prompt and try again.');
-      toast.error('Failed to generate image');
-    } finally {
-      cleanupInterval();
-      setIsGenerating(false);
-      setProgress(100);
-    }
-  };
-
-  const handleDownload = async () => {
-    if (!generatedImage?.imageURL) return;
-    
-    try {
-      const response = await fetch(generatedImage.imageURL);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `generated-image-${Date.now()}.png`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-      toast.success('Image downloaded successfully!');
-    } catch (error) {
-      toast.error('Failed to download image');
-      console.error('Download error:', error);
-    }
-  };
+  const {
+    prompt,
+    setPrompt,
+    isGenerating,
+    generatedImage,
+    timer,
+    progress,
+    loadingMessage,
+    error,
+    handleGenerate,
+    handleDownload
+  } = useImageGeneration();
 
   return (
     <div className="p-4 flex flex-col items-center justify-start mt-4 space-y-6">
