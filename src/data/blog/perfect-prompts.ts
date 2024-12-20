@@ -1,13 +1,18 @@
 import { BlogPost } from "../types/blog";
 
 export const perfectPrompts: BlogPost = {
-  id: "3",
+  id: "5",
   title: "Mastering AI Image Generation: A Beginner's Guide to Perfect Prompts",
   slug: "ai-prompt-guide",
   metaDescription: "Master AI image generation with proven prompt techniques. Learn step-by-step strategies, examples, and expert tips to create stunning visuals.",
   featuredImage: "/blog/perfect-prompts.jpg",
   content: `
     <article class="blog-content">
+      <img 
+        src="/blog/perfect-prompts.jpg" 
+        alt="AI Image Generation Guide" 
+        class="w-full h-auto rounded-lg mb-8 object-cover"
+      />
       <h2>Understanding AI Image Prompts</h2>
       <p>AI image generation success depends 85% on prompt quality. Your prompt is the blueprint that guides the AI in creating exactly what you envision.</p>
 
