@@ -151,8 +151,18 @@ const ImageGenerator = () => {
             isGenerating={isGenerating}
             disabled={isGenerating || !prompt.trim()}
           />
+        </Card>
 
-          <div className="border-t pt-4 mt-4">
+        {generatedImage && (
+          <GeneratedImage
+            imageURL={generatedImage.imageURL}
+            prompt={generatedImage.prompt}
+            onDownload={handleDownload}
+          />
+        )}
+
+        <Card className="p-6 glass-panel space-y-4">
+          <div className="border-t pt-4">
             <h2 className="text-lg font-semibold mb-3 text-center">How to Use AI Image Generator</h2>
             <div className="grid grid-cols-3 gap-4 text-sm text-center">
               <div className="flex flex-col items-center space-y-2">
@@ -178,14 +188,6 @@ const ImageGenerator = () => {
 
           <SpecialFeatures />
         </Card>
-
-        {generatedImage && (
-          <GeneratedImage
-            imageURL={generatedImage.imageURL}
-            prompt={generatedImage.prompt}
-            onDownload={handleDownload}
-          />
-        )}
 
         <FAQ />
       </div>
