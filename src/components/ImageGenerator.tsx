@@ -82,7 +82,6 @@ const ImageGenerator = () => {
     try {
       initializeProgress();
       const imageUrl = await generateImage(prompt);
-      const currentTime = timer;
       
       cleanupInterval();
       
@@ -91,7 +90,7 @@ const ImageGenerator = () => {
         prompt: prompt
       });
       
-      toast.success(`Image generated in ${currentTime.toFixed(1)} seconds!`);
+      toast.success('Image generated');
     } catch (error) {
       console.error('Generation error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to generate image. Please try again.');
