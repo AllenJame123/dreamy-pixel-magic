@@ -21,7 +21,7 @@ const BlogHeader = ({ title, featuredImage }: BlogHeaderProps) => {
         alt={title}
         className="w-full h-[400px] object-cover rounded-xl shadow-md mb-8"
       />
-      <h3 className="blog-title">{title}</h3>
+      <h1 className="blog-title">{title}</h1>
     </div>
   );
 };
