@@ -9,6 +9,7 @@ import ProgressIndicator from './image-generator/ProgressIndicator';
 import GenerateButton from './image-generator/GenerateButton';
 import SpecialFeatures from './image-generator/SpecialFeatures';
 import FAQ from './image-generator/FAQ';
+import ErrorMessage from './image-generator/ErrorMessage';
 
 const LOADING_MESSAGES = [
   "Channeling creative energy...",
@@ -33,18 +34,15 @@ const ImageGenerator = () => {
   const [timer, setTimer] = useState(0);
   const [progress, setProgress] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0]);
+  const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const messageIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup intervals on component unmount
   useEffect(() => {
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-      if (messageIntervalRef.current) {
-        clearInterval(messageIntervalRef.current);
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (messageIntervalRef.current) clearInterval(messageIntervalRef.current);
     };
   }, []);
 
@@ -105,6 +103,7 @@ const ImageGenerator = () => {
       return;
     }
 
+    setError(null);
     cleanupInterval();
     setIsGenerating(true);
     setProgress(0);
@@ -124,7 +123,8 @@ const ImageGenerator = () => {
       toast.success('Image generated');
     } catch (error) {
       console.error('Generation error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to generate image. Please try again.');
+      setError('Failed to generate image. Please try editing your prompt and try again.');
+      toast.error('Failed to generate image');
     } finally {
       cleanupInterval();
       setIsGenerating(false);
@@ -175,6 +175,8 @@ const ImageGenerator = () => {
               {loadingMessage}
             </p>
           )}
+
+          {error && <ErrorMessage message={error} />}
 
           <ProgressIndicator
             isGenerating={isGenerating}
