@@ -9,9 +9,9 @@ interface BlogHeaderProps {
 
 const BlogHeader = ({ title, featuredImage }: BlogHeaderProps) => {
   return (
-    <>
+    <div className="space-y-6">
       <Link to="/blog">
-        <Button variant="ghost" className="mb-4">
+        <Button variant="ghost" className="mb-4 hover:bg-gray-100">
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Blog
         </Button>
@@ -19,10 +19,10 @@ const BlogHeader = ({ title, featuredImage }: BlogHeaderProps) => {
       <img
         src={featuredImage}
         alt={title}
-        className="w-full h-[400px] object-cover rounded-lg mb-8"
+        className="w-full h-[400px] object-cover rounded-xl shadow-md mb-8"
       />
-      <h1 className="text-4xl font-bold mb-6">{title}</h1>
-    </>
+      <h1 className="text-4xl font-bold tracking-tight text-gray-900 font-serif">{title}</h1>
+    </div>
   );
 };
 

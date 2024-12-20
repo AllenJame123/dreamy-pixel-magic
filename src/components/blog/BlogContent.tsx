@@ -4,9 +4,9 @@ interface BlogContentProps {
 
 const BlogContent = ({ content }: BlogContentProps) => {
   return (
-    <div className="prose prose-slate lg:prose-lg max-w-none">
+    <div className="blog-content">
       <div 
-        className="text-lg text-muted-foreground leading-relaxed"
+        className="prose prose-slate lg:prose-lg max-w-none"
         dangerouslySetInnerHTML={{ __html: content }}
       />
     </div>
