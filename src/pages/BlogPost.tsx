@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import BlogHeader from "@/components/blog/BlogHeader";
 import BlogContent from "@/components/blog/BlogContent";
 import { blogPosts } from "@/data/blogPosts";
@@ -8,7 +8,7 @@ const BlogPost = () => {
   const post = id ? blogPosts[id] : null;
 
   if (!post) {
-    return <div>Post not found</div>;
+    return <Navigate to="/blog" replace />;
   }
 
   return (
