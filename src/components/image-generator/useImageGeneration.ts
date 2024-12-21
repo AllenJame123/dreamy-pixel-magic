@@ -16,7 +16,8 @@ export const useImageGeneration = () => {
   const [progress, setProgress] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState(AI_QUOTES[0]);
   const [error, setError] = useState<string | null>(null);
-  const [quality, setQuality] = useState(2); // Default to balanced quality
+  const [quality, setQuality] = useState(2);
+  const [imageSize, setImageSize] = useState(512); // Default size
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const messageIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -73,7 +74,9 @@ export const useImageGeneration = () => {
       const { data, error: functionError } = await supabase.functions.invoke('generate-image', {
         body: { 
           prompt: userPrompt,
-          ...qualitySettings
+          ...qualitySettings,
+          height: imageSize,
+          width: imageSize
         }
       });
 
@@ -166,6 +169,8 @@ export const useImageGeneration = () => {
     error,
     quality,
     setQuality,
+    imageSize,
+    setImageSize,
     handleGenerate,
     handleDownload
   };

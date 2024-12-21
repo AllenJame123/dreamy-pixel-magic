@@ -22,6 +22,8 @@ const ImageGenerator = () => {
     error,
     quality,
     setQuality,
+    imageSize,
+    setImageSize,
     handleGenerate,
     handleDownload
   } = useImageGeneration();
@@ -43,6 +45,8 @@ const ImageGenerator = () => {
             onEnterPress={handleGenerate}
             quality={quality}
             setQuality={setQuality}
+            imageSize={imageSize}
+            setImageSize={setImageSize}
           />
 
           {isGenerating && (
