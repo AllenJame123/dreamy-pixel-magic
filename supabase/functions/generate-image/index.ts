@@ -30,8 +30,8 @@ serve(async (req) => {
       inputs: prompt,
       model: 'black-forest-labs/FLUX.1-schnell',
       parameters: {
-        guidance_scale: 7.5,
-        num_inference_steps: 20,
+        guidance_scale: 5.0, // Reduced from 7.5 for faster generation
+        num_inference_steps: 15, // Reduced from 20 for faster generation
       }
     })
 
