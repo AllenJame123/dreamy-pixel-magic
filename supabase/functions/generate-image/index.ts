@@ -12,7 +12,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, guidance_scale, num_inference_steps } = await req.json()
+    const { prompt, guidance_scale, num_inference_steps, width, height } = await req.json()
     console.log('Received prompt:', prompt)
     console.log('Quality settings:', { guidance_scale, num_inference_steps })
 
@@ -32,8 +32,8 @@ serve(async (req) => {
       parameters: {
         guidance_scale,
         num_inference_steps,
-        height: 512,
-        width: 512,
+        height: height || 512,
+        width: width || 512,
       }
     })
 
