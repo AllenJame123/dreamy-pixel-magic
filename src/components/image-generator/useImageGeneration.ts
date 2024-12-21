@@ -139,7 +139,7 @@ export const useImageGeneration = () => {
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownload = async (format: string = 'png') => {
     if (!generatedImage?.imageURL) return;
     
     try {
@@ -148,7 +148,7 @@ export const useImageGeneration = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `generated-image-${Date.now()}.png`;
+      a.download = `generated-image-${Date.now()}.${format}`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

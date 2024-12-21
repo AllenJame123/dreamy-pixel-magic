@@ -5,6 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface PromptInputProps {
   prompt: string;
@@ -30,6 +31,8 @@ const PromptInput = ({
   const [customWidth, setCustomWidth] = useState('');
   const [customHeight, setCustomHeight] = useState('');
   const [isCustomSize, setIsCustomSize] = useState(false);
+  const [widthError, setWidthError] = useState(false);
+  const [heightError, setHeightError] = useState(false);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isGenerating) {
@@ -59,6 +62,9 @@ const PromptInput = ({
     if (isCustomSize) {
       const width = Number(customWidth);
       const height = Number(customHeight);
+
+      setWidthError(!validateDimension(width) && customWidth !== '');
+      setHeightError(!validateDimension(height) && customHeight !== '');
 
       if (validateDimension(width) && validateDimension(height)) {
         setImageSize(Math.max(width, height));
@@ -126,14 +132,10 @@ const PromptInput = ({
                     type="number"
                     placeholder="Width (128-1024)"
                     value={customWidth}
-                    onChange={(e) => {
-                      setCustomWidth(e.target.value);
-                      if (!validateDimension(Number(e.target.value))) {
-                        toast.error('Width must be between 128 and 1024 pixels');
-                      }
-                    }}
+                    onChange={(e) => setCustomWidth(e.target.value)}
                     min={128}
                     max={1024}
+                    className={cn(widthError && "border-red-500 focus-visible:ring-red-500")}
                   />
                 </div>
                 <div className="flex-1">
@@ -142,14 +144,10 @@ const PromptInput = ({
                     type="number"
                     placeholder="Height (128-1024)"
                     value={customHeight}
-                    onChange={(e) => {
-                      setCustomHeight(e.target.value);
-                      if (!validateDimension(Number(e.target.value))) {
-                        toast.error('Height must be between 128 and 1024 pixels');
-                      }
-                    }}
+                    onChange={(e) => setCustomHeight(e.target.value)}
                     min={128}
                     max={1024}
+                    className={cn(heightError && "border-red-500 focus-visible:ring-red-500")}
                   />
                 </div>
               </div>
