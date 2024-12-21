@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Sparkles } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 interface PromptInputProps {
@@ -56,21 +55,16 @@ const PromptInput = ({
     return !isNaN(value) && value >= 128 && value <= 1024;
   };
 
-  const handleCustomSizeSubmit = () => {
-    const width = Number(customWidth);
-    const height = Number(customHeight);
+  useEffect(() => {
+    if (isCustomSize) {
+      const width = Number(customWidth);
+      const height = Number(customHeight);
 
-    if (!validateDimension(width) || !validateDimension(height)) {
-      toast.error('Please enter valid dimensions between 128 and 1024 pixels');
-      return;
+      if (validateDimension(width) && validateDimension(height)) {
+        setImageSize(Math.max(width, height));
+      }
     }
-
-    // For now, we'll use the larger dimension as the size
-    // This ensures we stay within the model's capabilities
-    setImageSize(Math.max(width, height));
-    setIsCustomSize(false);
-    toast.success(`Custom size set to ${width}×${height} pixels`);
-  };
+  }, [customWidth, customHeight, isCustomSize, setImageSize]);
 
   return (
     <div className="space-y-4">
@@ -127,44 +121,37 @@ const PromptInput = ({
             <div className="space-y-2">
               <div className="flex gap-2">
                 <div className="flex-1">
-                  <Label className="text-xs">Width</Label>
+                  <Label className="text-xs">Width (px)</Label>
                   <Input
                     type="number"
                     placeholder="Width (128-1024)"
                     value={customWidth}
-                    onChange={(e) => setCustomWidth(e.target.value)}
+                    onChange={(e) => {
+                      setCustomWidth(e.target.value);
+                      if (!validateDimension(Number(e.target.value))) {
+                        toast.error('Width must be between 128 and 1024 pixels');
+                      }
+                    }}
                     min={128}
                     max={1024}
                   />
                 </div>
                 <div className="flex-1">
-                  <Label className="text-xs">Height</Label>
+                  <Label className="text-xs">Height (px)</Label>
                   <Input
                     type="number"
                     placeholder="Height (128-1024)"
                     value={customHeight}
-                    onChange={(e) => setCustomHeight(e.target.value)}
+                    onChange={(e) => {
+                      setCustomHeight(e.target.value);
+                      if (!validateDimension(Number(e.target.value))) {
+                        toast.error('Height must be between 128 and 1024 pixels');
+                      }
+                    }}
                     min={128}
                     max={1024}
                   />
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handleCustomSizeSubmit}
-                  variant="secondary"
-                  type="button"
-                  className="flex-1"
-                >
-                  Set Size
-                </Button>
-                <Button 
-                  onClick={() => setIsCustomSize(false)}
-                  variant="ghost"
-                  type="button"
-                >
-                  Cancel
-                </Button>
               </div>
             </div>
           )}

@@ -77,8 +77,8 @@ export const useImageGeneration = () => {
         body: { 
           prompt: userPrompt,
           ...qualitySettings,
-          height: height,
-          width: width
+          width: width || imageSize,
+          height: height || imageSize
         }
       });
 
