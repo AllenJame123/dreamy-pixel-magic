@@ -12,7 +12,7 @@ interface GeneratedImageProps {
 }
 
 const GeneratedImage = ({ imageURL, prompt, onDownload }: GeneratedImageProps) => {
-  const [downloadFormat, setDownloadFormat] = useState('png');
+  const [downloadFormat, setDownloadFormat] = useState('webp');
 
   return (
     <Card className="p-6 glass-panel space-y-4 animate-image-fade">
