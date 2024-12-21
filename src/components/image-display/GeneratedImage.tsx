@@ -39,10 +39,10 @@ const GeneratedImage = ({ imageURL, prompt, onDownload }: GeneratedImageProps) =
           <Button
             onClick={() => onDownload(downloadFormat)}
             variant="secondary"
-            className="bg-white/90 backdrop-blur-sm"
+            className="bg-white/90 backdrop-blur-sm hover:bg-white/95"
           >
             <Download className="w-4 h-4 mr-2" />
-            Download
+            Download {downloadFormat.toUpperCase()}
           </Button>
         </div>
       </div>

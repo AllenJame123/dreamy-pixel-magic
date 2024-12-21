@@ -32,7 +32,6 @@ const PromptInput = ({
   const [isCustomSize, setIsCustomSize] = useState(false);
   const [widthError, setWidthError] = useState(false);
   const [heightError, setHeightError] = useState(false);
-  const [selectedFormat, setSelectedFormat] = useState('png');
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isGenerating) {
@@ -158,24 +157,6 @@ const PromptInput = ({
               ? "Enter dimensions between 128 and 1024 pixels" 
               : "Larger sizes will take longer to generate"}
           </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label>Download Format</Label>
-          <Select
-            value={selectedFormat}
-            onValueChange={setSelectedFormat}
-            disabled={isGenerating}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select format" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="png">PNG</SelectItem>
-              <SelectItem value="jpg">JPG</SelectItem>
-              <SelectItem value="webp">WebP</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       </div>
     </div>
