@@ -17,7 +17,9 @@ export const useImageGeneration = () => {
   const [loadingMessage, setLoadingMessage] = useState(AI_QUOTES[0]);
   const [error, setError] = useState<string | null>(null);
   const [quality, setQuality] = useState(2);
-  const [imageSize, setImageSize] = useState(512); // Default size
+  const [imageSize, setImageSize] = useState(512);
+  const [width, setWidth] = useState(512);
+  const [height, setHeight] = useState(512);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const messageIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -75,8 +77,8 @@ export const useImageGeneration = () => {
         body: { 
           prompt: userPrompt,
           ...qualitySettings,
-          height: imageSize,
-          width: imageSize
+          height: height,
+          width: width
         }
       });
 
@@ -171,6 +173,10 @@ export const useImageGeneration = () => {
     setQuality,
     imageSize,
     setImageSize,
+    width,
+    setWidth,
+    height,
+    setHeight,
     handleGenerate,
     handleDownload
   };

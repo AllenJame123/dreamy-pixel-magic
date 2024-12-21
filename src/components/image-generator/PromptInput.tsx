@@ -28,7 +28,8 @@ const PromptInput = ({
   imageSize,
   setImageSize
 }: PromptInputProps) => {
-  const [customSize, setCustomSize] = useState('');
+  const [customWidth, setCustomWidth] = useState('');
+  const [customHeight, setCustomHeight] = useState('');
   const [isCustomSize, setIsCustomSize] = useState(false);
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -40,21 +41,35 @@ const PromptInput = ({
   const handleSizeChange = (value: string) => {
     if (value === 'custom') {
       setIsCustomSize(true);
+      setCustomWidth('');
+      setCustomHeight('');
     } else {
       setIsCustomSize(false);
-      setImageSize(Number(value));
+      const size = Number(value);
+      setImageSize(size);
+      setCustomWidth(size.toString());
+      setCustomHeight(size.toString());
     }
   };
 
+  const validateDimension = (value: number): boolean => {
+    return !isNaN(value) && value >= 128 && value <= 1024;
+  };
+
   const handleCustomSizeSubmit = () => {
-    const size = Number(customSize);
-    if (isNaN(size) || size < 128 || size > 1024) {
-      toast.error('Please enter a valid size between 128 and 1024 pixels');
+    const width = Number(customWidth);
+    const height = Number(customHeight);
+
+    if (!validateDimension(width) || !validateDimension(height)) {
+      toast.error('Please enter valid dimensions between 128 and 1024 pixels');
       return;
     }
-    setImageSize(size);
+
+    // For now, we'll use the larger dimension as the size
+    // This ensures we stay within the model's capabilities
+    setImageSize(Math.max(width, height));
     setIsCustomSize(false);
-    toast.success(`Custom size set to ${size}x${size} pixels`);
+    toast.success(`Custom size set to ${width}×${height} pixels`);
   };
 
   return (
@@ -75,7 +90,9 @@ const PromptInput = ({
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <Label>Image Quality</Label>
-            <span className="text-sm text-muted-foreground">{quality === 1 ? 'Fast' : quality === 2 ? 'Balanced' : 'High Quality'}</span>
+            <span className="text-sm text-muted-foreground">
+              {quality === 1 ? 'Fast' : quality === 2 ? 'Balanced' : 'High Quality'}
+            </span>
           </div>
           <Slider
             min={1}
@@ -107,35 +124,53 @@ const PromptInput = ({
               </SelectContent>
             </Select>
           ) : (
-            <div className="flex gap-2">
-              <Input
-                type="number"
-                placeholder="Enter size in pixels (128-1024)"
-                value={customSize}
-                onChange={(e) => setCustomSize(e.target.value)}
-                min={128}
-                max={1024}
-                className="flex-1"
-              />
-              <Button 
-                onClick={handleCustomSizeSubmit}
-                variant="secondary"
-                type="button"
-              >
-                Set Size
-              </Button>
-              <Button 
-                onClick={() => setIsCustomSize(false)}
-                variant="ghost"
-                type="button"
-              >
-                Cancel
-              </Button>
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Label className="text-xs">Width</Label>
+                  <Input
+                    type="number"
+                    placeholder="Width (128-1024)"
+                    value={customWidth}
+                    onChange={(e) => setCustomWidth(e.target.value)}
+                    min={128}
+                    max={1024}
+                  />
+                </div>
+                <div className="flex-1">
+                  <Label className="text-xs">Height</Label>
+                  <Input
+                    type="number"
+                    placeholder="Height (128-1024)"
+                    value={customHeight}
+                    onChange={(e) => setCustomHeight(e.target.value)}
+                    min={128}
+                    max={1024}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleCustomSizeSubmit}
+                  variant="secondary"
+                  type="button"
+                  className="flex-1"
+                >
+                  Set Size
+                </Button>
+                <Button 
+                  onClick={() => setIsCustomSize(false)}
+                  variant="ghost"
+                  type="button"
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           )}
           <p className="text-sm text-muted-foreground">
             {isCustomSize 
-              ? "Enter a custom size between 128 and 1024 pixels. The image will be square." 
+              ? "Enter dimensions between 128 and 1024 pixels" 
               : "Larger sizes will take longer to generate"}
           </p>
         </div>
