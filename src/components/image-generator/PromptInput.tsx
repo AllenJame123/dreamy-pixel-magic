@@ -4,7 +4,6 @@ import { Sparkles } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 interface PromptInputProps {
@@ -33,6 +32,7 @@ const PromptInput = ({
   const [isCustomSize, setIsCustomSize] = useState(false);
   const [widthError, setWidthError] = useState(false);
   const [heightError, setHeightError] = useState(false);
+  const [selectedFormat, setSelectedFormat] = useState('png');
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isGenerating) {
@@ -43,14 +43,14 @@ const PromptInput = ({
   const handleSizeChange = (value: string) => {
     if (value === 'custom') {
       setIsCustomSize(true);
-      setCustomWidth('');
-      setCustomHeight('');
+      if (!customWidth && !customHeight) {
+        setCustomWidth('512');
+        setCustomHeight('512');
+      }
     } else {
       setIsCustomSize(false);
       const size = Number(value);
       setImageSize(size);
-      setCustomWidth(size.toString());
-      setCustomHeight(size.toString());
     }
   };
 
@@ -107,24 +107,24 @@ const PromptInput = ({
 
         <div className="space-y-2">
           <Label>Image Size</Label>
-          {!isCustomSize ? (
-            <Select
-              value={imageSize.toString()}
-              onValueChange={handleSizeChange}
-              disabled={isGenerating}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select size" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="256">256 × 256 pixels</SelectItem>
-                <SelectItem value="512">512 × 512 pixels</SelectItem>
-                <SelectItem value="768">768 × 768 pixels</SelectItem>
-                <SelectItem value="custom">Custom size...</SelectItem>
-              </SelectContent>
-            </Select>
-          ) : (
-            <div className="space-y-2">
+          <Select
+            value={isCustomSize ? 'custom' : imageSize.toString()}
+            onValueChange={handleSizeChange}
+            disabled={isGenerating}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select size" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="256">256 × 256 pixels</SelectItem>
+              <SelectItem value="512">512 × 512 pixels</SelectItem>
+              <SelectItem value="768">768 × 768 pixels</SelectItem>
+              <SelectItem value="custom">Custom size...</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {isCustomSize && (
+            <div className="space-y-2 mt-2">
               <div className="flex gap-2">
                 <div className="flex-1">
                   <Label className="text-xs">Width (px)</Label>
@@ -158,6 +158,24 @@ const PromptInput = ({
               ? "Enter dimensions between 128 and 1024 pixels" 
               : "Larger sizes will take longer to generate"}
           </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label>Download Format</Label>
+          <Select
+            value={selectedFormat}
+            onValueChange={setSelectedFormat}
+            disabled={isGenerating}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select format" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="png">PNG</SelectItem>
+              <SelectItem value="jpg">JPG</SelectItem>
+              <SelectItem value="webp">WebP</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </div>
