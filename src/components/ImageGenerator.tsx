@@ -20,6 +20,8 @@ const ImageGenerator = () => {
     progress,
     loadingMessage,
     error,
+    quality,
+    setQuality,
     handleGenerate,
     handleDownload
   } = useImageGeneration();
@@ -39,6 +41,8 @@ const ImageGenerator = () => {
             setPrompt={setPrompt}
             isGenerating={isGenerating}
             onEnterPress={handleGenerate}
+            quality={quality}
+            setQuality={setQuality}
           />
 
           {isGenerating && (

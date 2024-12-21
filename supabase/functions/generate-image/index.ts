@@ -7,14 +7,14 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const { prompt } = await req.json()
+    const { prompt, guidance_scale, num_inference_steps } = await req.json()
     console.log('Received prompt:', prompt)
+    console.log('Quality settings:', { guidance_scale, num_inference_steps })
 
     const token = Deno.env.get('HUGGING_FACE_ACCESS_TOKEN')
     if (!token) {
@@ -30,10 +30,10 @@ serve(async (req) => {
       inputs: prompt,
       model: 'black-forest-labs/FLUX.1-schnell',
       parameters: {
-        guidance_scale: 3.0, // Further reduced from 5.0 for faster generation
-        num_inference_steps: 10, // Further reduced from 15 for faster generation
-        height: 512, // Reduced from default size
-        width: 512, // Reduced from default size
+        guidance_scale,
+        num_inference_steps,
+        height: 512,
+        width: 512,
       }
     })
 
@@ -42,26 +42,19 @@ serve(async (req) => {
       throw new Error('Failed to generate image')
     }
 
-    console.log('Image generated successfully, converting to base64...')
+    console.log('Image generated successfully')
     const arrayBuffer = await image.arrayBuffer()
     const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
     
-    console.log('Sending response...')
     return new Response(
       JSON.stringify({ 
         success: true,
         image: `data:image/png;base64,${base64}` 
       }),
-      { 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        } 
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
     console.error('Error in generate-image function:', error)
-    
     return new Response(
       JSON.stringify({ 
         success: false,
@@ -69,7 +62,7 @@ serve(async (req) => {
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 // Keep 200 to handle the error in the frontend
+        status: 200
       }
     )
   }
