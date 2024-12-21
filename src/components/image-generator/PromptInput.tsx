@@ -74,9 +74,9 @@ const PromptInput = ({
               <SelectValue placeholder="Select size" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="256">256 x 256</SelectItem>
-              <SelectItem value="512">512 x 512</SelectItem>
-              <SelectItem value="768">768 x 768</SelectItem>
+              <SelectItem value="256">256 × 256 pixels</SelectItem>
+              <SelectItem value="512">512 × 512 pixels</SelectItem>
+              <SelectItem value="768">768 × 768 pixels</SelectItem>
             </SelectContent>
           </Select>
           <p className="text-sm text-muted-foreground">Larger sizes will take longer to generate</p>
