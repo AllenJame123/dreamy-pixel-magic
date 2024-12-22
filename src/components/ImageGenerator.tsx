@@ -38,16 +38,27 @@ const ImageGenerator = () => {
         </div>
 
         <Card className="p-6 glass-panel space-y-4">
-          <PromptInput
-            prompt={prompt}
-            setPrompt={setPrompt}
-            isGenerating={isGenerating}
-            onEnterPress={handleGenerate}
-            quality={quality}
-            setQuality={setQuality}
-            imageSize={imageSize}
-            setImageSize={setImageSize}
-          />
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <PromptInput
+                prompt={prompt}
+                setPrompt={setPrompt}
+                isGenerating={isGenerating}
+                onEnterPress={handleGenerate}
+                quality={quality}
+                setQuality={setQuality}
+                imageSize={imageSize}
+                setImageSize={setImageSize}
+              />
+            </div>
+            <div className="flex-shrink-0">
+              <GenerateButton
+                onClick={handleGenerate}
+                isGenerating={isGenerating}
+                disabled={isGenerating || !prompt.trim()}
+              />
+            </div>
+          </div>
 
           {isGenerating && (
             <p className="text-center text-muted-foreground animate-pulse">
@@ -61,12 +72,6 @@ const ImageGenerator = () => {
             isGenerating={isGenerating}
             timer={timer}
             progress={progress}
-          />
-
-          <GenerateButton
-            onClick={handleGenerate}
-            isGenerating={isGenerating}
-            disabled={isGenerating || !prompt.trim()}
           />
         </Card>
 
