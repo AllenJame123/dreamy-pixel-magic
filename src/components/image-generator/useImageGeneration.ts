@@ -16,7 +16,7 @@ export const useImageGeneration = () => {
   const [progress, setProgress] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState(AI_QUOTES[0]);
   const [error, setError] = useState<string | null>(null);
-  const [quality, setQuality] = useState(3); // Highest/slowest quality
+  const [quality, setQuality] = useState(1); // Lowest/fastest quality
   const [imageSize, setImageSize] = useState(512);
   const [width, setWidth] = useState(512);
   const [height, setHeight] = useState(512);
