@@ -71,6 +71,12 @@ const PromptInput = ({
     }
   }, [customWidth, customHeight, isCustomSize, setImageSize]);
 
+  const qualityLabels = {
+    1: 'Fast',
+    2: 'Balanced',
+    3: 'High Quality'
+  };
+
   return (
     <div className="space-y-4">
       <div className="relative">
@@ -90,17 +96,25 @@ const PromptInput = ({
           <div className="flex justify-between items-center">
             <Label>Image Quality</Label>
             <span className="text-sm text-muted-foreground">
-              {quality === 1 ? 'Fast' : quality === 2 ? 'Balanced' : 'High Quality'}
+              {qualityLabels[quality as keyof typeof qualityLabels]}
             </span>
           </div>
-          <Slider
-            min={1}
-            max={3}
-            step={1}
-            value={[quality]}
-            onValueChange={(value) => setQuality(value[0])}
-            disabled={isGenerating}
-          />
+          <div className="relative pt-6">
+            <Slider
+              min={1}
+              max={3}
+              step={1}
+              value={[quality]}
+              onValueChange={(value) => setQuality(value[0])}
+              disabled={isGenerating}
+              className="z-10"
+            />
+            <div className="absolute top-0 left-0 right-0 flex justify-between text-xs text-muted-foreground">
+              <span className={cn("transition-colors", quality === 1 && "text-primary font-medium")}>Fast</span>
+              <span className={cn("transition-colors", quality === 2 && "text-primary font-medium")}>Balanced</span>
+              <span className={cn("transition-colors", quality === 3 && "text-primary font-medium")}>High Quality</span>
+            </div>
+          </div>
           <p className="text-sm text-muted-foreground">Higher quality settings will take longer to generate</p>
         </div>
 
