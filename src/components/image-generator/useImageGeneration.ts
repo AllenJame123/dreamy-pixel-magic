@@ -23,6 +23,11 @@ export const useImageGeneration = () => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const messageIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  const isValidSize = (): boolean => {
+    if (!width || !height) return true;
+    return width >= 128 && width <= 1024 && height >= 128 && height <= 1024;
+  };
+
   useEffect(() => {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -184,6 +189,7 @@ export const useImageGeneration = () => {
     height,
     setHeight,
     handleGenerate,
-    handleDownload
+    handleDownload,
+    isValidSize
   };
 };

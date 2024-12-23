@@ -24,8 +24,11 @@ const ImageGenerator = () => {
     setQuality,
     imageSize,
     setImageSize,
+    width,
+    height,
     handleGenerate,
-    handleDownload
+    handleDownload,
+    isValidSize
   } = useImageGeneration();
 
   return (
@@ -55,7 +58,7 @@ const ImageGenerator = () => {
               <GenerateButton
                 onClick={handleGenerate}
                 isGenerating={isGenerating}
-                disabled={isGenerating || !prompt.trim()}
+                disabled={isGenerating || !prompt.trim() || !isValidSize()}
               />
             </div>
           </div>
