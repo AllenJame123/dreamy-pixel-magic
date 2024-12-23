@@ -77,8 +77,8 @@ export const useImageGeneration = () => {
         body: { 
           prompt: userPrompt,
           ...qualitySettings,
-          width: width || imageSize,
-          height: height || imageSize
+          width,
+          height
         }
       });
 
@@ -107,6 +107,12 @@ export const useImageGeneration = () => {
   const handleGenerate = async () => {
     if (!prompt.trim()) {
       toast.error('Please enter a prompt');
+      return;
+    }
+
+    // Validate custom dimensions
+    if (width < 128 || width > 1024 || height < 128 || height > 1024) {
+      toast.error('Image dimensions must be between 128 and 1024 pixels');
       return;
     }
 
