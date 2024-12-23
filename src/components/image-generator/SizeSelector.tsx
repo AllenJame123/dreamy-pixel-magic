@@ -48,24 +48,23 @@ const SizeSelector = ({ imageSize, setImageSize, isGenerating, onValidSizeChange
       setWidthError(!isWidthValid && customWidth !== '');
       setHeightError(!isHeightValid && customHeight !== '');
 
+      onValidSizeChange(isWidthValid && isHeightValid);
+      
       if (isWidthValid && isHeightValid) {
         setImageSize(Math.max(width, height));
-        onValidSizeChange(true);
-      } else {
-        onValidSizeChange(false);
       }
     }
   }, [customWidth, customHeight, isCustomSize, setImageSize, onValidSizeChange]);
 
   return (
-    <div className="space-y-2">
-      <Label>Image Size</Label>
+    <div className="space-y-2 w-full max-w-xl mx-auto">
+      <Label className="text-center block">Image Size</Label>
       <Select
         value={isCustomSize ? 'custom' : imageSize.toString()}
         onValueChange={handleSizeChange}
         disabled={isGenerating}
       >
-        <SelectTrigger>
+        <SelectTrigger className="w-full">
           <SelectValue placeholder="Select size" />
         </SelectTrigger>
         <SelectContent>
@@ -78,9 +77,9 @@ const SizeSelector = ({ imageSize, setImageSize, isGenerating, onValidSizeChange
 
       {isCustomSize && (
         <div className="space-y-2 mt-2">
-          <div className="flex gap-2">
-            <div className="flex-1">
-              <Label className="text-xs">Width (px)</Label>
+          <div className="flex gap-4 justify-center">
+            <div className="flex-1 max-w-[200px]">
+              <Label className="text-xs text-center block">Width (px)</Label>
               <Input
                 type="number"
                 placeholder="Width (128-1024)"
@@ -91,8 +90,8 @@ const SizeSelector = ({ imageSize, setImageSize, isGenerating, onValidSizeChange
                 className={cn(widthError && "border-red-500 focus-visible:ring-red-500")}
               />
             </div>
-            <div className="flex-1">
-              <Label className="text-xs">Height (px)</Label>
+            <div className="flex-1 max-w-[200px]">
+              <Label className="text-xs text-center block">Height (px)</Label>
               <Input
                 type="number"
                 placeholder="Height (128-1024)"
@@ -106,7 +105,7 @@ const SizeSelector = ({ imageSize, setImageSize, isGenerating, onValidSizeChange
           </div>
         </div>
       )}
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-muted-foreground text-center">
         {isCustomSize 
           ? "Enter dimensions between 128 and 1024 pixels" 
           : "Larger sizes will take longer to generate"}

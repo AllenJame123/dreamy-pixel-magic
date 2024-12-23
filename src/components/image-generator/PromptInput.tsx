@@ -34,8 +34,8 @@ const PromptInput = ({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="relative">
+    <div className="space-y-6 w-full">
+      <div className="relative max-w-xl mx-auto">
         <Input
           placeholder="Describe the image you want to generate..."
           value={prompt}

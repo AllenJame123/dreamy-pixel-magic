@@ -11,8 +11,8 @@ interface QualitySelectorProps {
 
 const QualitySelector = ({ quality, setQuality }: QualitySelectorProps) => {
   return (
-    <div className="space-y-2">
-      <Label>Image Quality</Label>
+    <div className="space-y-2 w-full max-w-xl mx-auto">
+      <Label className="text-center block">Image Quality</Label>
       <RadioGroup
         value={quality.toString()}
         onValueChange={(value) => setQuality(Number(value))}
