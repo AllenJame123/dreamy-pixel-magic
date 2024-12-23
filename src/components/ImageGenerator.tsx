@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Image, Play, RefreshCw } from "lucide-react";
 import GeneratedImage from './image-display/GeneratedImage';
@@ -28,8 +28,9 @@ const ImageGenerator = () => {
     height,
     handleGenerate,
     handleDownload,
-    isValidSize
   } = useImageGeneration();
+
+  const [isValidSize, setIsValidSize] = useState(true);
 
   return (
     <div className="p-4 flex flex-col items-center justify-start mt-4 space-y-6">
@@ -52,13 +53,14 @@ const ImageGenerator = () => {
                 setQuality={setQuality}
                 imageSize={imageSize}
                 setImageSize={setImageSize}
+                onValidSizeChange={setIsValidSize}
               />
             </div>
             <div className="flex-shrink-0">
               <GenerateButton
                 onClick={handleGenerate}
                 isGenerating={isGenerating}
-                disabled={isGenerating || !prompt.trim() || !isValidSize()}
+                disabled={isGenerating || !prompt.trim() || !isValidSize}
               />
             </div>
           </div>
