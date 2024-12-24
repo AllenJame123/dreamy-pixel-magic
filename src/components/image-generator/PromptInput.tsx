@@ -34,7 +34,7 @@ const PromptInput = ({
   };
 
   return (
-    <div className="flex flex-col items-center w-full space-y-6">
+    <div className="flex flex-col items-center w-full space-y-6 px-4 sm:px-0">
       <div className="relative w-full max-w-xl">
         <Input
           placeholder="Describe the image you want to generate..."

@@ -11,12 +11,12 @@ interface QualitySelectorProps {
 
 const QualitySelector = ({ quality, setQuality }: QualitySelectorProps) => {
   return (
-    <div className="flex flex-col items-center justify-center w-full space-y-2">
+    <div className="flex flex-col items-center justify-center w-full max-w-xl mx-auto space-y-2">
       <Label className="text-center">Image Quality</Label>
       <RadioGroup
         value={quality.toString()}
         onValueChange={(value) => setQuality(Number(value))}
-        className="grid grid-cols-3 gap-4 max-w-xl w-full"
+        className="grid grid-cols-3 gap-4 w-full"
       >
         <Label
           htmlFor="quality-1"

@@ -57,9 +57,9 @@ const SizeSelector = ({ imageSize, setImageSize, isGenerating, onValidSizeChange
   }, [customWidth, customHeight, isCustomSize, setImageSize, onValidSizeChange]);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full space-y-2">
+    <div className="flex flex-col items-center justify-center w-full max-w-xl mx-auto space-y-2">
       <Label className="text-center">Image Size</Label>
-      <div className="w-full max-w-xl">
+      <div className="w-full">
         <Select
           value={isCustomSize ? 'custom' : imageSize.toString()}
           onValueChange={handleSizeChange}
@@ -79,7 +79,7 @@ const SizeSelector = ({ imageSize, setImageSize, isGenerating, onValidSizeChange
         {isCustomSize && (
           <div className="space-y-2 mt-2">
             <div className="flex gap-4 justify-center">
-              <div className="flex-1 max-w-[200px]">
+              <div className="flex-1 max-w-[150px]">
                 <Label className="text-xs text-center block">Width (px)</Label>
                 <Input
                   type="number"
@@ -91,7 +91,7 @@ const SizeSelector = ({ imageSize, setImageSize, isGenerating, onValidSizeChange
                   className={cn(widthError && "border-red-500 focus-visible:ring-red-500")}
                 />
               </div>
-              <div className="flex-1 max-w-[200px]">
+              <div className="flex-1 max-w-[150px]">
                 <Label className="text-xs text-center block">Height (px)</Label>
                 <Input
                   type="number"
