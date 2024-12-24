@@ -34,8 +34,8 @@ const PromptInput = ({
   };
 
   return (
-    <div className="space-y-6 w-full">
-      <div className="relative max-w-xl mx-auto">
+    <div className="flex flex-col items-center w-full space-y-6">
+      <div className="relative w-full max-w-xl">
         <Input
           placeholder="Describe the image you want to generate..."
           value={prompt}
@@ -47,13 +47,15 @@ const PromptInput = ({
         <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
       </div>
       
-      <QualitySelector quality={quality} setQuality={setQuality} />
-      <SizeSelector 
-        imageSize={imageSize} 
-        setImageSize={setImageSize} 
-        isGenerating={isGenerating}
-        onValidSizeChange={onValidSizeChange}
-      />
+      <div className="w-full flex flex-col items-center space-y-6">
+        <QualitySelector quality={quality} setQuality={setQuality} />
+        <SizeSelector 
+          imageSize={imageSize} 
+          setImageSize={setImageSize} 
+          isGenerating={isGenerating}
+          onValidSizeChange={onValidSizeChange}
+        />
+      </div>
     </div>
   );
 };
