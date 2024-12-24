@@ -6,12 +6,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Content filtering patterns for backend validation
+// Server-side content filtering patterns
 const RESTRICTED_PATTERNS = [
   /\b(nude|naked|sex|porn|xxx|adult|explicit)\b/i,
-  /\b(genitalia|breasts?|nipples?)\b/i,
-  /\b(intercourse|fornication|erotic)\b/i,
-  /\b(n[u4]d[e3]|s[e3]x[y]?|p[o0]rn)\b/i,
+  /\b(kiss(ing)?|love\s?making|dating|relationship|intimate|romance|romantic)\b/i,
+  /\b(genitalia|breasts?|nipples?|body\s?parts)\b/i,
+  /\b(intercourse|fornication|erotic|sensual|seductive)\b/i,
+  /\b(n[u4]d[e3]|s[e3]x[y]?|p[o0]rn|k[i1]ss)\b/i,
+  /\b(touch(ing)?|embrace|hug(ging)?|cuddle|affection(ate)?)\b/i,
 ];
 
 const validatePrompt = (prompt: string): boolean => {
@@ -29,12 +31,12 @@ serve(async (req) => {
     console.log('Received prompt:', prompt)
     console.log('Quality settings:', { guidance_scale, num_inference_steps })
 
-    // Validate prompt content
+    // Server-side content validation
     if (!validatePrompt(prompt)) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: 'Your prompt violates our content guidelines. Please provide a prompt suitable for all audiences.'
+          error: 'Your prompt contains inappropriate content. Please provide a prompt suitable for children.'
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
