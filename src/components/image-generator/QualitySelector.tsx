@@ -11,53 +11,56 @@ interface QualitySelectorProps {
 
 const QualitySelector = ({ quality, setQuality }: QualitySelectorProps) => {
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-xl mx-auto space-y-2">
-      <Label className="text-center">Image Quality</Label>
+    <div className="w-full">
+      <Label className="text-lg font-medium mb-4 block">Image Quality</Label>
       <RadioGroup
         value={quality.toString()}
         onValueChange={(value) => setQuality(Number(value))}
-        className="grid grid-cols-3 gap-4 w-full"
+        className="grid grid-cols-1 sm:grid-cols-3 gap-3"
       >
         <Label
           htmlFor="quality-1"
           className={cn(
-            "flex flex-col items-center justify-between rounded-md border-2 border-muted p-4 hover:bg-accent cursor-pointer",
-            quality === 1 && "border-primary"
+            "relative flex items-center justify-center p-4 rounded-xl cursor-pointer border-2 transition-all",
+            "hover:bg-primary/5",
+            quality === 1 ? "border-primary bg-primary/5" : "border-border"
           )}
         >
           <RadioGroupItem value="1" id="quality-1" className="sr-only" />
-          <Zap className="mb-2 h-6 w-6" />
-          <div className="space-y-1 text-center">
-            <p className="font-medium leading-none">Fast</p>
-            <p className="text-xs text-muted-foreground">Quick results</p>
+          <div className="text-center">
+            <Zap className="w-6 h-6 mx-auto mb-2 text-primary" />
+            <p className="font-medium">Fast</p>
+            <p className="text-sm text-muted-foreground">Quick results</p>
           </div>
         </Label>
         <Label
           htmlFor="quality-2"
           className={cn(
-            "flex flex-col items-center justify-between rounded-md border-2 border-muted p-4 hover:bg-accent cursor-pointer",
-            quality === 2 && "border-primary"
+            "relative flex items-center justify-center p-4 rounded-xl cursor-pointer border-2 transition-all",
+            "hover:bg-primary/5",
+            quality === 2 ? "border-primary bg-primary/5" : "border-border"
           )}
         >
           <RadioGroupItem value="2" id="quality-2" className="sr-only" />
-          <Scale className="mb-2 h-6 w-6" />
-          <div className="space-y-1 text-center">
-            <p className="font-medium leading-none">Balanced</p>
-            <p className="text-xs text-muted-foreground">Good quality</p>
+          <div className="text-center">
+            <Scale className="w-6 h-6 mx-auto mb-2 text-primary" />
+            <p className="font-medium">Balanced</p>
+            <p className="text-sm text-muted-foreground">Good quality</p>
           </div>
         </Label>
         <Label
           htmlFor="quality-3"
           className={cn(
-            "flex flex-col items-center justify-between rounded-md border-2 border-muted p-4 hover:bg-accent cursor-pointer",
-            quality === 3 && "border-primary"
+            "relative flex items-center justify-center p-4 rounded-xl cursor-pointer border-2 transition-all",
+            "hover:bg-primary/5",
+            quality === 3 ? "border-primary bg-primary/5" : "border-border"
           )}
         >
           <RadioGroupItem value="3" id="quality-3" className="sr-only" />
-          <Stars className="mb-2 h-6 w-6" />
-          <div className="space-y-1 text-center">
-            <p className="font-medium leading-none">High Quality</p>
-            <p className="text-xs text-muted-foreground">Best results</p>
+          <div className="text-center">
+            <Stars className="w-6 h-6 mx-auto mb-2 text-primary" />
+            <p className="font-medium">High Quality</p>
+            <p className="text-sm text-muted-foreground">Best results</p>
           </div>
         </Label>
       </RadioGroup>

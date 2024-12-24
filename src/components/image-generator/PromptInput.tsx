@@ -34,20 +34,20 @@ const PromptInput = ({
   };
 
   return (
-    <div className="flex flex-col items-center w-full space-y-6 px-4 sm:px-0">
-      <div className="relative w-full max-w-xl">
+    <div className="w-full max-w-2xl mx-auto space-y-8">
+      <div className="relative">
         <Input
           placeholder="Describe the image you want to generate..."
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           onKeyPress={handleKeyPress}
-          className="glass-panel pr-12"
+          className="w-full h-14 pl-4 pr-12 text-lg bg-white/50 backdrop-blur-sm border-2 focus:border-primary"
           disabled={isGenerating}
         />
-        <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <Sparkles className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
       </div>
       
-      <div className="w-full flex flex-col items-center space-y-6">
+      <div className="grid gap-8 w-full">
         <QualitySelector quality={quality} setQuality={setQuality} />
         <SizeSelector 
           imageSize={imageSize} 

@@ -57,15 +57,15 @@ const SizeSelector = ({ imageSize, setImageSize, isGenerating, onValidSizeChange
   }, [customWidth, customHeight, isCustomSize, setImageSize, onValidSizeChange]);
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-xl mx-auto space-y-2">
-      <Label className="text-center">Image Size</Label>
-      <div className="w-full">
+    <div className="w-full">
+      <Label className="text-lg font-medium mb-4 block">Image Size</Label>
+      <div className="space-y-4">
         <Select
           value={isCustomSize ? 'custom' : imageSize.toString()}
           onValueChange={handleSizeChange}
           disabled={isGenerating}
         >
-          <SelectTrigger className="w-full">
+          <SelectTrigger className="w-full bg-white/50 backdrop-blur-sm">
             <SelectValue placeholder="Select size" />
           </SelectTrigger>
           <SelectContent>
@@ -77,40 +77,49 @@ const SizeSelector = ({ imageSize, setImageSize, isGenerating, onValidSizeChange
         </Select>
 
         {isCustomSize && (
-          <div className="space-y-2 mt-2">
-            <div className="flex gap-4 justify-center">
-              <div className="flex-1 max-w-[150px]">
-                <Label className="text-xs text-center block">Width (px)</Label>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm text-center block mb-2">Width (px)</Label>
                 <Input
                   type="number"
-                  placeholder="Width (128-1024)"
+                  placeholder="128-1024"
                   value={customWidth}
                   onChange={(e) => setCustomWidth(e.target.value)}
                   min={128}
                   max={1024}
-                  className={cn(widthError && "border-red-500 focus-visible:ring-red-500")}
+                  className={cn(
+                    "bg-white/50 backdrop-blur-sm",
+                    widthError && "border-red-500 focus-visible:ring-red-500"
+                  )}
                 />
               </div>
-              <div className="flex-1 max-w-[150px]">
-                <Label className="text-xs text-center block">Height (px)</Label>
+              <div>
+                <Label className="text-sm text-center block mb-2">Height (px)</Label>
                 <Input
                   type="number"
-                  placeholder="Height (128-1024)"
+                  placeholder="128-1024"
                   value={customHeight}
                   onChange={(e) => setCustomHeight(e.target.value)}
                   min={128}
                   max={1024}
-                  className={cn(heightError && "border-red-500 focus-visible:ring-red-500")}
+                  className={cn(
+                    "bg-white/50 backdrop-blur-sm",
+                    heightError && "border-red-500 focus-visible:ring-red-500"
+                  )}
                 />
               </div>
             </div>
+            <p className="text-sm text-muted-foreground text-center">
+              Enter dimensions between 128 and 1024 pixels
+            </p>
           </div>
         )}
-        <p className="text-sm text-muted-foreground text-center mt-2">
-          {isCustomSize 
-            ? "Enter dimensions between 128 and 1024 pixels" 
-            : "Larger sizes will take longer to generate"}
-        </p>
+        {!isCustomSize && (
+          <p className="text-sm text-muted-foreground text-center">
+            Larger sizes will take longer to generate
+          </p>
+        )}
       </div>
     </div>
   );
