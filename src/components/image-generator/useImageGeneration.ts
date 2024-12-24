@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from "@/integrations/supabase/client";
 import { AI_QUOTES } from './AIQuotes';
+import { validatePrompt } from '@/utils/contentFilter';
 
 interface GeneratedImage {
   imageURL: string;
@@ -16,7 +17,7 @@ export const useImageGeneration = () => {
   const [progress, setProgress] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState(AI_QUOTES[0]);
   const [error, setError] = useState<string | null>(null);
-  const [quality, setQuality] = useState(1); // Default to Fast quality
+  const [quality, setQuality] = useState(1);
   const [imageSize, setImageSize] = useState(512);
   const [width, setWidth] = useState(512);
   const [height, setHeight] = useState(512);
@@ -71,11 +72,17 @@ export const useImageGeneration = () => {
   };
 
   const generateImage = async (userPrompt: string) => {
+    // Validate prompt content before proceeding
+    const validationResult = validatePrompt(userPrompt);
+    if (!validationResult.isValid) {
+      throw new Error(validationResult.message);
+    }
+
     try {
       const qualitySettings = {
-        1: { guidance_scale: 3.0, num_inference_steps: 10 }, // Fast
-        2: { guidance_scale: 5.0, num_inference_steps: 15 }, // Balanced
-        3: { guidance_scale: 7.5, num_inference_steps: 20 }, // High Quality
+        1: { guidance_scale: 3.0, num_inference_steps: 10 },
+        2: { guidance_scale: 5.0, num_inference_steps: 15 },
+        3: { guidance_scale: 7.5, num_inference_steps: 20 },
       }[quality];
 
       const { data, error: functionError } = await supabase.functions.invoke('generate-image', {
@@ -115,7 +122,7 @@ export const useImageGeneration = () => {
       return;
     }
 
-    // Validate custom dimensions
+    // Validate dimensions
     if (width < 128 || width > 1024 || height < 128 || height > 1024) {
       toast.error('Image dimensions must be between 128 and 1024 pixels');
       return;
@@ -128,6 +135,12 @@ export const useImageGeneration = () => {
     setTimer(0);
 
     try {
+      // Content validation
+      const validationResult = validatePrompt(prompt);
+      if (!validationResult.isValid) {
+        throw new Error(validationResult.message);
+      }
+
       initializeProgress();
       const imageUrl = await generateImage(prompt);
       
@@ -142,7 +155,7 @@ export const useImageGeneration = () => {
     } catch (error: any) {
       console.error('Generation error:', error);
       setError(error.message || 'Failed to generate image. Please try editing your prompt and try again.');
-      toast.error('Failed to generate image');
+      toast.error(error.message || 'Failed to generate image');
     } finally {
       cleanupInterval();
       setIsGenerating(false);
@@ -190,6 +203,6 @@ export const useImageGeneration = () => {
     setHeight,
     handleGenerate,
     handleDownload,
-    isValidSize
+    isValidSize: () => width >= 128 && width <= 1024 && height >= 128 && height <= 1024
   };
 };
