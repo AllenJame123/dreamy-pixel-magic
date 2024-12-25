@@ -4,7 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { AI_QUOTES } from './AIQuotes';
 import { validatePrompt } from '@/utils/contentFilter';
 
-// Move types to a separate file for better organization
 interface GeneratedImage {
   imageURL: string;
   prompt: string;
@@ -15,7 +14,6 @@ interface ImageDimensions {
   height: number;
 }
 
-// Split the loading state management into a separate hook
 const useLoadingState = () => {
   const [timer, setTimer] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -67,7 +65,8 @@ const useLoadingState = () => {
     progress,
     loadingMessage,
     initializeProgress,
-    cleanupInterval
+    cleanupInterval,
+    setProgress
   };
 };
 
@@ -85,7 +84,8 @@ export const useImageGeneration = () => {
     progress,
     loadingMessage,
     initializeProgress,
-    cleanupInterval
+    cleanupInterval,
+    setProgress
   } = useLoadingState();
 
   const generateImage = async (userPrompt: string, dimensions: ImageDimensions) => {

@@ -21,8 +21,10 @@ const ImageGenerator = () => {
     error,
     quality,
     setQuality,
-    imageSize,
-    setImageSize,
+    width,
+    setWidth,
+    height,
+    setHeight,
     handleGenerate,
     handleDownload,
   } = useImageGeneration();
@@ -46,8 +48,10 @@ const ImageGenerator = () => {
               onEnterPress={handleGenerate}
               quality={quality}
               setQuality={setQuality}
-              imageSize={imageSize}
-              setImageSize={setImageSize}
+              width={width}
+              height={height}
+              setWidth={setWidth}
+              setHeight={setHeight}
               onValidSizeChange={setIsValidSize}
             />
             <div className="flex justify-center">
