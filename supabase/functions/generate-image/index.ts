@@ -27,10 +27,17 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, guidance_scale, num_inference_steps, width = 512, height = 512 } = await req.json()
+    const { prompt, quality, width = 512, height = 512 } = await req.json()
     console.log('Received prompt:', prompt)
     console.log('Image dimensions:', { width, height })
-    console.log('Quality settings:', { guidance_scale, num_inference_steps })
+    console.log('Quality setting:', quality)
+
+    // Quality settings mapping
+    const qualitySettings = {
+      1: { num_inference_steps: 20 },  // Fast
+      2: { num_inference_steps: 35 },  // Balanced
+      3: { num_inference_steps: 50 },  // High Quality
+    }[quality] || { num_inference_steps: 35 }; // Default to balanced if quality is not specified
 
     // Server-side content validation
     if (!validatePrompt(prompt)) {
@@ -52,13 +59,18 @@ serve(async (req) => {
     console.log('Initializing HuggingFace client...')
     const hf = new HfInference(token)
 
-    console.log('Starting image generation with dimensions:', { width, height })
+    console.log('Starting image generation with settings:', { 
+      width, 
+      height, 
+      quality,
+      num_inference_steps: qualitySettings.num_inference_steps 
+    })
+
     const image = await hf.textToImage({
       inputs: prompt,
       model: 'black-forest-labs/FLUX.1-schnell',
       parameters: {
-        guidance_scale,
-        num_inference_steps,
+        ...qualitySettings,
         width: Number(width),
         height: Number(height),
       }
