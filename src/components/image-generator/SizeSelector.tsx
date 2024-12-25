@@ -5,15 +5,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils";
 
 interface SizeSelectorProps {
-  imageSize: number;
-  setImageSize: (size: number) => void;
+  width: number;
+  height: number;
+  setWidth: (width: number) => void;
+  setHeight: (height: number) => void;
   isGenerating: boolean;
   onValidSizeChange: (isValid: boolean) => void;
 }
 
-const SizeSelector = ({ imageSize, setImageSize, isGenerating, onValidSizeChange }: SizeSelectorProps) => {
-  const [customWidth, setCustomWidth] = useState('');
-  const [customHeight, setCustomHeight] = useState('');
+const SizeSelector = ({ 
+  width,
+  height,
+  setWidth,
+  setHeight,
+  isGenerating,
+  onValidSizeChange 
+}: SizeSelectorProps) => {
   const [isCustomSize, setIsCustomSize] = useState(false);
   const [widthError, setWidthError] = useState(false);
   const [heightError, setHeightError] = useState(false);
@@ -25,43 +32,39 @@ const SizeSelector = ({ imageSize, setImageSize, isGenerating, onValidSizeChange
   const handleSizeChange = (value: string) => {
     if (value === 'custom') {
       setIsCustomSize(true);
-      if (!customWidth && !customHeight) {
-        setCustomWidth('512');
-        setCustomHeight('512');
-      }
     } else {
       setIsCustomSize(false);
       const size = Number(value);
-      setImageSize(size);
+      setWidth(size);
+      setHeight(size);
       onValidSizeChange(true);
     }
   };
 
+  const getCurrentSizeValue = (): string => {
+    if (isCustomSize) return 'custom';
+    if (width === height) return width.toString();
+    return 'custom';
+  };
+
   useEffect(() => {
     if (isCustomSize) {
-      const width = Number(customWidth);
-      const height = Number(customHeight);
-
       const isWidthValid = validateDimension(width);
       const isHeightValid = validateDimension(height);
 
-      setWidthError(!isWidthValid && customWidth !== '');
-      setHeightError(!isHeightValid && customHeight !== '');
+      setWidthError(!isWidthValid);
+      setHeightError(!isHeightValid);
 
       onValidSizeChange(isWidthValid && isHeightValid);
-      
-      if (isWidthValid && isHeightValid) {
-        setImageSize(Math.max(width, height));
-      }
     }
-  }, [customWidth, customHeight, isCustomSize, setImageSize, onValidSizeChange]);
+  }, [width, height, isCustomSize, onValidSizeChange]);
 
   return (
     <div className="w-full">
       <Label className="text-lg font-medium mb-4 block">Image Size</Label>
       <div className="space-y-4">
         <Select
-          value={isCustomSize ? 'custom' : imageSize.toString()}
+          value={getCurrentSizeValue()}
           onValueChange={handleSizeChange}
           disabled={isGenerating}
         >
@@ -84,8 +87,8 @@ const SizeSelector = ({ imageSize, setImageSize, isGenerating, onValidSizeChange
                 <Input
                   type="number"
                   placeholder="128-1024"
-                  value={customWidth}
-                  onChange={(e) => setCustomWidth(e.target.value)}
+                  value={width}
+                  onChange={(e) => setWidth(Number(e.target.value))}
                   min={128}
                   max={1024}
                   className={cn(
@@ -99,8 +102,8 @@ const SizeSelector = ({ imageSize, setImageSize, isGenerating, onValidSizeChange
                 <Input
                   type="number"
                   placeholder="128-1024"
-                  value={customHeight}
-                  onChange={(e) => setCustomHeight(e.target.value)}
+                  value={height}
+                  onChange={(e) => setHeight(Number(e.target.value))}
                   min={128}
                   max={1024}
                   className={cn(

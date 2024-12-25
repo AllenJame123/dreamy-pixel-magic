@@ -11,8 +11,10 @@ interface PromptInputProps {
   onEnterPress: () => void;
   quality: number;
   setQuality: (quality: number) => void;
-  imageSize: number;
-  setImageSize: (size: number) => void;
+  width: number;
+  height: number;
+  setWidth: (width: number) => void;
+  setHeight: (height: number) => void;
   onValidSizeChange: (isValid: boolean) => void;
 }
 
@@ -23,8 +25,10 @@ const PromptInput = ({
   onEnterPress,
   quality,
   setQuality,
-  imageSize,
-  setImageSize,
+  width,
+  height,
+  setWidth,
+  setHeight,
   onValidSizeChange
 }: PromptInputProps) => {
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -50,8 +54,10 @@ const PromptInput = ({
       <div className="grid gap-8 w-full">
         <QualitySelector quality={quality} setQuality={setQuality} />
         <SizeSelector 
-          imageSize={imageSize} 
-          setImageSize={setImageSize} 
+          width={width}
+          height={height}
+          setWidth={setWidth}
+          setHeight={setHeight}
           isGenerating={isGenerating}
           onValidSizeChange={onValidSizeChange}
         />
