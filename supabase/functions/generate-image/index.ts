@@ -27,8 +27,9 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, guidance_scale, num_inference_steps, width, height } = await req.json()
+    const { prompt, guidance_scale, num_inference_steps, width = 512, height = 512 } = await req.json()
     console.log('Received prompt:', prompt)
+    console.log('Image dimensions:', { width, height })
     console.log('Quality settings:', { guidance_scale, num_inference_steps })
 
     // Server-side content validation
@@ -51,15 +52,15 @@ serve(async (req) => {
     console.log('Initializing HuggingFace client...')
     const hf = new HfInference(token)
 
-    console.log('Starting image generation...')
+    console.log('Starting image generation with dimensions:', { width, height })
     const image = await hf.textToImage({
       inputs: prompt,
       model: 'black-forest-labs/FLUX.1-schnell',
       parameters: {
         guidance_scale,
         num_inference_steps,
-        height: height || 512,
-        width: width || 512,
+        width: Number(width),
+        height: Number(height),
       }
     })
 
@@ -68,7 +69,7 @@ serve(async (req) => {
       throw new Error('Failed to generate image')
     }
 
-    console.log('Image generated successfully')
+    console.log('Image generated successfully with dimensions:', { width, height })
     const arrayBuffer = await image.arrayBuffer()
     const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
     

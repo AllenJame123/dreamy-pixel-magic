@@ -4,37 +4,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { AI_QUOTES } from './AIQuotes';
 import { validatePrompt } from '@/utils/contentFilter';
 
+// Move types to a separate file for better organization
 interface GeneratedImage {
   imageURL: string;
   prompt: string;
 }
 
-export const useImageGeneration = () => {
-  const [prompt, setPrompt] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedImage, setGeneratedImage] = useState<GeneratedImage | null>(null);
+interface ImageDimensions {
+  width: number;
+  height: number;
+}
+
+// Split the loading state management into a separate hook
+const useLoadingState = () => {
   const [timer, setTimer] = useState(0);
   const [progress, setProgress] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState(AI_QUOTES[0]);
-  const [error, setError] = useState<string | null>(null);
-  const [quality, setQuality] = useState(1);
-  const [imageSize, setImageSize] = useState(512);
-  const [width, setWidth] = useState(512);
-  const [height, setHeight] = useState(512);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const messageIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const isValidSize = (): boolean => {
-    if (!width || !height) return true;
-    return width >= 128 && width <= 1024 && height >= 128 && height <= 1024;
-  };
-
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      if (messageIntervalRef.current) clearInterval(messageIntervalRef.current);
-    };
-  }, []);
 
   const cleanupInterval = () => {
     if (intervalRef.current) {
@@ -71,8 +58,37 @@ export const useImageGeneration = () => {
     }, 100);
   };
 
-  const generateImage = async (userPrompt: string) => {
-    // Validate prompt content before proceeding
+  useEffect(() => {
+    return cleanupInterval;
+  }, []);
+
+  return {
+    timer,
+    progress,
+    loadingMessage,
+    initializeProgress,
+    cleanupInterval
+  };
+};
+
+export const useImageGeneration = () => {
+  const [prompt, setPrompt] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedImage, setGeneratedImage] = useState<GeneratedImage | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [quality, setQuality] = useState(1);
+  const [width, setWidth] = useState(512);
+  const [height, setHeight] = useState(512);
+  
+  const {
+    timer,
+    progress,
+    loadingMessage,
+    initializeProgress,
+    cleanupInterval
+  } = useLoadingState();
+
+  const generateImage = async (userPrompt: string, dimensions: ImageDimensions) => {
     const validationResult = validatePrompt(userPrompt);
     if (!validationResult.isValid) {
       throw new Error(validationResult.message);
@@ -85,12 +101,14 @@ export const useImageGeneration = () => {
         3: { guidance_scale: 7.5, num_inference_steps: 20 },
       }[quality];
 
+      console.log('Generating image with dimensions:', dimensions);
+
       const { data, error: functionError } = await supabase.functions.invoke('generate-image', {
         body: { 
           prompt: userPrompt,
           ...qualitySettings,
-          width,
-          height
+          width: dimensions.width,
+          height: dimensions.height
         }
       });
 
@@ -104,15 +122,10 @@ export const useImageGeneration = () => {
         throw new Error(data?.error || 'Failed to generate image. Please try a different prompt.');
       }
 
-      if (!data?.image) {
-        console.error('No image data received');
-        throw new Error('No image data received from the server. Please try again.');
-      }
-
       return data.image;
     } catch (error) {
       console.error('Generation error:', error);
-      throw new Error('Failed to generate image. Please try editing your prompt and try again.');
+      throw error;
     }
   };
 
@@ -122,29 +135,17 @@ export const useImageGeneration = () => {
       return;
     }
 
-    // Validate dimensions
     if (width < 128 || width > 1024 || height < 128 || height > 1024) {
       toast.error('Image dimensions must be between 128 and 1024 pixels');
       return;
     }
 
     setError(null);
-    cleanupInterval();
     setIsGenerating(true);
-    setProgress(0);
-    setTimer(0);
-
+    
     try {
-      // Content validation
-      const validationResult = validatePrompt(prompt);
-      if (!validationResult.isValid) {
-        throw new Error(validationResult.message);
-      }
-
       initializeProgress();
-      const imageUrl = await generateImage(prompt);
-      
-      cleanupInterval();
+      const imageUrl = await generateImage(prompt, { width, height });
       
       setGeneratedImage({
         imageURL: imageUrl,
@@ -195,14 +196,11 @@ export const useImageGeneration = () => {
     error,
     quality,
     setQuality,
-    imageSize,
-    setImageSize,
     width,
     setWidth,
     height,
     setHeight,
     handleGenerate,
     handleDownload,
-    isValidSize: () => width >= 128 && width <= 1024 && height >= 128 && height <= 1024
   };
 };
