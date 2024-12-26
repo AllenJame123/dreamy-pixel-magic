@@ -87,6 +87,24 @@ const ImageGenerator = () => {
         />
       )}
 
+      <Card className="p-6 glass-panel space-y-6">
+        <h2 className="text-2xl font-bold text-center">How It Works</h2>
+        <ol className="space-y-4 text-lg">
+          <li className="flex gap-3">
+            <span className="font-bold text-primary">1.</span>
+            <span><strong>Describe Your Image:</strong> Enter a detailed text description of the image you want to generate.</span>
+          </li>
+          <li className="flex gap-3">
+            <span className="font-bold text-primary">2.</span>
+            <span><strong>Select Quality and Size:</strong> Choose the quality (Fast, Balanced, High Quality) and the size (default: 512 x 512 pixels).</span>
+          </li>
+          <li className="flex gap-3">
+            <span className="font-bold text-primary">3.</span>
+            <span><strong>Generate and Download:</strong> Click "Generate" to create your image and download it instantly.</span>
+          </li>
+        </ol>
+      </Card>
+
       <Card className="p-6 glass-panel">
         <SpecialFeatures />
       </Card>
