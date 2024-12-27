@@ -46,7 +46,7 @@ const FAQ = () => {
             What should I do if I encounter a problem?
           </h3>
           <p className="text-muted-foreground">
-            Contact our support team via the help button or email. Most issues can be resolved by refreshing the page or trying a different browser.
+            Contact our support team. Most issues can be resolved by refreshing the page or trying a different browser.
           </p>
         </Card>
       </div>
