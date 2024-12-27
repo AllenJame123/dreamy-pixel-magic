@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { Home, BookOpen } from "lucide-react";
+import { Home, BookOpen, Palette } from "lucide-react";
 
 const Layout = () => {
   const location = useLocation();
@@ -20,6 +20,17 @@ const Layout = () => {
               >
                 <Home className="w-4 h-4 mr-2" />
                 Image Generator
+              </Link>
+              <Link
+                to="/logo-generator"
+                className={`inline-flex items-center px-4 py-2 text-sm font-medium ${
+                  location.pathname === "/logo-generator"
+                    ? "text-primary border-b-2 border-primary"
+                    : "text-muted-foreground hover:text-primary"
+                }`}
+              >
+                <Palette className="w-4 h-4 mr-2" />
+                Logo Generator
               </Link>
               <Link
                 to="/blog"
