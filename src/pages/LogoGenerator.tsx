@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const LogoGenerator = () => {
   const [prompt, setPrompt] = useState("");
@@ -17,15 +18,11 @@ const LogoGenerator = () => {
 
     setIsGenerating(true);
     try {
-      const response = await fetch("/api/generate-logo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: `Create a minimalist logo for: ${prompt}` }),
+      const { data, error } = await supabase.functions.invoke('generate-logo', {
+        body: { prompt: `Create a minimalist logo for: ${prompt}` }
       });
 
-      if (!response.ok) throw new Error("Failed to generate logo");
-
-      const data = await response.json();
+      if (error) throw error;
       setGeneratedLogo(data.image);
       toast.success("Logo generated successfully!");
     } catch (error) {
