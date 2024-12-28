@@ -14,20 +14,19 @@ serve(async (req) => {
 
   try {
     const { prompt } = await req.json()
+    console.log('Generating logo with prompt:', prompt)
 
     const hf = new HfInference(Deno.env.get('HUGGING_FACE_ACCESS_TOKEN'))
 
     const image = await hf.textToImage({
       inputs: prompt,
       model: 'black-forest-labs/FLUX.1-schnell',
-      parameters: {
-        negative_prompt: "text, words, letters, watermark, signature, blurry, low quality",
-      }
     })
 
     const arrayBuffer = await image.arrayBuffer()
     const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
 
+    console.log('Logo generated successfully')
     return new Response(
       JSON.stringify({ image: `data:image/png;base64,${base64}` }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
