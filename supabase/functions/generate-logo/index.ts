@@ -4,19 +4,15 @@ import { HfInference } from 'https://esm.sh/@huggingface/inference@2.3.2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    if (req.method !== 'POST') {
-      throw new Error('Method not allowed')
-    }
-
     const { prompt } = await req.json()
     console.log('Received prompt:', prompt)
 
@@ -27,7 +23,7 @@ serve(async (req) => {
     const hfToken = Deno.env.get('HUGGING_FACE_ACCESS_TOKEN')
     if (!hfToken) {
       console.error('HuggingFace token not found')
-      throw new Error('Configuration error')
+      throw new Error('Configuration error: HuggingFace token not found')
     }
 
     console.log('Initializing HuggingFace client...')
@@ -36,9 +32,9 @@ serve(async (req) => {
     console.log('Starting image generation...')
     const image = await hf.textToImage({
       inputs: `Create a minimalist logo design: ${prompt}`,
-      model: 'black-forest-labs/FLUX.1-schnell', // Using a faster model
+      model: 'black-forest-labs/FLUX.1-schnell',
       parameters: {
-        num_inference_steps: 20, // Reduced steps for faster generation
+        num_inference_steps: 20,
         guidance_scale: 7.0,
         width: 512,
         height: 512,
