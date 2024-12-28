@@ -24,9 +24,9 @@ const LogoGenerator = () => {
     const progressInterval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 90) return prev;
-        return prev + 10;
+        return prev + 15; // Increased progress speed
       });
-    }, 1000);
+    }, 500); // Reduced interval time
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-logo', {
@@ -52,6 +52,12 @@ const LogoGenerator = () => {
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !isGenerating) {
+      generateLogo();
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold text-center mb-8">AI Logo Generator</h1>
@@ -66,6 +72,7 @@ const LogoGenerator = () => {
               placeholder="e.g., A modern tech company logo with abstract shapes"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
+              onKeyPress={handleKeyPress}
               className="w-full"
               disabled={isGenerating}
             />

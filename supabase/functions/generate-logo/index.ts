@@ -8,7 +8,6 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -25,7 +24,6 @@ serve(async (req) => {
       throw new Error('Prompt is required')
     }
 
-    // Validate HuggingFace token
     const hfToken = Deno.env.get('HUGGING_FACE_ACCESS_TOKEN')
     if (!hfToken) {
       console.error('HuggingFace token not found')
@@ -38,10 +36,10 @@ serve(async (req) => {
     console.log('Starting image generation...')
     const image = await hf.textToImage({
       inputs: `Create a minimalist logo design: ${prompt}`,
-      model: 'stabilityai/stable-diffusion-2-1',
+      model: 'black-forest-labs/FLUX.1-schnell', // Using a faster model
       parameters: {
-        num_inference_steps: 30,
-        guidance_scale: 7.5,
+        num_inference_steps: 20, // Reduced steps for faster generation
+        guidance_scale: 7.0,
         width: 512,
         height: 512,
       }
@@ -55,7 +53,6 @@ serve(async (req) => {
     const arrayBuffer = await image.arrayBuffer()
     const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
 
-    console.log('Sending response...')
     return new Response(
       JSON.stringify({ 
         success: true,
