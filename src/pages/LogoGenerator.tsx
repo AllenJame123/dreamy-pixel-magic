@@ -4,11 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Progress } from "@/components/ui/progress";
 
 const LogoGenerator = () => {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedLogo, setGeneratedLogo] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
 
   const generateLogo = async () => {
     if (!prompt.trim()) {
@@ -17,6 +19,16 @@ const LogoGenerator = () => {
     }
 
     setIsGenerating(true);
+    setProgress(0);
+    
+    // Start progress animation
+    const progressInterval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 90) return prev; // Cap at 90% until complete
+        return prev + 10;
+      });
+    }, 1000);
+
     try {
       const { data, error } = await supabase.functions.invoke('generate-logo', {
         body: { prompt: `Create a minimalist logo for: ${prompt}` }
@@ -24,11 +36,13 @@ const LogoGenerator = () => {
 
       if (error) throw error;
       setGeneratedLogo(data.image);
+      setProgress(100);
       toast.success("Logo generated successfully!");
     } catch (error) {
       console.error("Error generating logo:", error);
       toast.error("Failed to generate logo. Please try again.");
     } finally {
+      clearInterval(progressInterval);
       setIsGenerating(false);
     }
   };
@@ -48,7 +62,17 @@ const LogoGenerator = () => {
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               className="w-full"
+              disabled={isGenerating}
             />
+            {isGenerating && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>Generating your logo...</span>
+                  <span>{progress}%</span>
+                </div>
+                <Progress value={progress} className="h-1" />
+              </div>
+            )}
             <Button
               onClick={generateLogo}
               disabled={isGenerating || !prompt.trim()}

@@ -7,7 +7,6 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -21,6 +20,10 @@ serve(async (req) => {
     const image = await hf.textToImage({
       inputs: prompt,
       model: 'black-forest-labs/FLUX.1-schnell',
+      parameters: {
+        num_inference_steps: 20, // Reduced from default for faster generation
+        guidance_scale: 7.0,    // Balanced quality and speed
+      }
     })
 
     const arrayBuffer = await image.arrayBuffer()
