@@ -21,26 +21,31 @@ const LogoGenerator = () => {
     setIsGenerating(true);
     setProgress(0);
     
-    // Start progress animation
     const progressInterval = setInterval(() => {
       setProgress(prev => {
-        if (prev >= 90) return prev; // Cap at 90% until complete
+        if (prev >= 90) return prev;
         return prev + 10;
       });
     }, 1000);
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-logo', {
-        body: { prompt: `Create a minimalist logo for: ${prompt}` }
+        body: { prompt: prompt.trim() }
       });
 
       if (error) throw error;
+      
+      if (!data?.success) {
+        throw new Error(data?.error || 'Failed to generate logo');
+      }
+
       setGeneratedLogo(data.image);
       setProgress(100);
       toast.success("Logo generated successfully!");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating logo:", error);
-      toast.error("Failed to generate logo. Please try again.");
+      toast.error(error.message || "Failed to generate logo. Please try again.");
+      setGeneratedLogo(null);
     } finally {
       clearInterval(progressInterval);
       setIsGenerating(false);
