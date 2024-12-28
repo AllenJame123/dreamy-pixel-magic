@@ -4,15 +4,25 @@ import { HfInference } from 'https://esm.sh/@huggingface/inference@2.3.2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { 
+      headers: corsHeaders,
+      status: 204
+    })
   }
 
   try {
+    // Validate request method
+    if (req.method !== 'POST') {
+      throw new Error('Method not allowed')
+    }
+
+    // Parse request body
     const { prompt } = await req.json()
     console.log('Received prompt:', prompt)
 
@@ -20,6 +30,7 @@ serve(async (req) => {
       throw new Error('Prompt is required')
     }
 
+    // Get HuggingFace token
     const hfToken = Deno.env.get('HUGGING_FACE_ACCESS_TOKEN')
     if (!hfToken) {
       console.error('HuggingFace token not found')
@@ -56,8 +67,8 @@ serve(async (req) => {
       }),
       { 
         headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json',
+          ...corsHeaders,
+          'Content-Type': 'application/json'
         } 
       }
     )
@@ -66,14 +77,14 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: 'Failed to generate logo', 
+        error: 'Failed to generate logo',
         details: error.message 
       }),
       { 
         headers: { 
-          ...corsHeaders, 
+          ...corsHeaders,
           'Content-Type': 'application/json'
-        }, 
+        },
         status: 500 
       }
     )
