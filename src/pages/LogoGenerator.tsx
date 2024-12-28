@@ -1,21 +1,24 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Download } from "lucide-react";
+import { Loader2, Download, Crop } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import LogoCropper from "@/components/logo-generator/LogoCropper";
 
 const LogoGenerator = () => {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedLogo, setGeneratedLogo] = useState<string | null>(null);
+  const [croppedLogo, setCroppedLogo] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [downloadFormat, setDownloadFormat] = useState("png");
   const [downloadSize, setDownloadSize] = useState("512");
   const [downloadShape, setDownloadShape] = useState("square");
+  const [showCropper, setShowCropper] = useState(false);
 
   const generateLogo = async () => {
     if (!prompt.trim()) {
@@ -64,7 +67,8 @@ const LogoGenerator = () => {
   };
 
   const handleDownload = async () => {
-    if (!generatedLogo) return;
+    const logoToDownload = croppedLogo || generatedLogo;
+    if (!logoToDownload) return;
 
     try {
       // Create a canvas with the desired size
@@ -79,7 +83,7 @@ const LogoGenerator = () => {
 
       // Create a temporary image to load the base64 data
       const img = new Image();
-      img.src = generatedLogo;
+      img.src = logoToDownload;
 
       await new Promise((resolve, reject) => {
         img.onload = resolve;
@@ -113,6 +117,11 @@ const LogoGenerator = () => {
       console.error('Error downloading logo:', error);
       toast.error('Failed to download logo');
     }
+  };
+
+  const handleCropComplete = (croppedImageUrl: string) => {
+    setCroppedLogo(croppedImageUrl);
+    setShowCropper(false);
   };
 
   return (
@@ -159,10 +168,10 @@ const LogoGenerator = () => {
           </div>
         </div>
 
-        {generatedLogo && (
+        {(generatedLogo || croppedLogo) && (
           <div className="glass-panel p-6 space-y-6 animate-image-fade">
             <img
-              src={generatedLogo}
+              src={croppedLogo || generatedLogo}
               alt="Generated logo"
               className="w-full h-auto rounded-lg"
             />
@@ -210,20 +219,36 @@ const LogoGenerator = () => {
                 </Select>
               </div>
 
-              <div className="flex items-end">
+              <div className="flex items-end gap-2">
+                <Button 
+                  onClick={() => setShowCropper(true)}
+                  className="flex-1"
+                  variant="outline"
+                >
+                  <Crop className="w-4 h-4 mr-2" />
+                  Crop
+                </Button>
                 <Button 
                   onClick={handleDownload} 
-                  className="w-full"
+                  className="flex-1"
                   variant="secondary"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  Download Logo
+                  Download
                 </Button>
               </div>
             </div>
           </div>
         )}
       </div>
+
+      {showCropper && generatedLogo && (
+        <LogoCropper
+          imageUrl={generatedLogo}
+          onClose={() => setShowCropper(false)}
+          onCropComplete={handleCropComplete}
+        />
+      )}
     </div>
   );
 };
