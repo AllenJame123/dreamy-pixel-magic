@@ -19,8 +19,14 @@ const LogoCropper = ({ imageUrl, onClose, onCropComplete }: LogoCropperProps) =>
     width: 50,
     height: 50
   });
+  const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
 
-  const handleCropComplete = async (pixelCrop: PixelCrop) => {
+  const handleCropComplete = async () => {
+    if (!completedCrop) {
+      toast.error('Please select an area to crop');
+      return;
+    }
+
     try {
       const image = new Image();
       image.src = imageUrl;
@@ -36,20 +42,20 @@ const LogoCropper = ({ imageUrl, onClose, onCropComplete }: LogoCropperProps) =>
       }
 
       // Set canvas size to the crop size
-      canvas.width = pixelCrop.width;
-      canvas.height = pixelCrop.height;
+      canvas.width = completedCrop.width;
+      canvas.height = completedCrop.height;
 
       // Draw the cropped image
       ctx.drawImage(
         image,
-        pixelCrop.x,
-        pixelCrop.y,
-        pixelCrop.width,
-        pixelCrop.height,
+        completedCrop.x,
+        completedCrop.y,
+        completedCrop.width,
+        completedCrop.height,
         0,
         0,
-        pixelCrop.width,
-        pixelCrop.height
+        completedCrop.width,
+        completedCrop.height
       );
 
       // Convert to base64
@@ -76,7 +82,7 @@ const LogoCropper = ({ imageUrl, onClose, onCropComplete }: LogoCropperProps) =>
           <ReactCrop
             crop={crop}
             onChange={(c) => setCrop(c)}
-            onComplete={(c) => handleCropComplete(c)}
+            onComplete={(c) => setCompletedCrop(c)}
           >
             <img
               src={imageUrl}
@@ -86,8 +92,16 @@ const LogoCropper = ({ imageUrl, onClose, onCropComplete }: LogoCropperProps) =>
           </ReactCrop>
         </div>
         
-        <div className="mt-4 text-sm text-muted-foreground">
-          Click and drag to select the area you want to crop, then release to apply the crop.
+        <div className="mt-4 flex justify-between items-center">
+          <div className="text-sm text-muted-foreground">
+            Click and drag to select the area you want to crop
+          </div>
+          <Button 
+            onClick={handleCropComplete}
+            className="ml-4"
+          >
+            Apply Crop
+          </Button>
         </div>
       </div>
     </div>
