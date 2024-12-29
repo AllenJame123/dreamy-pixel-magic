@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import GenerateButton from "@/components/image-generator/GenerateButton";
 import GeneratedLogo from "@/components/logo-generator/GeneratedLogo";
 import { Card } from "@/components/ui/card";
+import FAQ from "@/components/logo-generator/FAQ";
 
 const LogoGenerator = () => {
   const [prompt, setPrompt] = useState("");
@@ -161,6 +162,8 @@ const LogoGenerator = () => {
             </div>
           </div>
         </Card>
+
+        <FAQ />
       </div>
     </div>
   );
