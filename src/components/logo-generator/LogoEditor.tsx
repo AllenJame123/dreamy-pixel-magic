@@ -76,8 +76,8 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <Card className="bg-white p-6 rounded-lg max-w-3xl w-full mx-4 space-y-6">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <Card className="bg-white rounded-lg max-w-xl w-full mx-auto space-y-4 p-4">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-semibold">Edit Logo</h3>
           <Button variant="ghost" size="icon" onClick={onClose}>
@@ -85,11 +85,11 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
           </Button>
         </div>
 
-        <div className="aspect-square relative rounded-lg overflow-hidden">
+        <div className="aspect-square relative rounded-lg overflow-hidden max-h-[300px]">
           <img
             src={editedLogo}
             alt="Logo to edit"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
           />
         </div>
 
