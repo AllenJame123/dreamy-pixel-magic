@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from "react-router-dom";
-import { Home, BookOpen, Palette } from "lucide-react";
+import { Home, BookOpen, Palette, Image } from "lucide-react";
 
 const Layout = () => {
   const location = useLocation();
@@ -31,6 +31,17 @@ const Layout = () => {
               >
                 <Palette className="w-4 h-4 mr-2" />
                 Logo Generator
+              </Link>
+              <Link
+                to="/favicon-generator"
+                className={`inline-flex items-center px-4 py-2 text-sm font-medium ${
+                  location.pathname === "/favicon-generator"
+                    ? "text-primary border-b-2 border-primary"
+                    : "text-muted-foreground hover:text-primary"
+                }`}
+              >
+                <Image className="w-4 h-4 mr-2" />
+                Favicon Generator
               </Link>
               <Link
                 to="/blog"

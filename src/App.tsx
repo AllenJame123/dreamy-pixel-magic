@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import LogoGenerator from "./pages/LogoGenerator";
+import FaviconGenerator from "./pages/FaviconGenerator";
 import Layout from "./components/Layout";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/logo-generator" element={<LogoGenerator />} />
+            <Route path="/favicon-generator" element={<FaviconGenerator />} />
             <Route path="/:slug" element={<BlogPost />} />
           </Route>
         </Routes>
