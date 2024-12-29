@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Download, Edit2 } from "lucide-react";
+import { Download } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from 'sonner';
 
 interface GeneratedLogoProps {
   logoUrl: string;
   prompt: string;
-  onEdit: () => void;
 }
 
-const GeneratedLogo = ({ logoUrl, prompt, onEdit }: GeneratedLogoProps) => {
+const GeneratedLogo = ({ logoUrl, prompt }: GeneratedLogoProps) => {
   const [downloadFormat, setDownloadFormat] = useState('png');
 
   const handleDownload = async () => {
@@ -56,14 +55,6 @@ const GeneratedLogo = ({ logoUrl, prompt, onEdit }: GeneratedLogoProps) => {
         >
           <Download className="w-4 h-4 mr-2" />
           Download {downloadFormat.toUpperCase()}
-        </Button>
-        <Button
-          onClick={onEdit}
-          variant="outline"
-          className="bg-white/90 backdrop-blur-sm hover:bg-white/95"
-        >
-          <Edit2 className="w-4 h-4 mr-2" />
-          Edit Logo
         </Button>
       </div>
       
