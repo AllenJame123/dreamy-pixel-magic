@@ -101,7 +101,6 @@ const LogoGenerator = () => {
             logoUrl={generatedLogo}
             prompt={prompt}
             onEdit={() => setShowEditor(true)}
-            onDownload={() => setShowEditor(true)}
           />
         )}
       </div>
