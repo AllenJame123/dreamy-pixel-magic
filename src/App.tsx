@@ -8,6 +8,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import LogoGenerator from "./pages/LogoGenerator";
 import FaviconGenerator from "./pages/FaviconGenerator";
+import MemeGenerator from "./pages/MemeGenerator";
 import Layout from "./components/Layout";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/blog" element={<Blog />} />
             <Route path="/logo-generator" element={<LogoGenerator />} />
             <Route path="/favicon-generator" element={<FaviconGenerator />} />
+            <Route path="/meme-generator" element={<MemeGenerator />} />
             <Route path="/:slug" element={<BlogPost />} />
           </Route>
         </Routes>
