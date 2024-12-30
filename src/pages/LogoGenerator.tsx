@@ -8,6 +8,7 @@ import GenerateButton from "@/components/image-generator/GenerateButton";
 import GeneratedLogo from "@/components/logo-generator/GeneratedLogo";
 import { Card } from "@/components/ui/card";
 import FAQ from "@/components/logo-generator/FAQ";
+import { validatePrompt } from "@/utils/contentFilter";
 
 const LogoGenerator = () => {
   const [prompt, setPrompt] = useState("");
@@ -18,6 +19,13 @@ const LogoGenerator = () => {
   const generateLogo = async () => {
     if (!prompt.trim()) {
       toast.error("Please enter a description for your logo");
+      return;
+    }
+
+    // Validate prompt content
+    const validationResult = validatePrompt(prompt);
+    if (!validationResult.isValid) {
+      toast.error(validationResult.message);
       return;
     }
 
