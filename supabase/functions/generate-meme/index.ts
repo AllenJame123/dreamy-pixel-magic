@@ -28,37 +28,23 @@ serve(async (req) => {
 
   try {
     const { prompt, topText, bottomText } = await req.json();
-    console.log('Received prompt:', prompt);
-    console.log('Top text:', topText);
-    console.log('Bottom text:', bottomText);
+    console.log('Generating meme with prompt:', prompt);
 
-    if (!prompt) {
-      throw new Error('Prompt is required');
-    }
-
-    // Server-side content validation
     if (!validatePrompt(prompt)) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: 'Your prompt contains inappropriate content. Please provide a prompt suitable for children.'
+          error: 'Your prompt contains inappropriate content'
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const token = Deno.env.get('HUGGING_FACE_ACCESS_TOKEN');
-    if (!token) {
-      console.error('HUGGING_FACE_ACCESS_TOKEN is not set');
-      throw new Error('API configuration error. Please contact support.');
-    }
+    const hf = new HfInference(Deno.env.get('HUGGING_FACE_ACCESS_TOKEN'));
 
-    console.log('Initializing HuggingFace client...');
-    const hf = new HfInference(token);
-
-    console.log('Starting image generation...');
+    // Use the faster FLUX model with optimized parameters
     const image = await hf.textToImage({
-      inputs: `A meme image of: ${prompt}`,
+      inputs: prompt,
       model: 'black-forest-labs/FLUX.1-schnell',
       parameters: {
         num_inference_steps: 20,
@@ -66,23 +52,21 @@ serve(async (req) => {
       }
     });
 
-    if (!image) {
-      throw new Error('Failed to generate image');
-    }
-
-    console.log('Image generated successfully, converting to base64...');
+    // Convert image to base64
     const arrayBuffer = await image.arrayBuffer();
     const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
 
     return new Response(
       JSON.stringify({ 
         success: true,
-        image: `data:image/png;base64,${base64}` 
+        image: `data:image/png;base64,${base64}`,
+        topText,
+        bottomText
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error in generate-meme function:', error);
+    console.error('Error generating meme:', error);
     return new Response(
       JSON.stringify({ 
         success: false,
@@ -90,7 +74,7 @@ serve(async (req) => {
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500 
+        status: 500
       }
     );
   }

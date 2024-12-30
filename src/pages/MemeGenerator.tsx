@@ -1,22 +1,21 @@
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Progress } from "@/components/ui/progress";
 import { validatePrompt } from "@/utils/contentFilter";
+import MemeForm from "@/components/meme-generator/MemeForm";
+import GeneratedMeme from "@/components/meme-generator/GeneratedMeme";
 
 const MemeGenerator = () => {
-  const [topText, setTopText] = useState("");
-  const [bottomText, setBottomText] = useState("");
-  const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedMeme, setGeneratedMeme] = useState<string | null>(null);
+  const [generatedMeme, setGeneratedMeme] = useState<{
+    imageUrl: string;
+    topText: string;
+    bottomText: string;
+  } | null>(null);
   const [progress, setProgress] = useState(0);
 
-  const generateMeme = async () => {
+  const generateMeme = async (prompt: string, topText: string, bottomText: string) => {
     if (!prompt.trim()) {
       toast.error("Please enter a description for your meme");
       return;
@@ -41,11 +40,7 @@ const MemeGenerator = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-meme', {
-        body: { 
-          prompt: prompt.trim(),
-          topText: topText.trim(),
-          bottomText: bottomText.trim()
-        }
+        body: { prompt, topText, bottomText }
       });
 
       if (error) throw error;
@@ -54,7 +49,11 @@ const MemeGenerator = () => {
         throw new Error(data?.error || 'Failed to generate meme');
       }
 
-      setGeneratedMeme(data.image);
+      setGeneratedMeme({
+        imageUrl: data.image,
+        topText,
+        bottomText
+      });
       setProgress(100);
       toast.success("Meme generated successfully!");
     } catch (error: any) {
@@ -71,15 +70,15 @@ const MemeGenerator = () => {
     if (!generatedMeme) return;
     
     try {
-      const response = await fetch(generatedMeme);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const canvas = document.querySelector('canvas');
+      if (!canvas) return;
+
+      const url = canvas.toDataURL('image/png');
       const a = document.createElement('a');
       a.href = url;
       a.download = `meme-${Date.now()}.png`;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
       toast.success('Meme downloaded successfully!');
     } catch (error) {
@@ -96,84 +95,19 @@ const MemeGenerator = () => {
       </div>
       
       <div className="max-w-2xl mx-auto space-y-6">
-        <Card className="glass-panel p-6">
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Describe your meme image
-              </label>
-              <Input
-                placeholder="e.g., A funny cat wearing sunglasses and a business suit"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="w-full"
-                disabled={isGenerating}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Top Text
-              </label>
-              <Input
-                placeholder="Enter top text for your meme"
-                value={topText}
-                onChange={(e) => setTopText(e.target.value)}
-                className="w-full"
-                disabled={isGenerating}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Bottom Text
-              </label>
-              <Input
-                placeholder="Enter bottom text for your meme"
-                value={bottomText}
-                onChange={(e) => setBottomText(e.target.value)}
-                className="w-full"
-                disabled={isGenerating}
-              />
-            </div>
-
-            {isGenerating && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Generating your meme...</span>
-                  <span>{progress}%</span>
-                </div>
-                <Progress value={progress} className="h-1" />
-              </div>
-            )}
-
-            <Button
-              onClick={generateMeme}
-              disabled={isGenerating || !prompt.trim()}
-              className="w-full"
-            >
-              {isGenerating ? "Generating..." : "Generate Meme"}
-            </Button>
-          </div>
-        </Card>
+        <MemeForm
+          onGenerate={generateMeme}
+          isGenerating={isGenerating}
+          progress={progress}
+        />
 
         {generatedMeme && (
-          <Card className="glass-panel p-6 space-y-4">
-            <div className="aspect-square relative rounded-lg overflow-hidden">
-              <img
-                src={generatedMeme}
-                alt={prompt}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <Button
-              onClick={handleDownload}
-              className="w-full"
-              variant="secondary"
-            >
-              Download Meme
-            </Button>
-          </Card>
+          <GeneratedMeme
+            imageUrl={generatedMeme.imageUrl}
+            topText={generatedMeme.topText}
+            bottomText={generatedMeme.bottomText}
+            onDownload={handleDownload}
+          />
         )}
 
         <Card className="glass-panel p-6">
