@@ -1,74 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
-import { supabase } from "@/integrations/supabase/client";
-import { AI_QUOTES } from './AIQuotes';
-import { validatePrompt } from '@/utils/contentFilter';
+import { useLoadingState } from './useLoadingState';
+import { generateImage } from '@/services/imageGenerationService';
 
 interface GeneratedImage {
   imageURL: string;
   prompt: string;
 }
-
-interface ImageDimensions {
-  width: number;
-  height: number;
-}
-
-const useLoadingState = () => {
-  const [timer, setTimer] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [loadingMessage, setLoadingMessage] = useState(AI_QUOTES[0]);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const messageIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const cleanupInterval = () => {
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-    if (messageIntervalRef.current) {
-      clearInterval(messageIntervalRef.current);
-      messageIntervalRef.current = null;
-    }
-  };
-
-  const startLoadingMessages = () => {
-    let index = 0;
-    setLoadingMessage(AI_QUOTES[0]);
-    
-    messageIntervalRef.current = setInterval(() => {
-      index = Math.floor(Math.random() * AI_QUOTES.length);
-      setLoadingMessage(AI_QUOTES[index]);
-    }, 5000);
-  };
-
-  const initializeProgress = () => {
-    cleanupInterval();
-    setTimer(0);
-    setProgress(0);
-    startLoadingMessages();
-    
-    const startTime = Date.now();
-    intervalRef.current = setInterval(() => {
-      const elapsed = (Date.now() - startTime) / 1000;
-      setTimer(elapsed);
-      setProgress(Math.min(elapsed * 3.33, 100));
-    }, 100);
-  };
-
-  useEffect(() => {
-    return cleanupInterval;
-  }, []);
-
-  return {
-    timer,
-    progress,
-    loadingMessage,
-    initializeProgress,
-    cleanupInterval,
-    setProgress
-  };
-};
 
 export const useImageGeneration = () => {
   const [prompt, setPrompt] = useState('');
@@ -88,48 +26,6 @@ export const useImageGeneration = () => {
     setProgress
   } = useLoadingState();
 
-  const generateImage = async (userPrompt: string, dimensions: ImageDimensions) => {
-    const validationResult = validatePrompt(userPrompt);
-    if (!validationResult.isValid) {
-      throw new Error(validationResult.message);
-    }
-
-    try {
-      // Optimized quality settings for faster generation
-      const qualitySettings = {
-        1: { guidance_scale: 3.0, num_inference_steps: 8 },  // Faster
-        2: { guidance_scale: 4.0, num_inference_steps: 12 }, // Balanced
-        3: { guidance_scale: 5.0, num_inference_steps: 15 }, // High Quality
-      }[quality];
-
-      console.log('Generating image with dimensions:', dimensions);
-
-      const { data, error: functionError } = await supabase.functions.invoke('generate-image', {
-        body: { 
-          prompt: userPrompt,
-          ...qualitySettings,
-          width: dimensions.width,
-          height: dimensions.height
-        }
-      });
-
-      if (functionError) {
-        console.error('Function error:', functionError);
-        throw new Error(`Failed to generate image: ${functionError.message}`);
-      }
-
-      if (!data?.success) {
-        console.error('Generation failed:', data?.error);
-        throw new Error(data?.error || 'Failed to generate image. Please try a different prompt.');
-      }
-
-      return data.image;
-    } catch (error) {
-      console.error('Generation error:', error);
-      throw error;
-    }
-  };
-
   const handleGenerate = async () => {
     if (!prompt.trim()) {
       toast.error('Please enter a prompt');
@@ -146,7 +42,7 @@ export const useImageGeneration = () => {
     
     try {
       initializeProgress();
-      const imageUrl = await generateImage(prompt, { width, height });
+      const imageUrl = await generateImage(prompt, { width, height }, quality);
       
       setGeneratedImage({
         imageURL: imageUrl,
