@@ -13,28 +13,28 @@ const HowItWorks = () => {
         <div className="space-y-2">
           <h3 className="font-semibold text-lg">1. Generate Your Base Image</h3>
           <p className="text-muted-foreground">
-            Start by describing the image you want for your meme. Our AI will generate a unique image based on your description.
+            Start by describing the image you want for your meme. Our AI will create a unique, custom image based on your description.
           </p>
         </div>
 
         <div className="space-y-2">
           <h3 className="font-semibold text-lg">2. Add Your Text</h3>
           <p className="text-muted-foreground">
-            Use the editor to add top and bottom text to your meme. You can customize the text content, position, and color.
+            Add your meme text in the top and bottom text fields. The text will automatically wrap and fit within the image.
           </p>
         </div>
 
         <div className="space-y-2">
-          <h3 className="font-semibold text-lg">3. Customize the Look</h3>
+          <h3 className="font-semibold text-lg">3. Preview Your Meme</h3>
           <p className="text-muted-foreground">
-            Fine-tune your meme by adjusting text positions using sliders and selecting from various color options for perfect visibility.
+            See your meme update in real-time as you type. The preview shows exactly how your meme will look when downloaded.
           </p>
         </div>
 
         <div className="space-y-2">
-          <h3 className="font-semibold text-lg">4. Download and Share</h3>
+          <h3 className="font-semibold text-lg">4. Download Your Creation</h3>
           <p className="text-muted-foreground">
-            Once you're happy with your meme, click the download button to save it and share it with the world!
+            Once you're happy with your meme, simply click the download button to save it to your device.
           </p>
         </div>
       </div>
