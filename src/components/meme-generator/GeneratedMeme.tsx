@@ -2,7 +2,6 @@ import { Card } from "@/components/ui/card";
 import MemePreview from "./MemePreview";
 import MemeTextInput from "./MemeTextInput";
 import MemeActions from "./MemeActions";
-import HowItWorks from "./HowItWorks";
 
 interface GeneratedMemeProps {
   imageUrl: string;
@@ -59,8 +58,6 @@ const GeneratedMeme = ({
           </div>
         </div>
       </Card>
-      
-      <HowItWorks />
     </div>
   );
 };
