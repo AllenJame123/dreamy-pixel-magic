@@ -23,16 +23,23 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
 
   useEffect(() => {
     const loadImage = async () => {
+      if (!logoUrl) return;
+      
       setIsLoading(true);
       try {
         const img = new Image();
-        img.crossOrigin = "anonymous"; // Enable CORS
-        img.src = logoUrl;
-        await new Promise((resolve, reject) => {
+        img.crossOrigin = "anonymous";
+        
+        const loadPromise = new Promise((resolve, reject) => {
           img.onload = resolve;
           img.onerror = reject;
         });
+
+        img.src = logoUrl;
+        await loadPromise;
+        
         setEditedLogo(logoUrl);
+        console.log('Image loaded successfully:', logoUrl);
       } catch (error) {
         console.error('Error loading image:', error);
         toast.error('Failed to load image');
@@ -41,12 +48,9 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
       }
     };
 
-    if (logoUrl) {
-      loadImage();
-    }
+    loadImage();
 
     return () => {
-      // Cleanup
       setEditedLogo('');
       setIsLoading(false);
     };
@@ -65,16 +69,16 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
       if (!ctx) throw new Error('Could not get canvas context');
 
       const size = parseInt(downloadSize);
-      canvas.width = downloadShape === 'square' ? size : size;
-      canvas.height = downloadShape === 'square' ? size : size * 0.75;
+      canvas.width = downloadShape === 'rectangle' ? size * 1.5 : size;
+      canvas.height = downloadShape === 'rectangle' ? size : size;
 
       const img = new Image();
-      img.crossOrigin = "anonymous"; // Enable CORS
-      img.src = editedLogo;
+      img.crossOrigin = "anonymous";
 
       await new Promise((resolve, reject) => {
         img.onload = resolve;
         img.onerror = reject;
+        img.src = editedLogo;
       });
 
       if (downloadShape === 'circle') {
@@ -86,18 +90,21 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
 
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `logo-${Date.now()}.${downloadFormat}`;
-        document.body.appendChild(a);
-        a.click();
-        URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        toast.success('Logo downloaded successfully!');
-      }, `image/${downloadFormat}`);
+      const blob = await new Promise<Blob | null>((resolve) => 
+        canvas.toBlob(resolve, `image/${downloadFormat}`)
+      );
+
+      if (!blob) throw new Error('Failed to create image blob');
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `logo-${Date.now()}.${downloadFormat}`;
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Logo downloaded successfully!');
     } catch (error) {
       console.error('Error downloading logo:', error);
       toast.error('Failed to download logo');
