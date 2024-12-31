@@ -1,4 +1,3 @@
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -17,7 +16,7 @@ const MemeTextInput = ({ label, value, onChange, placeholder }: MemeTextInputPro
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="resize-none h-20"
+        className="resize-none h-24 w-full"
       />
     </div>
   );
