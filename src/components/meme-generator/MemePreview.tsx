@@ -3,7 +3,8 @@ import { useRef, useEffect } from "react";
 interface TextStyle {
   color: string;
   yPosition: number;
-  width: number;
+  fontSize: number;
+  fontFamily: string;
 }
 
 interface MemePreviewProps {
@@ -43,9 +44,6 @@ const MemePreview = ({
       ctx.lineWidth = 5;
       ctx.textAlign = 'center';
 
-      const fontSize = Math.min(canvas.width * 0.08, 60);
-      ctx.font = `bold ${fontSize}px Impact`;
-
       const wrapText = (text: string, maxWidth: number) => {
         const words = text.split(' ');
         const lines = [];
@@ -65,9 +63,10 @@ const MemePreview = ({
       };
 
       if (topText) {
-        const maxWidth = canvas.width * topStyle.width / 100;
+        ctx.font = `${topStyle.fontSize}px ${topStyle.fontFamily}`;
+        const maxWidth = canvas.width * 0.8; // Fixed width at 80% of canvas
         const lines = wrapText(topText.toUpperCase(), maxWidth);
-        const lineHeight = fontSize * 1.2;
+        const lineHeight = topStyle.fontSize * 1.2;
         const topPadding = (canvas.height * topStyle.yPosition) / 100;
 
         ctx.fillStyle = topStyle.color;
@@ -79,9 +78,10 @@ const MemePreview = ({
       }
 
       if (bottomText) {
-        const maxWidth = canvas.width * bottomStyle.width / 100;
+        ctx.font = `${bottomStyle.fontSize}px ${bottomStyle.fontFamily}`;
+        const maxWidth = canvas.width * 0.8; // Fixed width at 80% of canvas
         const lines = wrapText(bottomText.toUpperCase(), maxWidth);
-        const lineHeight = fontSize * 1.2;
+        const lineHeight = bottomStyle.fontSize * 1.2;
         const bottomPadding = (canvas.height * bottomStyle.yPosition) / 100;
         
         ctx.fillStyle = bottomStyle.color;

@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Download, Share2 } from "lucide-react";
 import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import TextSettingsPanel from "./TextSettingsPanel";
 import MemePreview from "./MemePreview";
 import HowItWorks from "./HowItWorks";
@@ -18,7 +21,8 @@ interface GeneratedMemeProps {
 interface TextStyle {
   color: string;
   yPosition: number;
-  width: number;
+  fontSize: number;
+  fontFamily: string;
 }
 
 const GeneratedMeme = ({ 
@@ -28,8 +32,32 @@ const GeneratedMeme = ({
   onDownload,
   onUpdateText 
 }: GeneratedMemeProps) => {
-  const [topStyle, setTopStyle] = useState<TextStyle>({ color: '#ffffff', yPosition: 10, width: 80 });
-  const [bottomStyle, setBottomStyle] = useState<TextStyle>({ color: '#ffffff', yPosition: 90, width: 80 });
+  const [topStyle, setTopStyle] = useState<TextStyle>({ 
+    color: '#ffffff', 
+    yPosition: 10, 
+    fontSize: 48,
+    fontFamily: 'Impact'
+  });
+  
+  const [bottomStyle, setBottomStyle] = useState<TextStyle>({ 
+    color: '#ffffff', 
+    yPosition: 90,
+    fontSize: 48,
+    fontFamily: 'Impact'
+  });
+
+  const colors = [
+    '#ffffff', '#9b87f5', '#F2FCE2', '#8B5CF6', '#0EA5E9',
+    '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'
+  ];
+
+  const fonts = [
+    'Impact',
+    'Arial',
+    'Comic Sans MS',
+    'Helvetica',
+    'Times New Roman'
+  ];
 
   const handleShare = async () => {
     try {
@@ -40,7 +68,6 @@ const GeneratedMeme = ({
           url: window.location.href
         });
       } else {
-        // Fallback for browsers that don't support Web Share API
         const url = window.location.href;
         await navigator.clipboard.writeText(url);
         toast.success("Link copied to clipboard!");
@@ -49,6 +76,11 @@ const GeneratedMeme = ({
       console.error('Error sharing:', error);
       toast.error("Failed to share meme");
     }
+  };
+
+  const updateBothStyles = (updates: Partial<TextStyle>) => {
+    setTopStyle(prev => ({ ...prev, ...updates }));
+    setBottomStyle(prev => ({ ...prev, ...updates }));
   };
 
   return (
@@ -62,15 +94,68 @@ const GeneratedMeme = ({
               text={topText}
               style={topStyle}
               onTextChange={(text) => onUpdateText('top', text)}
-              onStyleChange={(style: TextStyle) => setTopStyle(style)}
+              onStyleChange={setTopStyle}
             />
             <TextSettingsPanel
               title="Bottom Text Settings"
               text={bottomText}
               style={bottomStyle}
               onTextChange={(text) => onUpdateText('bottom', text)}
-              onStyleChange={(style: TextStyle) => setBottomStyle(style)}
+              onStyleChange={setBottomStyle}
             />
+            
+            {/* Global Text Settings */}
+            <div className="space-y-4 p-4 bg-gray-50 rounded-lg shadow-sm">
+              <h3 className="text-xl font-semibold text-primary">Global Text Settings</h3>
+              
+              <div className="space-y-2">
+                <Label className="text-base">Text Color</Label>
+                <div className="flex flex-wrap gap-2">
+                  {colors.map((color) => (
+                    <button
+                      key={color}
+                      className="w-8 h-8 rounded-full border-2 border-gray-300 hover:scale-110 transition-transform"
+                      style={{ 
+                        backgroundColor: color,
+                        outline: color === topStyle.color ? '2px solid #0EA5E9' : 'none',
+                        outlineOffset: '2px'
+                      }}
+                      onClick={() => updateBothStyles({ color })}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-base">Font Family</Label>
+                <Select 
+                  value={topStyle.fontFamily}
+                  onValueChange={(value) => updateBothStyles({ fontFamily: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fonts.map((font) => (
+                      <SelectItem key={font} value={font}>
+                        <span style={{ fontFamily: font }}>{font}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-base">Font Size</Label>
+                <Slider
+                  value={[topStyle.fontSize]}
+                  onValueChange={(value) => updateBothStyles({ fontSize: value[0] })}
+                  min={24}
+                  max={72}
+                  step={2}
+                />
+              </div>
+            </div>
           </div>
 
           <div className="space-y-4">
