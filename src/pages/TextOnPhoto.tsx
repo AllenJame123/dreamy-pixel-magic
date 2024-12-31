@@ -1,142 +1,180 @@
-import { useState, useRef } from 'react';
+import { useEffect, useRef, useState } from "react";
+import { Canvas as FabricCanvas, IEvent } from "fabric";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { Upload, Type, Download } from "lucide-react";
+import { Upload, Download, Type, Undo, Redo } from "lucide-react";
+import TextEditor from "@/components/text-on-photo/TextEditor";
+import ImageUploader from "@/components/text-on-photo/ImageUploader";
+import { ColorPicker } from "@/components/text-on-photo/ColorPicker";
 
 const TextOnPhoto = () => {
-  const [image, setImage] = useState<string | null>(null);
-  const [text, setText] = useState('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
+  const [activeTextColor, setActiveTextColor] = useState("#000000");
+  const [activeBackgroundColor, setActiveBackgroundColor] = useState("");
+  const [fontSize, setFontSize] = useState(40);
+  const [text, setText] = useState("");
+  const [history, setHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        toast.error('Please upload an image file');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImage(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const canvas = new FabricCanvas(canvasRef.current, {
+      width: 800,
+      height: 600,
+      backgroundColor: "#ffffff",
+    });
+
+    canvas.on('object:modified', saveToHistory);
+    setFabricCanvas(canvas);
+
+    return () => {
+      canvas.dispose();
+    };
+  }, []);
+
+  const saveToHistory = () => {
+    if (!fabricCanvas) return;
+    const json = JSON.stringify(fabricCanvas.toJSON());
+    setHistory(prev => [...prev.slice(0, historyIndex + 1), json]);
+    setHistoryIndex(prev => prev + 1);
+  };
+
+  const undo = () => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      loadFromHistory(newIndex);
     }
   };
 
+  const redo = () => {
+    if (historyIndex < history.length - 1) {
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      loadFromHistory(newIndex);
+    }
+  };
+
+  const loadFromHistory = (index: number) => {
+    if (!fabricCanvas) return;
+    fabricCanvas.loadFromJSON(JSON.parse(history[index]), () => {
+      fabricCanvas.renderAll();
+    });
+  };
+
   const handleAddText = () => {
-    if (!image || !canvasRef.current) return;
+    if (!fabricCanvas || !text) return;
 
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    const fabricText = new fabric.IText(text, {
+      left: 100,
+      top: 100,
+      fontSize: fontSize,
+      fill: activeTextColor,
+      backgroundColor: activeBackgroundColor || undefined,
+      padding: 10,
+      editable: true,
+    });
 
-    const img = new Image();
-    img.onload = () => {
-      // Set canvas size to match image
-      canvas.width = img.width;
-      canvas.height = img.height;
-
-      // Draw image
-      ctx.drawImage(img, 0, 0);
-
-      // Add text
-      ctx.fillStyle = 'white';
-      ctx.strokeStyle = 'black';
-      ctx.lineWidth = 4;
-      ctx.font = '48px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-
-      // Position text in center
-      const x = canvas.width / 2;
-      const y = canvas.height / 2;
-
-      // Add stroke
-      ctx.strokeText(text, x, y);
-      // Add fill
-      ctx.fillText(text, x, y);
-    };
-    img.src = image;
+    fabricCanvas.add(fabricText);
+    fabricCanvas.setActiveObject(fabricText);
+    fabricCanvas.renderAll();
+    saveToHistory();
+    setText("");
+    toast.success("Text added successfully!");
   };
 
   const handleDownload = () => {
-    if (!canvasRef.current) return;
+    if (!fabricCanvas) return;
     const link = document.createElement('a');
     link.download = 'text-on-photo.png';
-    link.href = canvasRef.current.toDataURL('image/png');
+    link.href = fabricCanvas.toDataURL({
+      format: 'png',
+      quality: 1
+    });
     link.click();
-    toast.success('Image downloaded successfully!');
+    toast.success("Image downloaded successfully!");
   };
 
   return (
-    <div className="min-h-screen w-full max-w-4xl mx-auto px-4 py-8 space-y-8">
+    <div className="min-h-screen w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
       <div className="text-center space-y-3">
-        <h1 className="text-4xl font-bold tracking-tight">Text on Photo</h1>
-        <h2 className="text-xl text-muted-foreground">Add custom text to your photos easily</h2>
+        <h1 className="text-4xl font-bold tracking-tight">Text on Photo Editor</h1>
+        <p className="text-xl text-muted-foreground">Add and customize text on your images</p>
       </div>
 
-      <Card className="p-6 space-y-6">
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="image-upload">Upload Image</Label>
-            <div className="mt-2">
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                variant="outline"
-                className="w-full"
-              >
-                <Upload className="w-4 h-4 mr-2" />
-                Choose Image
-              </Button>
-              <input
-                ref={fileInputRef}
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
+      <Card className="p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            <ImageUploader canvas={fabricCanvas} />
+            
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Text Content</Label>
+                <Input
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="Enter text to add"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Font Size: {fontSize}px</Label>
+                <Slider
+                  value={[fontSize]}
+                  onValueChange={(value) => setFontSize(value[0])}
+                  min={12}
+                  max={100}
+                  step={1}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Text Color</Label>
+                  <ColorPicker color={activeTextColor} onChange={setActiveTextColor} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Background Color</Label>
+                  <ColorPicker
+                    color={activeBackgroundColor}
+                    onChange={setActiveBackgroundColor}
+                    allowTransparent
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button onClick={handleAddText} disabled={!text}>
+                  <Type className="w-4 h-4 mr-2" />
+                  Add Text
+                </Button>
+                <Button variant="outline" onClick={undo} disabled={historyIndex <= 0}>
+                  <Undo className="w-4 h-4" />
+                </Button>
+                <Button variant="outline" onClick={redo} disabled={historyIndex >= history.length - 1}>
+                  <Redo className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="text">Text to Add</Label>
-            <div className="flex gap-2">
-              <Input
-                id="text"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Enter text to add to image"
-              />
-              <Button onClick={handleAddText} disabled={!image || !text}>
-                <Type className="w-4 h-4 mr-2" />
-                Add Text
-              </Button>
+          <div className="space-y-4">
+            <div className="border rounded-lg overflow-hidden bg-gray-50">
+              <canvas ref={canvasRef} className="max-w-full" />
             </div>
+            <Button onClick={handleDownload} className="w-full">
+              <Download className="w-4 h-4 mr-2" />
+              Download Image
+            </Button>
           </div>
         </div>
       </Card>
-
-      {image && (
-        <Card className="p-6 space-y-4">
-          <div className="aspect-video relative bg-gray-50 rounded-lg overflow-hidden">
-            <canvas
-              ref={canvasRef}
-              className="w-full h-full object-contain"
-            />
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={handleDownload}>
-              <Download className="w-4 h-4 mr-2" />
-              Download
-            </Button>
-          </div>
-        </Card>
-      )}
     </div>
   );
 };
