@@ -20,33 +20,38 @@ const MemeGenerator = () => {
     setProgress(0);
     
     try {
-      // Faster progress simulation
       const progressInterval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev < 70) return prev + 20;
-          if (prev < 90) return prev + 5;
-          return prev;
-        });
-      }, 300);
+        setProgress((prev) => Math.min(prev + 10, 90));
+      }, 500);
 
-      // Generate image using Supabase Edge Function
       const { data, error } = await supabase.functions.invoke("generate-meme", {
-        body: { prompt }
+        body: { 
+          prompt,
+          model: "stabilityai/stable-diffusion-2",
+          num_inference_steps: 20,
+          guidance_scale: 7.5,
+        }
       });
 
       clearInterval(progressInterval);
       
-      if (error) throw error;
-      if (!data?.imageUrl) throw new Error("No image URL returned");
+      if (error) {
+        console.error("Generation error:", error);
+        throw error;
+      }
+
+      if (!data?.imageUrl) {
+        throw new Error("No image URL returned from generation");
+      }
 
       setGeneratedMeme(data.imageUrl);
       setTopText(top);
       setBottomText(bottom);
       setProgress(100);
       toast.success("Meme generated successfully!");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating meme:", error);
-      toast.error("Failed to generate meme. Please try again.");
+      toast.error(error.message || "Failed to generate meme. Please try again.");
     } finally {
       setIsGenerating(false);
     }
@@ -63,15 +68,14 @@ const MemeGenerator = () => {
   const handleDownload = () => {
     if (!generatedMeme) return;
     
-    const canvas = document.querySelector("canvas") as HTMLCanvasElement;
-    if (!canvas) {
-      toast.error("Could not download meme");
-      return;
-    }
-
     try {
+      const canvas = document.querySelector("canvas") as HTMLCanvasElement;
+      if (!canvas) {
+        throw new Error("Canvas not found");
+      }
+
       const link = document.createElement("a");
-      link.download = "meme.png";
+      link.download = `meme-${Date.now()}.png`;
       link.href = canvas.toDataURL("image/png");
       document.body.appendChild(link);
       link.click();

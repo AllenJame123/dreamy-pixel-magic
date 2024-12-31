@@ -20,14 +20,17 @@ const validatePrompt = (prompt: string): boolean => {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { prompt } = await req.json()
+    const { prompt, model = "stabilityai/stable-diffusion-2" } = await req.json();
+    console.log('Received prompt:', prompt);
+    console.log('Using model:', model);
 
-    // Validate prompt
+    // Server-side content validation
     if (!validatePrompt(prompt)) {
       return new Response(
         JSON.stringify({
@@ -38,48 +41,56 @@ serve(async (req) => {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400
         }
-      )
+      );
     }
 
-    // Initialize Hugging Face with access token
-    const hf = new HfInference(Deno.env.get('HUGGING_FACE_ACCESS_TOKEN'))
+    const token = Deno.env.get('HUGGING_FACE_ACCESS_TOKEN');
+    if (!token) {
+      throw new Error('API configuration error. Please contact support.');
+    }
 
-    // Generate image using Stable Diffusion
+    console.log('Initializing HuggingFace client...');
+    const hf = new HfInference(token);
+
+    console.log('Starting image generation...');
     const image = await hf.textToImage({
       inputs: prompt,
-      model: "stabilityai/stable-diffusion-2",
+      model: model,
       parameters: {
         negative_prompt: "nsfw, nude, naked, sexual, explicit content, inappropriate, adult content",
-        num_inference_steps: 30,
+        num_inference_steps: 20,
         guidance_scale: 7.5,
       }
-    })
+    });
 
-    // Convert image to base64
-    const arrayBuffer = await image.arrayBuffer()
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
-    const imageUrl = `data:image/jpeg;base64,${base64}`
+    if (!image) {
+      throw new Error('Failed to generate image');
+    }
 
+    console.log('Image generated successfully');
+    const arrayBuffer = await image.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    
     return new Response(
       JSON.stringify({ 
-        success: true, 
-        imageUrl: imageUrl
+        success: true,
+        imageUrl: `data:image/jpeg;base64,${base64}` 
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
-    )
+    );
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error in generate-meme function:', error);
     return new Response(
       JSON.stringify({ 
-        success: false, 
-        error: 'Failed to generate image. Please try again with a different prompt.' 
+        success: false,
+        error: error.message || 'Failed to generate meme. Please try again.' 
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500
       }
-    )
+    );
   }
-})
+});
