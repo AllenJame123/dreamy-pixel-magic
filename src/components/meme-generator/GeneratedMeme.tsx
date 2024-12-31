@@ -36,23 +36,56 @@ const GeneratedMeme = ({ imageUrl, topText, bottomText, onDownload }: GeneratedM
       ctx.strokeStyle = 'black';
       ctx.lineWidth = 5;
       ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
 
-      // Calculate font size based on canvas width
-      const fontSize = canvas.width * 0.08;
+      // Calculate font size based on canvas width (slightly smaller than before)
+      const fontSize = Math.min(canvas.width * 0.06, 48); // Cap the maximum font size
       ctx.font = `bold ${fontSize}px Impact`;
 
-      // Add top text
+      // Function to wrap text
+      const wrapText = (text: string, maxWidth: number) => {
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = words[0];
+
+        for (let i = 1; i < words.length; i++) {
+          const width = ctx.measureText(currentLine + " " + words[i]).width;
+          if (width < maxWidth) {
+            currentLine += " " + words[i];
+          } else {
+            lines.push(currentLine);
+            currentLine = words[i];
+          }
+        }
+        lines.push(currentLine);
+        return lines;
+      };
+
+      // Add top text with padding and word wrap
       if (topText) {
-        ctx.strokeText(topText.toUpperCase(), canvas.width / 2, 20);
-        ctx.fillText(topText.toUpperCase(), canvas.width / 2, 20);
+        const maxWidth = canvas.width * 0.9; // 90% of canvas width
+        const lines = wrapText(topText.toUpperCase(), maxWidth);
+        const lineHeight = fontSize * 1.2;
+        const topPadding = fontSize;
+
+        lines.forEach((line, index) => {
+          const y = topPadding + (index * lineHeight);
+          ctx.strokeText(line, canvas.width / 2, y);
+          ctx.fillText(line, canvas.width / 2, y);
+        });
       }
 
-      // Add bottom text
+      // Add bottom text with padding and word wrap
       if (bottomText) {
-        ctx.textBaseline = 'bottom';
-        ctx.strokeText(bottomText.toUpperCase(), canvas.width / 2, canvas.height - 20);
-        ctx.fillText(bottomText.toUpperCase(), canvas.width / 2, canvas.height - 20);
+        const maxWidth = canvas.width * 0.9; // 90% of canvas width
+        const lines = wrapText(bottomText.toUpperCase(), maxWidth);
+        const lineHeight = fontSize * 1.2;
+        const bottomPadding = canvas.height - (lines.length * lineHeight);
+
+        lines.forEach((line, index) => {
+          const y = bottomPadding + (index * lineHeight);
+          ctx.strokeText(line, canvas.width / 2, y);
+          ctx.fillText(line, canvas.width / 2, y);
+        });
       }
     };
   }, [imageUrl, topText, bottomText]);
