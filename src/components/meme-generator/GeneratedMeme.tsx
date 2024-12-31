@@ -43,18 +43,11 @@ const GeneratedMeme = ({
         // Fallback for browsers that don't support Web Share API
         const url = window.location.href;
         await navigator.clipboard.writeText(url);
-        toast({
-          title: "Success",
-          description: "Link copied to clipboard!"
-        });
+        toast.success("Link copied to clipboard!");
       }
     } catch (error) {
       console.error('Error sharing:', error);
-      toast({
-        title: "Error",
-        description: "Failed to share meme",
-        variant: "destructive"
-      });
+      toast.error("Failed to share meme");
     }
   };
 
