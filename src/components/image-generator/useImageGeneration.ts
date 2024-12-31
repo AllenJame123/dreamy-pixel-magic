@@ -95,10 +95,11 @@ export const useImageGeneration = () => {
     }
 
     try {
+      // Optimized quality settings for faster generation
       const qualitySettings = {
-        1: { guidance_scale: 3.0, num_inference_steps: 10 },
-        2: { guidance_scale: 5.0, num_inference_steps: 15 },
-        3: { guidance_scale: 7.5, num_inference_steps: 20 },
+        1: { guidance_scale: 3.0, num_inference_steps: 8 },  // Faster
+        2: { guidance_scale: 4.0, num_inference_steps: 12 }, // Balanced
+        3: { guidance_scale: 5.0, num_inference_steps: 15 }, // High Quality
       }[quality];
 
       console.log('Generating image with dimensions:', dimensions);

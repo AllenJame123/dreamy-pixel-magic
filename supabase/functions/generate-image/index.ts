@@ -32,12 +32,12 @@ serve(async (req) => {
     console.log('Image dimensions:', { width, height })
     console.log('Quality setting:', quality)
 
-    // Quality settings mapping
+    // Optimized quality settings for faster generation
     const qualitySettings = {
-      1: { num_inference_steps: 20 },  // Fast
-      2: { num_inference_steps: 35 },  // Balanced
-      3: { num_inference_steps: 50 },  // High Quality
-    }[quality] || { num_inference_steps: 35 }; // Default to balanced if quality is not specified
+      1: { num_inference_steps: 8 },   // Fast
+      2: { num_inference_steps: 12 },  // Balanced
+      3: { num_inference_steps: 15 },  // High Quality
+    }[quality] || { num_inference_steps: 12 }; // Default to balanced if quality is not specified
 
     // Server-side content validation
     if (!validatePrompt(prompt)) {
