@@ -6,6 +6,7 @@ import { Loader2, PenLine, Sliders, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { validatePrompt } from "@/utils/contentFilter";
+import FAQ from "@/components/favicon-generator/FAQ";
 
 const FaviconGenerator = () => {
   const [prompt, setPrompt] = useState("");
@@ -65,7 +66,7 @@ const FaviconGenerator = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="max-w-2xl mx-auto space-y-8 px-4 py-8">
       <div className="text-center">
         <h1 className="text-3xl font-bold mb-4">AI Favicon Generator</h1>
         <p className="text-muted-foreground">
@@ -108,7 +109,8 @@ const FaviconGenerator = () => {
               <img
                 src={faviconUrl}
                 alt="Generated Favicon"
-                className="w-32 h-32 object-contain"
+                className="w-32 h-32 object-contain bg-gray-50"
+                crossOrigin="anonymous"
               />
             </div>
             <Button onClick={downloadFavicon} variant="secondary">
@@ -174,6 +176,8 @@ const FaviconGenerator = () => {
           </div>
         </div>
       </Card>
+
+      <FAQ />
     </div>
   );
 };
