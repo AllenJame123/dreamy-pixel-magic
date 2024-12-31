@@ -51,6 +51,14 @@ const MemeGenerator = () => {
     }
   };
 
+  const handleUpdateText = (position: 'top' | 'bottom', text: string) => {
+    if (position === 'top') {
+      setTopText(text);
+    } else {
+      setBottomText(text);
+    }
+  };
+
   const handleDownload = () => {
     if (!generatedMeme) return;
     
@@ -95,6 +103,7 @@ const MemeGenerator = () => {
           topText={topText}
           bottomText={bottomText}
           onDownload={handleDownload}
+          onUpdateText={handleUpdateText}
         />
       )}
 

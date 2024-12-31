@@ -1,12 +1,11 @@
-import { Card } from "@/components/ui/card";
 import { CheckCircle } from "lucide-react";
 
 const SpecialFeatures = () => {
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-center">Special Features</h2>
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="p-6">
+      <h2 className="text-2xl font-bold tracking-tight">Special Features</h2>
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="space-y-6">
           <div className="flex items-start gap-4">
             <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
             <div>
@@ -16,33 +15,29 @@ const SpecialFeatures = () => {
               </p>
             </div>
           </div>
-        </Card>
 
-        <Card className="p-6">
           <div className="flex items-start gap-4">
             <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
             <div>
-              <h3 className="font-semibold mb-2">Classic Meme Text</h3>
+              <h3 className="font-semibold mb-2">Custom Text Positioning</h3>
               <p className="text-muted-foreground">
-                Add top and bottom text to your meme in the classic Impact font style.
+                Adjust the position of your text using intuitive sliders for perfect placement.
               </p>
             </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-6">
+        <div className="space-y-6">
           <div className="flex items-start gap-4">
             <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
             <div>
-              <h3 className="font-semibold mb-2">Real-Time Preview</h3>
+              <h3 className="font-semibold mb-2">Text Color Customization</h3>
               <p className="text-muted-foreground">
-                See your meme come to life instantly as you add text and generate images.
+                Choose from a variety of colors to make your meme text pop and stand out.
               </p>
             </div>
           </div>
-        </Card>
 
-        <Card className="p-6">
           <div className="flex items-start gap-4">
             <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
             <div>
@@ -52,7 +47,7 @@ const SpecialFeatures = () => {
               </p>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );
