@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
@@ -11,13 +11,17 @@ interface GeneratedMemeProps {
 
 const GeneratedMeme = ({ imageUrl, topText, bottomText, onDownload }: GeneratedMemeProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !imageUrl) return;
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      setError("Could not initialize canvas");
+      return;
+    }
 
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -40,7 +44,7 @@ const GeneratedMeme = ({ imageUrl, topText, bottomText, onDownload }: GeneratedM
       ctx.textAlign = 'center';
 
       // Calculate font size based on image dimensions
-      const fontSize = Math.min(canvas.width * 0.06, 48);
+      const fontSize = Math.min(canvas.width * 0.08, 60); // Increased from 0.06 to 0.08
       ctx.font = `bold ${fontSize}px Impact`;
 
       // Function to wrap text
@@ -64,7 +68,7 @@ const GeneratedMeme = ({ imageUrl, topText, bottomText, onDownload }: GeneratedM
 
       // Add top text
       if (topText) {
-        const maxWidth = canvas.width * 0.8; // 80% of canvas width
+        const maxWidth = canvas.width * 0.8;
         const lines = wrapText(topText.toUpperCase(), maxWidth);
         const lineHeight = fontSize * 1.2;
         const topPadding = fontSize;
@@ -78,13 +82,16 @@ const GeneratedMeme = ({ imageUrl, topText, bottomText, onDownload }: GeneratedM
 
       // Add bottom text
       if (bottomText) {
-        const maxWidth = canvas.width * 0.8; // 80% of canvas width
+        const maxWidth = canvas.width * 0.8;
         const lines = wrapText(bottomText.toUpperCase(), maxWidth);
         const lineHeight = fontSize * 1.2;
-        const bottomPadding = canvas.height - (fontSize / 2);
-
+        
+        // Calculate bottom position to ensure text stays within canvas
+        const totalTextHeight = lines.length * lineHeight;
+        const bottomPosition = canvas.height - (fontSize / 2);
+        
         lines.reverse().forEach((line, index) => {
-          const y = bottomPadding - (index * lineHeight);
+          const y = bottomPosition - (index * lineHeight);
           ctx.strokeText(line, canvas.width / 2, y);
           ctx.fillText(line, canvas.width / 2, y);
         });
@@ -93,18 +100,26 @@ const GeneratedMeme = ({ imageUrl, topText, bottomText, onDownload }: GeneratedM
 
     img.onerror = (error) => {
       console.error('Error loading image:', error);
+      setError("Failed to load image");
     };
 
+    // Set image source after setting up handlers
     img.src = imageUrl;
   }, [imageUrl, topText, bottomText]);
 
   return (
     <Card className="glass-panel p-6 space-y-4">
       <div className="aspect-square relative rounded-lg overflow-hidden bg-gray-100">
-        <canvas
-          ref={canvasRef}
-          className="w-full h-full object-contain"
-        />
+        {error ? (
+          <div className="absolute inset-0 flex items-center justify-center text-red-500">
+            {error}
+          </div>
+        ) : (
+          <canvas
+            ref={canvasRef}
+            className="w-full h-full object-contain"
+          />
+        )}
       </div>
       <Button
         onClick={onDownload}
