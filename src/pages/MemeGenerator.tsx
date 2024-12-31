@@ -5,6 +5,7 @@ import SpecialFeatures from "@/components/meme-generator/SpecialFeatures";
 import FAQ from "@/components/meme-generator/FAQ";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const MemeGenerator = () => {
   const [generatedMeme, setGeneratedMeme] = useState<string | null>(null);
@@ -23,35 +24,26 @@ const MemeGenerator = () => {
         setProgress((prev) => Math.min(prev + 10, 90));
       }, 500);
 
-      // Make the API call to generate the image
-      const response = await fetch("/api/generate-meme", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+      // Generate image using Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke("generate-meme", {
+        body: { prompt }
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to generate meme");
-      }
-
-      const data = await response.json();
-      
-      // Clear interval and set final progress
       clearInterval(progressInterval);
-      setProgress(100);
       
-      // Update state with the generated image and text
+      if (error) throw error;
+      if (!data?.imageUrl) throw new Error("No image URL returned");
+
       setGeneratedMeme(data.imageUrl);
       setTopText(top);
       setBottomText(bottom);
-      
+      setProgress(100);
       toast.success("Meme generated successfully!");
     } catch (error) {
-      toast.error("Failed to generate meme. Please try again.");
       console.error("Error generating meme:", error);
+      toast.error("Failed to generate meme. Please try again.");
     } finally {
       setIsGenerating(false);
-      setProgress(0);
     }
   };
 
@@ -73,8 +65,8 @@ const MemeGenerator = () => {
       document.body.removeChild(link);
       toast.success("Meme downloaded successfully!");
     } catch (error) {
-      toast.error("Failed to download meme");
       console.error("Error downloading meme:", error);
+      toast.error("Failed to download meme");
     }
   };
 

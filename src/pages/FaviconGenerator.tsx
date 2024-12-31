@@ -45,6 +45,12 @@ const FaviconGenerator = () => {
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !isGenerating) {
+      generateFavicon();
+    }
+  };
+
   const downloadFavicon = async () => {
     if (!faviconUrl) return;
 
@@ -81,6 +87,7 @@ const FaviconGenerator = () => {
               placeholder="Describe your favicon (e.g., 'minimalist letter A in blue')"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
+              onKeyPress={handleKeyPress}
               disabled={isGenerating}
             />
           </div>
