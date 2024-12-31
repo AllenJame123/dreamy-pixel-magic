@@ -10,9 +10,9 @@ const SpecialFeatures = () => {
           <div className="flex items-start gap-4">
             <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
             <div>
-              <h3 className="font-semibold mb-2">Custom Text Positioning</h3>
+              <h3 className="font-semibold mb-2">AI-Powered Image Generation</h3>
               <p className="text-muted-foreground">
-                Place your text anywhere on the image with our intuitive text positioning system.
+                Create unique meme images using advanced AI technology - just describe what you want!
               </p>
             </div>
           </div>
@@ -22,9 +22,9 @@ const SpecialFeatures = () => {
           <div className="flex items-start gap-4">
             <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
             <div>
-              <h3 className="font-semibold mb-2">Multiple Text Lines</h3>
+              <h3 className="font-semibold mb-2">Classic Meme Text</h3>
               <p className="text-muted-foreground">
-                Add multiple text lines to create more complex and engaging memes.
+                Add top and bottom text to your meme in the classic Impact font style.
               </p>
             </div>
           </div>
@@ -34,9 +34,9 @@ const SpecialFeatures = () => {
           <div className="flex items-start gap-4">
             <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
             <div>
-              <h3 className="font-semibold mb-2">Font Customization</h3>
+              <h3 className="font-semibold mb-2">Real-Time Preview</h3>
               <p className="text-muted-foreground">
-                Choose from different font styles and sizes to match your meme's mood.
+                See your meme come to life instantly as you add text and generate images.
               </p>
             </div>
           </div>
@@ -46,9 +46,9 @@ const SpecialFeatures = () => {
           <div className="flex items-start gap-4">
             <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
             <div>
-              <h3 className="font-semibold mb-2">High-Quality Export</h3>
+              <h3 className="font-semibold mb-2">Easy Download</h3>
               <p className="text-muted-foreground">
-                Download your memes in high resolution, perfect for sharing on social media.
+                Download your finished meme with one click, ready to share on social media.
               </p>
             </div>
           </div>

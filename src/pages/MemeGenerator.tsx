@@ -19,10 +19,14 @@ const MemeGenerator = () => {
     setProgress(0);
     
     try {
-      // Start progress simulation
+      // Faster progress simulation
       const progressInterval = setInterval(() => {
-        setProgress((prev) => Math.min(prev + 10, 90));
-      }, 500);
+        setProgress((prev) => {
+          if (prev < 70) return prev + 20;
+          if (prev < 90) return prev + 5;
+          return prev;
+        });
+      }, 300);
 
       // Generate image using Supabase Edge Function
       const { data, error } = await supabase.functions.invoke("generate-meme", {
@@ -86,14 +90,12 @@ const MemeGenerator = () => {
       </Card>
 
       {generatedMeme && (
-        <Card className="p-6">
-          <GeneratedMeme 
-            imageUrl={generatedMeme}
-            topText={topText}
-            bottomText={bottomText}
-            onDownload={handleDownload}
-          />
-        </Card>
+        <GeneratedMeme 
+          imageUrl={generatedMeme}
+          topText={topText}
+          bottomText={bottomText}
+          onDownload={handleDownload}
+        />
       )}
 
       <Card className="p-6">
