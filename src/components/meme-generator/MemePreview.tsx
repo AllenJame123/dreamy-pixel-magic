@@ -53,8 +53,8 @@ const MemePreview = ({
         ctx.font = `${style.fontSize}px ${style.fontFamily}`;
         ctx.fillStyle = style.color;
 
-        // Calculate max width for text (80% of canvas width)
-        const maxWidth = canvas.width * 0.8;
+        // Calculate max width for text (70% of canvas width)
+        const maxWidth = canvas.width * 0.7;
         const words = text.toUpperCase().split(' ');
         const lines: string[] = [];
         let currentLine = words[0];
@@ -72,16 +72,28 @@ const MemePreview = ({
         }
         lines.push(currentLine);
 
-        // Calculate vertical positioning
-        const lineHeight = style.fontSize * 1.2;
+        // Calculate line height and adjust font size if needed
+        let fontSize = style.fontSize;
+        const maxLines = 3;
+        if (lines.length > maxLines) {
+          fontSize = fontSize * (maxLines / lines.length);
+          ctx.font = `${fontSize}px ${style.fontFamily}`;
+        }
+
+        const lineHeight = fontSize * 1.2;
         const totalHeight = lines.length * lineHeight;
         
+        // Adjust vertical positioning
+        let startY = y;
+        if (isTop) {
+          startY = fontSize + (canvas.height * 0.05); // Add 5% padding from top
+        } else {
+          startY = canvas.height - (totalHeight + canvas.height * 0.05); // Subtract 5% padding from bottom
+        }
+
         // Draw each line
         lines.forEach((line, index) => {
-          const lineY = isTop 
-            ? y + (index * lineHeight)
-            : y - ((lines.length - 1 - index) * lineHeight);
-          
+          const lineY = startY + (index * lineHeight);
           ctx.strokeText(line, canvas.width / 2, lineY);
           ctx.fillText(line, canvas.width / 2, lineY);
         });
@@ -89,12 +101,12 @@ const MemePreview = ({
 
       // Draw top text
       if (topText) {
-        drawWrappedText(topText, topStyle.fontSize * 1.2, topStyle, true);
+        drawWrappedText(topText, 0, topStyle, true);
       }
 
       // Draw bottom text
       if (bottomText) {
-        drawWrappedText(bottomText, canvas.height - bottomStyle.fontSize * 0.5, bottomStyle, false);
+        drawWrappedText(bottomText, canvas.height, bottomStyle, false);
       }
     };
 
