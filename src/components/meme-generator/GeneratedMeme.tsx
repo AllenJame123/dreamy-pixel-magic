@@ -53,7 +53,7 @@ const GeneratedMeme = ({
               topStyle={defaultStyle}
               bottomStyle={defaultStyle}
             />
-            <MemeActions onDownload={onDownload} />
+            <MemeActions onDownload={onDownload} imageUrl={imageUrl} />
           </div>
         </div>
       </Card>
