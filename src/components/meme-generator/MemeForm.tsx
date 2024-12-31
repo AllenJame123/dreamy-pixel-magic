@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
+import { validatePrompt } from "@/utils/contentFilter";
+import { toast } from "sonner";
 
 interface MemeFormProps {
   onGenerate: (prompt: string, topText: string, bottomText: string) => void;
@@ -18,6 +20,13 @@ const MemeForm = ({ onGenerate, isGenerating, progress }: MemeFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const validation = validatePrompt(prompt);
+    if (!validation.isValid) {
+      toast.error(validation.message);
+      return;
+    }
+
     if (prompt.trim()) {
       onGenerate(prompt.trim(), topText.trim(), bottomText.trim());
     }
