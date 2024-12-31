@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Download, Share2 } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import TextSettingsPanel from "./TextSettingsPanel";
 import MemePreview from "./MemePreview";
 import HowItWorks from "./HowItWorks";
@@ -45,7 +45,7 @@ const GeneratedMeme = ({
         await navigator.clipboard.writeText(url);
         toast({
           title: "Success",
-          description: "Link copied to clipboard!",
+          description: "Link copied to clipboard!"
         });
       }
     } catch (error) {
@@ -53,7 +53,7 @@ const GeneratedMeme = ({
       toast({
         title: "Error",
         description: "Failed to share meme",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
@@ -69,14 +69,14 @@ const GeneratedMeme = ({
               text={topText}
               style={topStyle}
               onTextChange={(text) => onUpdateText('top', text)}
-              onStyleChange={setTopStyle}
+              onStyleChange={(style: TextStyle) => setTopStyle(style)}
             />
             <TextSettingsPanel
               title="Bottom Text Settings"
               text={bottomText}
               style={bottomStyle}
               onTextChange={(text) => onUpdateText('bottom', text)}
-              onStyleChange={setBottomStyle}
+              onStyleChange={(style: TextStyle) => setBottomStyle(style)}
             />
           </div>
 

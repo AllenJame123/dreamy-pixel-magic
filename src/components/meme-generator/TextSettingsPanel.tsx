@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 interface TextStyle {
   color: string;
   yPosition: number;
-  width?: number;
+  width: number;
 }
 
 interface TextSettingsPanelProps {
@@ -55,7 +55,7 @@ const TextSettingsPanel = ({
       <div className="space-y-2">
         <Label className="text-base">Text Width (%)</Label>
         <Slider
-          value={[style.width || 80]}
+          value={[style.width]}
           onValueChange={(value) => {
             onStyleChange({ ...style, width: value[0] });
           }}
