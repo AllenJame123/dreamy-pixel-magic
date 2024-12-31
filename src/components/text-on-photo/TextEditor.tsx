@@ -4,36 +4,77 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ColorPicker } from "./ColorPicker";
 import { useState } from "react";
-import { Type } from "lucide-react";
+import { Type, Bold, Italic, Underline } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface TextEditorProps {
   canvas: fabric.Canvas | null;
 }
 
-const MAX_CHARS = 100;
+const MAX_CHARS = 500;
+const FONT_FAMILIES = [
+  "Arial",
+  "Times New Roman",
+  "Helvetica",
+  "Georgia",
+  "Impact",
+  "Verdana",
+  "Comic Sans MS",
+];
 
 const TextEditor = ({ canvas }: TextEditorProps) => {
   const [text, setText] = useState("");
   const [fontSize, setFontSize] = useState(40);
   const [textColor, setTextColor] = useState("#000000");
   const [backgroundColor, setBackgroundColor] = useState("");
+  const [fontFamily, setFontFamily] = useState("Arial");
 
   const addText = () => {
     if (!canvas || !text) return;
 
     const fabricText = new fabric.IText(text, {
-      left: 100,
-      top: 100,
+      left: canvas.getCenter().left,
+      top: canvas.getCenter().top,
       fontSize: fontSize,
+      fontFamily: fontFamily,
       fill: textColor,
       backgroundColor: backgroundColor || undefined,
       padding: 10,
+      originX: 'center',
+      originY: 'center',
+      cornerStyle: 'circle',
+      transparentCorners: false,
+      cornerColor: '#2563eb',
+      cornerStrokeColor: '#ffffff',
+      borderColor: '#2563eb',
+      editingBorderColor: '#2563eb',
+      strokeWidth: 1,
     });
 
     canvas.add(fabricText);
     canvas.setActiveObject(fabricText);
     canvas.renderAll();
     setText("");
+  };
+
+  const toggleStyle = (style: 'bold' | 'italic' | 'underline') => {
+    if (!canvas) return;
+    
+    const activeObject = canvas.getActiveObject();
+    if (activeObject && activeObject.type === 'i-text') {
+      switch (style) {
+        case 'bold':
+          activeObject.set('fontWeight', activeObject.fontWeight === 'bold' ? 'normal' : 'bold');
+          break;
+        case 'italic':
+          activeObject.set('fontStyle', activeObject.fontStyle === 'italic' ? 'normal' : 'italic');
+          break;
+        case 'underline':
+          activeObject.set('underline', !activeObject.underline);
+          break;
+      }
+      canvas.renderAll();
+    }
   };
 
   return (
@@ -62,14 +103,57 @@ const TextEditor = ({ canvas }: TextEditorProps) => {
       </div>
 
       <div className="space-y-2">
+        <Label>Font Family</Label>
+        <Select value={fontFamily} onValueChange={setFontFamily}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select font" />
+          </SelectTrigger>
+          <SelectContent>
+            {FONT_FAMILIES.map((font) => (
+              <SelectItem key={font} value={font}>
+                {font}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
         <Label>Font Size: {fontSize}px</Label>
         <Input
           type="range"
           min="12"
-          max="100"
+          max="200"
           value={fontSize}
           onChange={(e) => setFontSize(Number(e.target.value))}
         />
+      </div>
+
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => toggleStyle('bold')}
+          title="Bold"
+        >
+          <Bold className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => toggleStyle('italic')}
+          title="Italic"
+        >
+          <Italic className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => toggleStyle('underline')}
+          title="Underline"
+        >
+          <Underline className="h-4 w-4" />
+        </Button>
       </div>
 
       <div className="grid grid-cols-2 gap-4">

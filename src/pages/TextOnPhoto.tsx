@@ -6,7 +6,7 @@ import { Download } from "lucide-react";
 import { toast } from "sonner";
 import ImageUploader from "@/components/text-on-photo/ImageUploader";
 import TextEditor from "@/components/text-on-photo/TextEditor";
-import HowItWorks from "@/components/text-on-photo/HowItWorks";
+import TextAlignmentControls from "@/components/text-on-photo/TextAlignmentControls";
 
 const TextOnPhoto = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -19,6 +19,15 @@ const TextOnPhoto = () => {
       width: 800,
       height: 600,
       backgroundColor: "#ffffff",
+      preserveObjectStacking: true,
+    });
+
+    // Enable text editing on double click
+    canvas.on('mouse:dblclick', (options) => {
+      if (options.target && options.target.type === 'i-text') {
+        options.target.enterEditing();
+        options.target.selectAll();
+      }
     });
 
     setFabricCanvas(canvas);
@@ -36,7 +45,8 @@ const TextOnPhoto = () => {
       link.download = 'text-on-photo.png';
       link.href = fabricCanvas.toDataURL({
         format: 'png',
-        quality: 1
+        quality: 1,
+        multiplier: 2 // Higher resolution output
       });
       document.body.appendChild(link);
       link.click();
@@ -44,6 +54,7 @@ const TextOnPhoto = () => {
       toast.success("Image downloaded successfully!");
     } catch (error) {
       toast.error("Failed to download image");
+      console.error("Download error:", error);
     }
   };
 
@@ -52,7 +63,7 @@ const TextOnPhoto = () => {
       <div className="text-center space-y-3">
         <h1 className="text-4xl font-bold tracking-tight">Add Text to Photos</h1>
         <p className="text-xl text-muted-foreground">
-          Easily add and customize text overlays on your images
+          Create professional text overlays with advanced styling options
         </p>
       </div>
 
@@ -61,6 +72,7 @@ const TextOnPhoto = () => {
           <div className="space-y-6">
             <ImageUploader canvas={fabricCanvas} />
             <TextEditor canvas={fabricCanvas} />
+            <TextAlignmentControls canvas={fabricCanvas} />
           </div>
 
           <div className="space-y-4">
@@ -74,8 +86,6 @@ const TextOnPhoto = () => {
           </div>
         </div>
       </Card>
-
-      <HowItWorks />
     </div>
   );
 };
