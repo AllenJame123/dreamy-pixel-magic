@@ -14,7 +14,7 @@ const LogoPreview = ({ editedLogo }: LogoPreviewProps) => {
           className="w-full h-full object-contain"
           crossOrigin="anonymous"
           onError={(e) => {
-            console.error('Error loading image in preview');
+            console.error('Error loading image in preview:', e);
             const target = e.target as HTMLImageElement;
             target.style.display = 'none';
           }}

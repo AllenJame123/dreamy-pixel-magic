@@ -22,6 +22,8 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let objectUrl = '';
+
     const loadImage = async () => {
       if (!logoUrl) {
         setIsLoading(false);
@@ -30,22 +32,38 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
 
       setIsLoading(true);
       try {
-        // Create a new URL to handle CORS
-        const response = await fetch(logoUrl);
-        const blob = await response.blob();
-        const objectUrl = URL.createObjectURL(blob);
+        console.log('Loading image from URL:', logoUrl);
         
+        // First try to load directly
         const img = new Image();
         img.crossOrigin = "anonymous";
         
-        await new Promise((resolve, reject) => {
-          img.onload = resolve;
-          img.onerror = reject;
-          img.src = objectUrl;
-        });
-
-        setEditedLogo(objectUrl);
-        console.log('Image loaded successfully:', objectUrl);
+        try {
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = logoUrl;
+          });
+          
+          setEditedLogo(logoUrl);
+          console.log('Image loaded directly successfully');
+        } catch (directError) {
+          console.log('Direct loading failed, trying fetch:', directError);
+          
+          // If direct loading fails, try fetching
+          const response = await fetch(logoUrl);
+          const blob = await response.blob();
+          objectUrl = URL.createObjectURL(blob);
+          
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = objectUrl;
+          });
+          
+          setEditedLogo(objectUrl);
+          console.log('Image loaded via fetch successfully');
+        }
       } catch (error) {
         console.error('Error loading image:', error);
         toast.error('Failed to load image');
@@ -56,10 +74,9 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
 
     loadImage();
 
-    // Cleanup function to revoke object URLs
     return () => {
-      if (editedLogo.startsWith('blob:')) {
-        URL.revokeObjectURL(editedLogo);
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
       }
       setEditedLogo('');
       setIsLoading(false);
