@@ -50,17 +50,17 @@ const MemePreview = ({
       const drawWrappedText = (text: string, isTop: boolean, style: TextStyle) => {
         if (!text) return;
 
-        // Initial font size and settings
-        let fontSize = style.fontSize;
+        // Split text into lines based on user input line breaks
+        const userLines = text.split('\n');
         const maxWidth = canvas.width * 0.8; // 80% of canvas width
-        const maxLines = 3;
         const padding = canvas.height * 0.05; // 5% padding from edges
+        let fontSize = style.fontSize;
 
-        // Function to measure and wrap text
-        const wrapText = (fontSize: number): string[] => {
+        // Function to measure and wrap a single line of text
+        const wrapLine = (line: string, fontSize: number): string[] => {
           ctx.font = `${fontSize}px ${style.fontFamily}`;
-          const words = text.toUpperCase().split(' ');
-          const lines: string[] = [];
+          const words = line.toUpperCase().split(' ');
+          const wrappedLines: string[] = [];
           let currentLine = words[0];
 
           for (let i = 1; i < words.length; i++) {
@@ -68,23 +68,29 @@ const MemePreview = ({
             const metrics = ctx.measureText(testLine);
             
             if (metrics.width > maxWidth) {
-              lines.push(currentLine);
+              wrappedLines.push(currentLine);
               currentLine = words[i];
             } else {
               currentLine = testLine;
             }
           }
-          lines.push(currentLine);
-          return lines;
+          wrappedLines.push(currentLine);
+          return wrappedLines;
         };
 
-        // Get initial text wrap
-        let lines = wrapText(fontSize);
+        // Process all user input lines and wrap them if needed
+        let allLines: string[] = [];
+        userLines.forEach(line => {
+          allLines = [...allLines, ...wrapLine(line, fontSize)];
+        });
 
-        // Reduce font size until text fits in maxLines
-        while (lines.length > maxLines && fontSize > 20) {
+        // Reduce font size if there are too many lines
+        while (allLines.length > 6 && fontSize > 20) {
           fontSize -= 5;
-          lines = wrapText(fontSize);
+          allLines = [];
+          userLines.forEach(line => {
+            allLines = [...allLines, ...wrapLine(line, fontSize)];
+          });
         }
 
         // Set final font settings
@@ -93,7 +99,7 @@ const MemePreview = ({
 
         // Calculate positions
         const lineHeight = fontSize * 1.2;
-        const totalHeight = lines.length * lineHeight;
+        const totalHeight = allLines.length * lineHeight;
         
         let startY;
         if (isTop) {
@@ -103,7 +109,7 @@ const MemePreview = ({
         }
 
         // Draw each line
-        lines.forEach((line, index) => {
+        allLines.forEach((line, index) => {
           const y = startY + (index * lineHeight);
           // Draw stroke (outline)
           ctx.strokeText(line, canvas.width / 2, y);
