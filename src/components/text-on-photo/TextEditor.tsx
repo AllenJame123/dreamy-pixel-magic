@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { ColorPicker } from "./ColorPicker";
 import { useState } from "react";
 import { Type } from "lucide-react";
+import { fabric } from "fabric";
 
 interface TextEditorProps {
   canvas: Canvas | null;
