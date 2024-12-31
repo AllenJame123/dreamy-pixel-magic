@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Download, Share2 } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import TextSettingsPanel from "./TextSettingsPanel";
 import MemePreview from "./MemePreview";
 import HowItWorks from "./HowItWorks";
