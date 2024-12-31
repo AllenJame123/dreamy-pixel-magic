@@ -43,65 +43,71 @@ const MemePreview = ({
       ctx.drawImage(img, 0, 0);
 
       // Text styling
+      ctx.textAlign = 'center';
       ctx.strokeStyle = 'black';
       ctx.lineWidth = 5;
-      ctx.textAlign = 'center';
 
       const drawWrappedText = (text: string, isTop: boolean, style: TextStyle) => {
         if (!text) return;
 
-        // Set initial font size
+        // Initial font size and settings
         let fontSize = style.fontSize;
+        const maxWidth = canvas.width * 0.8; // 80% of canvas width
+        const maxLines = 3;
+        const padding = canvas.height * 0.05; // 5% padding from edges
+
+        // Function to measure and wrap text
+        const wrapText = (fontSize: number): string[] => {
+          ctx.font = `${fontSize}px ${style.fontFamily}`;
+          const words = text.toUpperCase().split(' ');
+          const lines: string[] = [];
+          let currentLine = words[0];
+
+          for (let i = 1; i < words.length; i++) {
+            const testLine = currentLine + ' ' + words[i];
+            const metrics = ctx.measureText(testLine);
+            
+            if (metrics.width > maxWidth) {
+              lines.push(currentLine);
+              currentLine = words[i];
+            } else {
+              currentLine = testLine;
+            }
+          }
+          lines.push(currentLine);
+          return lines;
+        };
+
+        // Get initial text wrap
+        let lines = wrapText(fontSize);
+
+        // Reduce font size until text fits in maxLines
+        while (lines.length > maxLines && fontSize > 20) {
+          fontSize -= 5;
+          lines = wrapText(fontSize);
+        }
+
+        // Set final font settings
         ctx.font = `${fontSize}px ${style.fontFamily}`;
         ctx.fillStyle = style.color;
 
-        // Calculate max width (60% of canvas width)
-        const maxWidth = canvas.width * 0.6;
-        
-        // Split text into words and initialize lines array
-        const words = text.toUpperCase().split(' ');
-        const lines: string[] = [];
-        let currentLine = words[0];
-
-        // Break text into lines that fit within maxWidth
-        for (let i = 1; i < words.length; i++) {
-          const testLine = currentLine + ' ' + words[i];
-          const metrics = ctx.measureText(testLine);
-          
-          if (metrics.width > maxWidth) {
-            lines.push(currentLine);
-            currentLine = words[i];
-          } else {
-            currentLine = testLine;
-          }
-        }
-        lines.push(currentLine);
-
-        // Adjust font size if too many lines
-        const maxLines = 3;
-        if (lines.length > maxLines) {
-          fontSize = fontSize * (maxLines / lines.length);
-          ctx.font = `${fontSize}px ${style.fontFamily}`;
-        }
-
-        // Calculate line height and total height
+        // Calculate positions
         const lineHeight = fontSize * 1.2;
         const totalHeight = lines.length * lineHeight;
         
-        // Calculate starting Y position
         let startY;
         if (isTop) {
-          startY = fontSize + (canvas.height * 0.05); // 5% padding from top
+          startY = padding + fontSize; // Top position with padding
         } else {
-          startY = canvas.height - (totalHeight + canvas.height * 0.05); // 5% padding from bottom
+          startY = canvas.height - padding - totalHeight + fontSize; // Bottom position with padding
         }
 
-        // Draw each line with stroke and fill
+        // Draw each line
         lines.forEach((line, index) => {
           const y = startY + (index * lineHeight);
-          // Draw stroke
+          // Draw stroke (outline)
           ctx.strokeText(line, canvas.width / 2, y);
-          // Draw fill
+          // Draw fill (text)
           ctx.fillText(line, canvas.width / 2, y);
         });
       };
