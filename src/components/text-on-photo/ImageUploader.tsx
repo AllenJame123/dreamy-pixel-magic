@@ -1,12 +1,11 @@
 import { useRef } from "react";
-import { Canvas, Image as FabricImage } from "fabric";
+import { fabric } from "fabric";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
-import { fabric } from "fabric";
 
 interface ImageUploaderProps {
-  canvas: Canvas | null;
+  canvas: fabric.Canvas | null;
 }
 
 const ImageUploader = ({ canvas }: ImageUploaderProps) => {

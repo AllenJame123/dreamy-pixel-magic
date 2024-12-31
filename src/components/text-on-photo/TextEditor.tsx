@@ -1,14 +1,13 @@
-import { Canvas } from "fabric";
+import { fabric } from "fabric";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ColorPicker } from "./ColorPicker";
 import { useState } from "react";
 import { Type } from "lucide-react";
-import { fabric } from "fabric";
 
 interface TextEditorProps {
-  canvas: Canvas | null;
+  canvas: fabric.Canvas | null;
 }
 
 const TextEditor = ({ canvas }: TextEditorProps) => {
