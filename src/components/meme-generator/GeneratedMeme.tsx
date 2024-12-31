@@ -20,7 +20,6 @@ interface GeneratedMemeProps {
 
 interface TextStyle {
   color: string;
-  yPosition: number;
   fontSize: number;
   fontFamily: string;
 }
@@ -33,22 +32,28 @@ const GeneratedMeme = ({
   onUpdateText 
 }: GeneratedMemeProps) => {
   const [topStyle, setTopStyle] = useState<TextStyle>({ 
-    color: '#ffffff', 
-    yPosition: 10, 
+    color: '#ffffff',
     fontSize: 48,
     fontFamily: 'Impact'
   });
   
   const [bottomStyle, setBottomStyle] = useState<TextStyle>({ 
-    color: '#ffffff', 
-    yPosition: 90,
+    color: '#ffffff',
     fontSize: 48,
     fontFamily: 'Impact'
   });
 
   const colors = [
-    '#ffffff', '#9b87f5', '#F2FCE2', '#8B5CF6', '#0EA5E9',
-    '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff'
+    { value: '#ffffff', label: 'White' },
+    { value: '#9b87f5', label: 'Purple' },
+    { value: '#F2FCE2', label: 'Light Green' },
+    { value: '#8B5CF6', label: 'Vivid Purple' },
+    { value: '#0EA5E9', label: 'Ocean Blue' },
+    { value: '#ff0000', label: 'Red' },
+    { value: '#00ff00', label: 'Green' },
+    { value: '#0000ff', label: 'Blue' },
+    { value: '#ffff00', label: 'Yellow' },
+    { value: '#ff00ff', label: 'Magenta' }
   ];
 
   const fonts = [
@@ -110,20 +115,29 @@ const GeneratedMeme = ({
               
               <div className="space-y-2">
                 <Label className="text-base">Text Color</Label>
-                <div className="flex flex-wrap gap-2">
-                  {colors.map((color) => (
-                    <button
-                      key={color}
-                      className="w-8 h-8 rounded-full border-2 border-gray-300 hover:scale-110 transition-transform"
-                      style={{ 
-                        backgroundColor: color,
-                        outline: color === topStyle.color ? '2px solid #0EA5E9' : 'none',
-                        outlineOffset: '2px'
-                      }}
-                      onClick={() => updateBothStyles({ color })}
-                    />
-                  ))}
-                </div>
+                <Select 
+                  value={topStyle.color}
+                  onValueChange={(value) => updateBothStyles({ color: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {colors.map((color) => (
+                      <SelectItem 
+                        key={color.value} 
+                        value={color.value}
+                        className="flex items-center gap-2"
+                      >
+                        <div 
+                          className="w-4 h-4 rounded-full" 
+                          style={{ backgroundColor: color.value }}
+                        />
+                        {color.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">

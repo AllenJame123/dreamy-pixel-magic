@@ -2,7 +2,6 @@ import { useRef, useEffect } from "react";
 
 interface TextStyle {
   color: string;
-  yPosition: number;
   fontSize: number;
   fontFamily: string;
 }
@@ -64,10 +63,10 @@ const MemePreview = ({
 
       if (topText) {
         ctx.font = `${topStyle.fontSize}px ${topStyle.fontFamily}`;
-        const maxWidth = canvas.width * 0.8; // Fixed width at 80% of canvas
+        const maxWidth = canvas.width * 0.8;
         const lines = wrapText(topText.toUpperCase(), maxWidth);
         const lineHeight = topStyle.fontSize * 1.2;
-        const topPadding = (canvas.height * topStyle.yPosition) / 100;
+        const topPadding = topStyle.fontSize;
 
         ctx.fillStyle = topStyle.color;
         lines.forEach((line, index) => {
@@ -79,10 +78,10 @@ const MemePreview = ({
 
       if (bottomText) {
         ctx.font = `${bottomStyle.fontSize}px ${bottomStyle.fontFamily}`;
-        const maxWidth = canvas.width * 0.8; // Fixed width at 80% of canvas
+        const maxWidth = canvas.width * 0.8;
         const lines = wrapText(bottomText.toUpperCase(), maxWidth);
         const lineHeight = bottomStyle.fontSize * 1.2;
-        const bottomPadding = (canvas.height * bottomStyle.yPosition) / 100;
+        const bottomPadding = canvas.height - (bottomStyle.fontSize / 2);
         
         ctx.fillStyle = bottomStyle.color;
         lines.reverse().forEach((line, index) => {
