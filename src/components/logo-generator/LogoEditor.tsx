@@ -26,47 +26,58 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
 
     const loadImage = async () => {
       if (!logoUrl) {
+        console.log('No logo URL provided');
         setIsLoading(false);
         return;
       }
 
+      console.log('Starting to load image with URL:', logoUrl);
       setIsLoading(true);
+
       try {
-        console.log('Loading image from URL:', logoUrl);
-        
-        // First try to load directly
+        // Create a new image element to test loading
         const img = new Image();
         img.crossOrigin = "anonymous";
         
-        try {
-          await new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
+        const loadImageDirectly = () => {
+          return new Promise((resolve, reject) => {
+            img.onload = () => {
+              console.log('Image loaded directly successfully');
+              resolve(logoUrl);
+            };
+            img.onerror = (error) => {
+              console.error('Direct image load failed:', error);
+              reject(error);
+            };
             img.src = logoUrl;
           });
-          
-          setEditedLogo(logoUrl);
-          console.log('Image loaded directly successfully');
-        } catch (directError) {
-          console.log('Direct loading failed, trying fetch:', directError);
-          
-          // If direct loading fails, try fetching
+        };
+
+        const loadImageViaBlob = async () => {
+          console.log('Attempting to load image via blob...');
           const response = await fetch(logoUrl);
+          if (!response.ok) throw new Error('Failed to fetch image');
           const blob = await response.blob();
           objectUrl = URL.createObjectURL(blob);
-          
-          await new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
-            img.src = objectUrl;
-          });
-          
-          setEditedLogo(objectUrl);
-          console.log('Image loaded via fetch successfully');
+          console.log('Created blob URL:', objectUrl);
+          return objectUrl;
+        };
+
+        try {
+          // First try loading directly
+          const directUrl = await loadImageDirectly();
+          setEditedLogo(directUrl);
+        } catch (directError) {
+          console.log('Direct loading failed, trying blob method...');
+          // If direct loading fails, try via blob
+          const blobUrl = await loadImageViaBlob();
+          setEditedLogo(blobUrl);
         }
+
+        console.log('Final editedLogo value:', editedLogo);
       } catch (error) {
-        console.error('Error loading image:', error);
-        toast.error('Failed to load image');
+        console.error('Error in image loading process:', error);
+        toast.error('Failed to load image. Please try again.');
       } finally {
         setIsLoading(false);
       }
@@ -76,6 +87,7 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
 
     return () => {
       if (objectUrl) {
+        console.log('Cleaning up blob URL:', objectUrl);
         URL.revokeObjectURL(objectUrl);
       }
       setEditedLogo('');
@@ -84,6 +96,7 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
   }, [logoUrl]);
 
   const handleCropComplete = (croppedImageUrl: string) => {
+    console.log('Setting cropped image URL:', croppedImageUrl);
     setEditedLogo(croppedImageUrl);
     setShowCropper(false);
     toast.success('Logo cropped successfully!');
@@ -151,6 +164,12 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
             <X className="h-4 w-4" />
           </Button>
         </div>
+
+        {editedLogo && (
+          <div className="mb-4">
+            <p className="text-xs text-gray-500">Debug: Image URL length: {editedLogo.length}</p>
+          </div>
+        )}
 
         <LogoPreview editedLogo={editedLogo} />
 
