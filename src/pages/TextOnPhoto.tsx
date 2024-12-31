@@ -6,6 +6,7 @@ import { Download } from "lucide-react";
 import { toast } from "sonner";
 import TextEditor from "@/components/text-on-photo/TextEditor";
 import ImageUploader from "@/components/text-on-photo/ImageUploader";
+import HowItWorks from "@/components/text-on-photo/HowItWorks";
 
 const TextOnPhoto = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -54,6 +55,8 @@ const TextOnPhoto = () => {
           Upload an image and add customizable text overlays to create stunning visuals
         </p>
       </div>
+
+      <HowItWorks />
 
       <Card className="p-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

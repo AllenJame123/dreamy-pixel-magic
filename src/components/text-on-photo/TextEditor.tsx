@@ -10,6 +10,8 @@ interface TextEditorProps {
   canvas: fabric.Canvas | null;
 }
 
+const MAX_CHARS = 100;
+
 const TextEditor = ({ canvas }: TextEditorProps) => {
   const [text, setText] = useState("");
   const [fontSize, setFontSize] = useState(40);
@@ -41,14 +43,22 @@ const TextEditor = ({ canvas }: TextEditorProps) => {
         <div className="flex gap-2">
           <Input
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value.length <= MAX_CHARS) {
+                setText(e.target.value);
+              }
+            }}
             placeholder="Enter text to add"
+            maxLength={MAX_CHARS}
           />
           <Button onClick={addText} disabled={!text.trim()}>
             <Type className="w-4 h-4 mr-2" />
             Add Text
           </Button>
         </div>
+        <p className="text-sm text-muted-foreground mt-1">
+          {text.length}/{MAX_CHARS} characters
+        </p>
       </div>
 
       <div className="space-y-2">
