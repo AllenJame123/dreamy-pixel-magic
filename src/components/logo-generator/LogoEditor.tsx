@@ -39,7 +39,7 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
         const img = new Image();
         img.crossOrigin = "anonymous";
         
-        const loadImageDirectly = () => {
+        const loadImageDirectly = async (): Promise<string> => {
           return new Promise((resolve, reject) => {
             img.onload = () => {
               console.log('Image loaded directly successfully');
@@ -53,7 +53,7 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
           });
         };
 
-        const loadImageViaBlob = async () => {
+        const loadImageViaBlob = async (): Promise<string> => {
           console.log('Attempting to load image via blob...');
           const response = await fetch(logoUrl);
           if (!response.ok) throw new Error('Failed to fetch image');
