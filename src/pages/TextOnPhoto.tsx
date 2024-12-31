@@ -49,8 +49,10 @@ const TextOnPhoto = () => {
   return (
     <div className="min-h-screen w-full max-w-7xl mx-auto px-4 py-8 space-y-8">
       <div className="text-center space-y-3">
-        <h1 className="text-4xl font-bold tracking-tight">Text on Photo Editor</h1>
-        <p className="text-xl text-muted-foreground">Add and customize text on your images</p>
+        <h1 className="text-4xl font-bold tracking-tight">Add Text to Photo</h1>
+        <p className="text-xl text-muted-foreground">
+          Upload an image and add customizable text overlays to create stunning visuals
+        </p>
       </div>
 
       <Card className="p-6">
