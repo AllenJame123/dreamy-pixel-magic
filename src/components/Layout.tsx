@@ -55,15 +55,15 @@ const Layout = () => {
                 Meme Generator
               </Link>
               <Link
-                to="/text-on-photo"
+                to="/add-text-to-photo"
                 className={`inline-flex items-center px-4 py-2 text-sm font-medium ${
-                  location.pathname === "/text-on-photo"
+                  location.pathname === "/add-text-to-photo"
                     ? "text-primary border-b-2 border-primary"
                     : "text-muted-foreground hover:text-primary"
                 }`}
               >
                 <Type className="w-4 h-4 mr-2" />
-                Text on Photo
+                Add Text to Photo
               </Link>
               <Link
                 to="/blog"

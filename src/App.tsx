@@ -27,7 +27,7 @@ const App = () => (
             <Route path="/logo-generator" element={<LogoGenerator />} />
             <Route path="/favicon-generator" element={<FaviconGenerator />} />
             <Route path="/meme-generator" element={<MemeGenerator />} />
-            <Route path="/text-on-photo" element={<TextOnPhoto />} />
+            <Route path="/add-text-to-photo" element={<TextOnPhoto />} />
             <Route path="/:slug" element={<BlogPost />} />
           </Route>
         </Routes>
