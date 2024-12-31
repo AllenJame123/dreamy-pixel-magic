@@ -19,9 +19,9 @@ const SpecialFeatures = () => {
           <div className="flex items-start gap-4">
             <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
             <div>
-              <h3 className="font-semibold mb-2">Smart Text Wrapping</h3>
+              <h3 className="font-semibold mb-2">Smart Text Placement</h3>
               <p className="text-muted-foreground">
-                Text automatically wraps and scales to fit perfectly within your meme, no matter how long it is.
+                Add custom text at the top and bottom of your meme, with automatic text scaling to fit perfectly.
               </p>
             </div>
           </div>
@@ -31,9 +31,9 @@ const SpecialFeatures = () => {
           <div className="flex items-start gap-4">
             <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
             <div>
-              <h3 className="font-semibold mb-2">Real-Time Preview</h3>
+              <h3 className="font-semibold mb-2">Preview Mode</h3>
               <p className="text-muted-foreground">
-                See your meme come to life instantly as you type, with immediate updates to both image and text.
+                Preview your meme with the added text before downloading, ensuring your meme looks exactly how you want it.
               </p>
             </div>
           </div>

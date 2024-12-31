@@ -11,30 +11,30 @@ const HowItWorks = () => {
       
       <div className="grid gap-4">
         <div className="space-y-2">
-          <h3 className="font-semibold text-lg">1. Generate Your Base Image</h3>
+          <h3 className="font-semibold text-lg">1. Describe Your Meme Image</h3>
           <p className="text-muted-foreground">
-            Start by describing the image you want for your meme. Our AI will create a unique, custom image based on your description.
+            Start by describing the image you want for your meme in the prompt field. Our AI will generate a safe, appropriate image based on your description.
           </p>
         </div>
 
         <div className="space-y-2">
-          <h3 className="font-semibold text-lg">2. Add Your Text</h3>
+          <h3 className="font-semibold text-lg">2. Generate the Base Image</h3>
           <p className="text-muted-foreground">
-            Add your meme text in the top and bottom text fields. The text will automatically wrap and fit within the image.
+            Click the "Generate Meme" button to create your custom meme template. The AI will process your description and create a unique image.
           </p>
         </div>
 
         <div className="space-y-2">
-          <h3 className="font-semibold text-lg">3. Preview Your Meme</h3>
+          <h3 className="font-semibold text-lg">3. Add Your Meme Text</h3>
           <p className="text-muted-foreground">
-            See your meme update in real-time as you type. The preview shows exactly how your meme will look when downloaded.
+            Once your image is generated, add your text in the top and bottom text fields. You can preview how the text appears on your meme in real-time.
           </p>
         </div>
 
         <div className="space-y-2">
-          <h3 className="font-semibold text-lg">4. Download Your Creation</h3>
+          <h3 className="font-semibold text-lg">4. Download Your Meme</h3>
           <p className="text-muted-foreground">
-            Once you're happy with your meme, simply click the download button to save it to your device.
+            Happy with your creation? Simply click the download button to save your meme as a high-quality PNG file, ready to be shared.
           </p>
         </div>
       </div>
