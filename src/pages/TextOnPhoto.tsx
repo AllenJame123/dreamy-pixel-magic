@@ -25,8 +25,9 @@ const TextOnPhoto = () => {
     // Enable text editing on double click
     canvas.on('mouse:dblclick', (options) => {
       if (options.target && options.target.type === 'i-text') {
-        options.target.enterEditing();
-        options.target.selectAll();
+        const textObject = options.target as fabric.IText;
+        textObject.enterEditing();
+        textObject.selectAll();
       }
     });
 

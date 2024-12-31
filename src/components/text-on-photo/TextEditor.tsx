@@ -60,17 +60,18 @@ const TextEditor = ({ canvas }: TextEditorProps) => {
   const toggleStyle = (style: 'bold' | 'italic' | 'underline') => {
     if (!canvas) return;
     
-    const activeObject = canvas.getActiveObject();
+    const activeObject = canvas.getActiveObject() as fabric.IText;
     if (activeObject && activeObject.type === 'i-text') {
+      const iTextObject = activeObject as fabric.IText;
       switch (style) {
         case 'bold':
-          activeObject.set('fontWeight', activeObject.fontWeight === 'bold' ? 'normal' : 'bold');
+          iTextObject.set({ fontWeight: iTextObject.get('fontWeight') === 'bold' ? 'normal' : 'bold' });
           break;
         case 'italic':
-          activeObject.set('fontStyle', activeObject.fontStyle === 'italic' ? 'normal' : 'italic');
+          iTextObject.set({ fontStyle: iTextObject.get('fontStyle') === 'italic' ? 'normal' : 'italic' });
           break;
         case 'underline':
-          activeObject.set('underline', !activeObject.underline);
+          iTextObject.set({ underline: !iTextObject.get('underline') });
           break;
       }
       canvas.renderAll();

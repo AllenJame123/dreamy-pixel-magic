@@ -17,9 +17,9 @@ const TextAlignmentControls = ({ canvas }: TextAlignmentControlsProps) => {
   const handleAlign = (alignment: string) => {
     if (!canvas) return;
     
-    const activeObject = canvas.getActiveObject();
+    const activeObject = canvas.getActiveObject() as fabric.IText;
     if (activeObject && activeObject.type === 'i-text') {
-      activeObject.set('textAlign', alignment);
+      (activeObject as fabric.IText).set({ textAlign: alignment });
       canvas.renderAll();
     }
   };
