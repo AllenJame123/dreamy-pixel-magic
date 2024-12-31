@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { Download } from "lucide-react";
 
 interface GeneratedMemeProps {
   imageUrl: string;
@@ -125,17 +126,23 @@ const GeneratedMeme = ({
 
   return (
     <Card className="glass-panel p-6 space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Top Text</Label>
-            <Input
-              value={topText}
-              onChange={(e) => onUpdateText('top', e.target.value)}
-              placeholder="Top text"
-            />
+      <h2 className="text-2xl font-bold text-center mb-6">Edit Your Meme</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          {/* Top Text Section */}
+          <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+            <h3 className="text-xl font-semibold text-primary">Top Text Settings</h3>
             <div className="space-y-2">
-              <Label>Position</Label>
+              <Label className="text-base">Text Content</Label>
+              <Input
+                value={topText}
+                onChange={(e) => onUpdateText('top', e.target.value)}
+                placeholder="Enter top text"
+                className="border-2"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-base">Vertical Position</Label>
               <Slider
                 value={[topStyle.yPosition]}
                 onValueChange={(value) => {
@@ -147,12 +154,12 @@ const GeneratedMeme = ({
               />
             </div>
             <div className="space-y-2">
-              <Label>Color</Label>
+              <Label className="text-base">Text Color</Label>
               <div className="flex flex-wrap gap-2">
                 {colors.map((color) => (
                   <button
                     key={color}
-                    className="w-6 h-6 rounded-full border border-gray-300"
+                    className="w-8 h-8 rounded-full border-2 border-gray-300 hover:scale-110 transition-transform"
                     style={{ backgroundColor: color }}
                     onClick={() => setTopStyle(prev => ({ ...prev, color }))}
                   />
@@ -161,15 +168,20 @@ const GeneratedMeme = ({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Bottom Text</Label>
-            <Input
-              value={bottomText}
-              onChange={(e) => onUpdateText('bottom', e.target.value)}
-              placeholder="Bottom text"
-            />
+          {/* Bottom Text Section */}
+          <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+            <h3 className="text-xl font-semibold text-primary">Bottom Text Settings</h3>
             <div className="space-y-2">
-              <Label>Position</Label>
+              <Label className="text-base">Text Content</Label>
+              <Input
+                value={bottomText}
+                onChange={(e) => onUpdateText('bottom', e.target.value)}
+                placeholder="Enter bottom text"
+                className="border-2"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-base">Vertical Position</Label>
               <Slider
                 value={[bottomStyle.yPosition]}
                 onValueChange={(value) => {
@@ -181,12 +193,12 @@ const GeneratedMeme = ({
               />
             </div>
             <div className="space-y-2">
-              <Label>Color</Label>
+              <Label className="text-base">Text Color</Label>
               <div className="flex flex-wrap gap-2">
                 {colors.map((color) => (
                   <button
                     key={color}
-                    className="w-6 h-6 rounded-full border border-gray-300"
+                    className="w-8 h-8 rounded-full border-2 border-gray-300 hover:scale-110 transition-transform"
                     style={{ backgroundColor: color }}
                     onClick={() => setBottomStyle(prev => ({ ...prev, color }))}
                   />
@@ -211,9 +223,10 @@ const GeneratedMeme = ({
           </div>
           <Button
             onClick={onDownload}
-            className="w-full"
-            variant="secondary"
+            className="w-full py-6 text-lg font-semibold bg-primary hover:bg-primary/90"
+            size="lg"
           >
+            <Download className="w-6 h-6 mr-2" />
             Download Meme
           </Button>
         </div>
