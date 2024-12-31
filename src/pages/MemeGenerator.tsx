@@ -5,6 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { validatePrompt } from "@/utils/contentFilter";
 import MemeForm from "@/components/meme-generator/MemeForm";
 import GeneratedMeme from "@/components/meme-generator/GeneratedMeme";
+import FAQ from "@/components/meme-generator/FAQ";
+import SpecialFeatures from "@/components/meme-generator/SpecialFeatures";
 
 const MemeGenerator = () => {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -21,7 +23,6 @@ const MemeGenerator = () => {
       return;
     }
 
-    // Validate prompt content
     const validationResult = validatePrompt(prompt);
     if (!validationResult.isValid) {
       toast.error(validationResult.message);
@@ -66,20 +67,26 @@ const MemeGenerator = () => {
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     if (!generatedMeme) return;
     
     try {
       const canvas = document.querySelector('canvas');
-      if (!canvas) return;
+      if (!canvas) {
+        toast.error('Canvas not found');
+        return;
+      }
 
-      const url = canvas.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `meme-${Date.now()}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      // Create a temporary link element
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      link.download = `meme-${Date.now()}.png`;
+      
+      // Trigger download without leaving the page
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
       toast.success('Meme downloaded successfully!');
     } catch (error) {
       toast.error('Failed to download meme');
@@ -110,25 +117,8 @@ const MemeGenerator = () => {
           />
         )}
 
-        <Card className="glass-panel p-6">
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-center">How It Works</h2>
-            <ol className="space-y-4">
-              <li className="flex gap-2">
-                <span className="font-bold text-primary">1.</span>
-                <span>Describe the image you want for your meme</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="font-bold text-primary">2.</span>
-                <span>Add your custom top and bottom text</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="font-bold text-primary">3.</span>
-                <span>Generate and download your custom meme</span>
-              </li>
-            </ol>
-          </div>
-        </Card>
+        <SpecialFeatures />
+        <FAQ />
       </div>
     </div>
   );
