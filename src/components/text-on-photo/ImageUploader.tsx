@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Canvas } from "fabric";
+import { Canvas, Image } from "fabric";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
