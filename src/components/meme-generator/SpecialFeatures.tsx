@@ -19,9 +19,9 @@ const SpecialFeatures = () => {
           <div className="flex items-start gap-4">
             <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
             <div>
-              <h3 className="font-semibold mb-2">Custom Text Positioning</h3>
+              <h3 className="font-semibold mb-2">Advanced Text Editor</h3>
               <p className="text-muted-foreground">
-                Adjust the position of your text using intuitive sliders for perfect placement.
+                Full control over your meme text with our intuitive editor panel - adjust position, color, and content easily.
               </p>
             </div>
           </div>
@@ -31,9 +31,9 @@ const SpecialFeatures = () => {
           <div className="flex items-start gap-4">
             <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
             <div>
-              <h3 className="font-semibold mb-2">Text Color Customization</h3>
+              <h3 className="font-semibold mb-2">Real-Time Preview</h3>
               <p className="text-muted-foreground">
-                Choose from a variety of colors to make your meme text pop and stand out.
+                See your changes instantly as you edit text position and colors in the editor window.
               </p>
             </div>
           </div>
@@ -41,9 +41,9 @@ const SpecialFeatures = () => {
           <div className="flex items-start gap-4">
             <CheckCircle className="w-6 h-6 text-primary flex-shrink-0" />
             <div>
-              <h3 className="font-semibold mb-2">Easy Download</h3>
+              <h3 className="font-semibold mb-2">One-Click Download</h3>
               <p className="text-muted-foreground">
-                Download your finished meme with one click, ready to share on social media.
+                Download your finished meme instantly with our prominent download button - ready to share!
               </p>
             </div>
           </div>
