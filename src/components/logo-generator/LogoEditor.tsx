@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { X, Download, Crop } from "lucide-react";
+import { X, Download, Crop, Upload } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import LogoCropper from './LogoCropper';
@@ -14,10 +14,32 @@ interface LogoEditorProps {
 
 const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
   const [showCropper, setShowCropper] = useState(false);
-  const [editedLogo, setEditedLogo] = useState(logoUrl);
+  const [editedLogo, setEditedLogo] = useState('');
   const [downloadFormat, setDownloadFormat] = useState("png");
   const [downloadSize, setDownloadSize] = useState("512");
   const [downloadShape, setDownloadShape] = useState("square");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load the initial image when the component mounts
+  React.useEffect(() => {
+    const loadImage = async () => {
+      try {
+        const img = new Image();
+        img.src = logoUrl;
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+        setEditedLogo(logoUrl);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error loading image:', error);
+        toast.error('Failed to load image');
+        setIsLoading(false);
+      }
+    };
+    loadImage();
+  }, [logoUrl]);
 
   const handleCropComplete = (croppedImageUrl: string) => {
     setEditedLogo(croppedImageUrl);
@@ -75,6 +97,19 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <Card className="p-6">
+          <div className="flex items-center space-x-2">
+            <Upload className="animate-pulse" />
+            <span>Loading image...</span>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <Card className="bg-white rounded-lg max-w-xl w-full mx-auto space-y-4 p-4">
@@ -86,11 +121,17 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
         </div>
 
         <div className="aspect-square relative rounded-lg overflow-hidden max-h-[300px]">
-          <img
-            src={editedLogo}
-            alt="Logo to edit"
-            className="w-full h-full object-contain"
-          />
+          {editedLogo ? (
+            <img
+              src={editedLogo}
+              alt="Logo to edit"
+              className="w-full h-full object-contain"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-100">
+              <span className="text-gray-400">No image loaded</span>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -141,6 +182,7 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
               onClick={() => setShowCropper(true)}
               className="flex-1"
               variant="outline"
+              disabled={!editedLogo}
             >
               <Crop className="w-4 h-4 mr-2" />
               Crop
@@ -149,6 +191,7 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
               onClick={handleDownload}
               className="flex-1"
               variant="secondary"
+              disabled={!editedLogo}
             >
               <Download className="w-4 h-4 mr-2" />
               Download
@@ -157,7 +200,7 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
         </div>
       </Card>
 
-      {showCropper && (
+      {showCropper && editedLogo && (
         <LogoCropper
           imageUrl={editedLogo}
           onClose={() => setShowCropper(false)}
