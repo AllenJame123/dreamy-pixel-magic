@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Label } from "@/components/ui/label";
 
 interface MemeFormProps {
   onGenerate: (prompt: string, topText: string, bottomText: string) => void;
@@ -26,22 +27,23 @@ const MemeForm = ({ onGenerate, isGenerating, progress }: MemeFormProps) => {
     <Card className="glass-panel p-6">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Describe your meme image
-          </label>
+          <Label className="block text-sm font-medium text-gray-700 mb-1">
+            Describe your meme image (Required)
+          </Label>
           <Input
             placeholder="e.g., A funny cat wearing sunglasses and a business suit"
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             className="w-full"
             disabled={isGenerating}
+            required
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Top Text
-          </label>
+          <Label className="block text-sm font-medium text-gray-700 mb-1">
+            Top Text (Optional)
+          </Label>
           <Input
             placeholder="Enter top text for your meme"
             value={topText}
@@ -52,9 +54,9 @@ const MemeForm = ({ onGenerate, isGenerating, progress }: MemeFormProps) => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Bottom Text
-          </label>
+          <Label className="block text-sm font-medium text-gray-700 mb-1">
+            Bottom Text (Optional)
+          </Label>
           <Input
             placeholder="Enter bottom text for your meme"
             value={bottomText}
