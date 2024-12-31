@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactCrop, { Crop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,12 @@ const LogoCropper = ({ imageUrl, onClose, onCropComplete }: LogoCropperProps) =>
     height: 50
   });
   const [completedCrop, setCompletedCrop] = useState<PixelCrop | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  useEffect(() => {
+    // Reset image loaded state when imageUrl changes
+    setImageLoaded(false);
+  }, [imageUrl]);
 
   const handleCropComplete = async () => {
     if (!completedCrop) {
@@ -31,8 +37,9 @@ const LogoCropper = ({ imageUrl, onClose, onCropComplete }: LogoCropperProps) =>
       const image = new Image();
       image.src = imageUrl;
       
-      await new Promise((resolve) => {
+      await new Promise((resolve, reject) => {
         image.onload = resolve;
+        image.onerror = reject;
       });
 
       const canvas = document.createElement('canvas');
@@ -68,6 +75,10 @@ const LogoCropper = ({ imageUrl, onClose, onCropComplete }: LogoCropperProps) =>
     }
   };
 
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg max-w-3xl w-full mx-4">
@@ -79,17 +90,20 @@ const LogoCropper = ({ imageUrl, onClose, onCropComplete }: LogoCropperProps) =>
         </div>
         
         <div className="max-h-[60vh] overflow-auto">
-          <ReactCrop
-            crop={crop}
-            onChange={(c) => setCrop(c)}
-            onComplete={(c) => setCompletedCrop(c)}
-          >
-            <img
-              src={imageUrl}
-              alt="Logo to crop"
-              className="max-w-full h-auto"
-            />
-          </ReactCrop>
+          {imageUrl && (
+            <ReactCrop
+              crop={crop}
+              onChange={(c) => setCrop(c)}
+              onComplete={(c) => setCompletedCrop(c)}
+            >
+              <img
+                src={imageUrl}
+                alt="Logo to crop"
+                className="max-w-full h-auto"
+                onLoad={handleImageLoad}
+              />
+            </ReactCrop>
+          )}
         </div>
         
         <div className="mt-4 flex justify-between items-center">
@@ -99,6 +113,7 @@ const LogoCropper = ({ imageUrl, onClose, onCropComplete }: LogoCropperProps) =>
           <Button 
             onClick={handleCropComplete}
             className="ml-4"
+            disabled={!imageLoaded}
           >
             Apply Crop
           </Button>
