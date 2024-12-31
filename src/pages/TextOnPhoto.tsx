@@ -11,13 +11,20 @@ import TextAlignmentControls from "@/components/text-on-photo/TextAlignmentContr
 const TextOnPhoto = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<fabric.Canvas | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !containerRef.current) return;
 
+    // Get container dimensions
+    const container = containerRef.current;
+    const containerWidth = container.clientWidth;
+    const containerHeight = Math.min(600, window.innerHeight - 200); // Max height of 600px or screen height - 200px
+
+    // Initialize canvas with container dimensions
     const canvas = new fabric.Canvas(canvasRef.current, {
-      width: 800,
-      height: 600,
+      width: containerWidth,
+      height: containerHeight,
       backgroundColor: "#ffffff",
       preserveObjectStacking: true,
     });
@@ -33,8 +40,37 @@ const TextOnPhoto = () => {
 
     setFabricCanvas(canvas);
 
+    // Handle window resize
+    const handleResize = () => {
+      const newWidth = container.clientWidth;
+      const newHeight = Math.min(600, window.innerHeight - 200);
+      
+      canvas.setDimensions({
+        width: newWidth,
+        height: newHeight,
+      });
+      
+      // Scale all objects proportionally
+      const scaleX = newWidth / canvas.getWidth();
+      const scaleY = newHeight / canvas.getHeight();
+      const objects = canvas.getObjects();
+      
+      objects.forEach(obj => {
+        obj.scaleX = obj.scaleX! * scaleX;
+        obj.scaleY = obj.scaleY! * scaleY;
+        obj.left = obj.left! * scaleX;
+        obj.top = obj.top! * scaleY;
+        obj.setCoords();
+      });
+      
+      canvas.renderAll();
+    };
+
+    window.addEventListener('resize', handleResize);
+
     return () => {
       canvas.dispose();
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -77,7 +113,10 @@ const TextOnPhoto = () => {
           </div>
 
           <div className="space-y-4">
-            <div className="border rounded-lg overflow-hidden bg-gray-50">
+            <div 
+              ref={containerRef}
+              className="border rounded-lg overflow-hidden bg-gray-50 w-full"
+            >
               <canvas ref={canvasRef} className="max-w-full" />
             </div>
             <Button onClick={handleDownload} className="w-full">

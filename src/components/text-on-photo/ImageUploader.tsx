@@ -26,18 +26,32 @@ const ImageUploader = ({ canvas }: ImageUploaderProps) => {
       img.onload = () => {
         const fabricImage = new fabric.Image(img);
         
-        // Scale image to fit canvas while maintaining aspect ratio
-        const scale = Math.min(
-          canvas.width! / img.width,
-          canvas.height! / img.height
-        );
+        // Calculate dimensions to fit the canvas while maintaining aspect ratio
+        const canvasWidth = canvas.width!;
+        const canvasHeight = canvas.height!;
+        const imgAspectRatio = img.width / img.height;
+        const canvasAspectRatio = canvasWidth / canvasHeight;
         
-        fabricImage.scale(scale);
+        let scaledWidth, scaledHeight;
         
-        // Center the image
+        if (imgAspectRatio > canvasAspectRatio) {
+          // Image is wider than canvas (relative to height)
+          scaledWidth = canvasWidth;
+          scaledHeight = canvasWidth / imgAspectRatio;
+        } else {
+          // Image is taller than canvas (relative to width)
+          scaledHeight = canvasHeight;
+          scaledWidth = canvasHeight * imgAspectRatio;
+        }
+        
+        // Set the image dimensions
+        fabricImage.scaleToWidth(scaledWidth);
+        fabricImage.scaleToHeight(scaledHeight);
+        
+        // Center the image on canvas
         fabricImage.set({
-          left: (canvas.width! - img.width * scale) / 2,
-          top: (canvas.height! - img.height * scale) / 2,
+          left: (canvasWidth - scaledWidth) / 2,
+          top: (canvasHeight - scaledHeight) / 2,
         });
 
         canvas.clear();
