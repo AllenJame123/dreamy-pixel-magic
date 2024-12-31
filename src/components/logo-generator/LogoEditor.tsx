@@ -23,23 +23,29 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
 
   useEffect(() => {
     const loadImage = async () => {
-      if (!logoUrl) return;
-      
+      if (!logoUrl) {
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       try {
+        // Create a new URL to handle CORS
+        const response = await fetch(logoUrl);
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        
         const img = new Image();
         img.crossOrigin = "anonymous";
         
-        const loadPromise = new Promise((resolve, reject) => {
+        await new Promise((resolve, reject) => {
           img.onload = resolve;
           img.onerror = reject;
+          img.src = objectUrl;
         });
 
-        img.src = logoUrl;
-        await loadPromise;
-        
-        setEditedLogo(logoUrl);
-        console.log('Image loaded successfully:', logoUrl);
+        setEditedLogo(objectUrl);
+        console.log('Image loaded successfully:', objectUrl);
       } catch (error) {
         console.error('Error loading image:', error);
         toast.error('Failed to load image');
@@ -50,7 +56,11 @@ const LogoEditor = ({ logoUrl, onClose }: LogoEditorProps) => {
 
     loadImage();
 
+    // Cleanup function to revoke object URLs
     return () => {
+      if (editedLogo.startsWith('blob:')) {
+        URL.revokeObjectURL(editedLogo);
+      }
       setEditedLogo('');
       setIsLoading(false);
     };

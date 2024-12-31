@@ -13,6 +13,11 @@ const LogoPreview = ({ editedLogo }: LogoPreviewProps) => {
           alt="Logo to edit"
           className="w-full h-full object-contain"
           crossOrigin="anonymous"
+          onError={(e) => {
+            console.error('Error loading image in preview');
+            const target = e.target as HTMLImageElement;
+            target.style.display = 'none';
+          }}
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center">
