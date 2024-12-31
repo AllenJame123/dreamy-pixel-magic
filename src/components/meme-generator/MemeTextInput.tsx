@@ -16,8 +16,12 @@ const MemeTextInput = ({ label, value, onChange, placeholder }: MemeTextInputPro
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="resize-none h-24 w-full"
+        className="resize-none h-24 w-full max-w-full overflow-auto break-words"
+        maxLength={100} // Limit text length to prevent excessive overflow
       />
+      <p className="text-sm text-muted-foreground">
+        {value.length}/100 characters
+      </p>
     </div>
   );
 };

@@ -27,10 +27,10 @@ const GeneratedMeme = ({
 
   return (
     <div className="space-y-8">
-      <Card className="glass-panel p-6 space-y-4">
+      <Card className="glass-panel p-6">
         <h2 className="text-2xl font-bold text-center mb-6">Edit Your Meme</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-6">
+          <div className="space-y-6 max-w-full">
             <MemeTextInput
               label="Top Text (Optional)"
               value={topText}
@@ -46,13 +46,15 @@ const GeneratedMeme = ({
           </div>
 
           <div className="space-y-4">
-            <MemePreview
-              imageUrl={imageUrl}
-              topText={topText}
-              bottomText={bottomText}
-              topStyle={defaultStyle}
-              bottomStyle={defaultStyle}
-            />
+            <div className="aspect-square relative overflow-hidden rounded-lg">
+              <MemePreview
+                imageUrl={imageUrl}
+                topText={topText}
+                bottomText={bottomText}
+                topStyle={defaultStyle}
+                bottomStyle={defaultStyle}
+              />
+            </div>
             <MemeActions onDownload={onDownload} imageUrl={imageUrl} />
           </div>
         </div>
