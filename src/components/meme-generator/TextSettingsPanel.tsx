@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 interface TextStyle {
   color: string;
   yPosition: number;
+  width?: number;
 }
 
 interface TextSettingsPanelProps {
@@ -48,6 +49,18 @@ const TextSettingsPanel = ({
           }}
           min={title.toLowerCase().includes('top') ? 0 : 50}
           max={title.toLowerCase().includes('top') ? 50 : 100}
+          step={1}
+        />
+      </div>
+      <div className="space-y-2">
+        <Label className="text-base">Text Width (%)</Label>
+        <Slider
+          value={[style.width || 80]}
+          onValueChange={(value) => {
+            onStyleChange({ ...style, width: value[0] });
+          }}
+          min={40}
+          max={100}
           step={1}
         />
       </div>

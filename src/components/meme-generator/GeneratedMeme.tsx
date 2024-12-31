@@ -18,6 +18,7 @@ interface GeneratedMemeProps {
 interface TextStyle {
   color: string;
   yPosition: number;
+  width: number;
 }
 
 const GeneratedMeme = ({ 
@@ -27,8 +28,8 @@ const GeneratedMeme = ({
   onDownload,
   onUpdateText 
 }: GeneratedMemeProps) => {
-  const [topStyle, setTopStyle] = useState<TextStyle>({ color: '#ffffff', yPosition: 10 });
-  const [bottomStyle, setBottomStyle] = useState<TextStyle>({ color: '#ffffff', yPosition: 90 });
+  const [topStyle, setTopStyle] = useState<TextStyle>({ color: '#ffffff', yPosition: 10, width: 80 });
+  const [bottomStyle, setBottomStyle] = useState<TextStyle>({ color: '#ffffff', yPosition: 90, width: 80 });
 
   const handleShare = async () => {
     try {

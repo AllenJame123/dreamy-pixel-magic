@@ -3,6 +3,7 @@ import { useRef, useEffect } from "react";
 interface TextStyle {
   color: string;
   yPosition: number;
+  width?: number;
 }
 
 interface MemePreviewProps {
@@ -64,7 +65,7 @@ const MemePreview = ({
       };
 
       if (topText) {
-        const maxWidth = canvas.width * 0.8;
+        const maxWidth = canvas.width * (topStyle.width || 80) / 100;
         const lines = wrapText(topText.toUpperCase(), maxWidth);
         const lineHeight = fontSize * 1.2;
         const topPadding = (canvas.height * topStyle.yPosition) / 100;
@@ -78,7 +79,7 @@ const MemePreview = ({
       }
 
       if (bottomText) {
-        const maxWidth = canvas.width * 0.8;
+        const maxWidth = canvas.width * (bottomStyle.width || 80) / 100;
         const lines = wrapText(bottomText.toUpperCase(), maxWidth);
         const lineHeight = fontSize * 1.2;
         const bottomPadding = (canvas.height * bottomStyle.yPosition) / 100;
