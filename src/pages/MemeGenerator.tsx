@@ -2,6 +2,7 @@ import { useState } from "react";
 import MemeForm from "@/components/meme-generator/MemeForm";
 import GeneratedMeme from "@/components/meme-generator/GeneratedMeme";
 import SpecialFeatures from "@/components/meme-generator/SpecialFeatures";
+import HowItWorks from "@/components/meme-generator/HowItWorks";
 import FAQ from "@/components/meme-generator/FAQ";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -106,6 +107,8 @@ const MemeGenerator = () => {
           onUpdateText={handleUpdateText}
         />
       )}
+
+      <HowItWorks />
 
       <Card className="p-6">
         <SpecialFeatures />

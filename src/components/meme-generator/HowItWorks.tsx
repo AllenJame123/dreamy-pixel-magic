@@ -20,7 +20,7 @@ const HowItWorks = () => {
         <div className="space-y-2">
           <h3 className="font-semibold text-lg">2. Add Your Text</h3>
           <p className="text-muted-foreground">
-            Once your image is generated, add your meme text. You can add text at the top and bottom of the image. See your changes in real-time as you type!
+            Once your image is generated, add your meme text. You can add text at the top and bottom of the image, with up to 100 characters each. See your changes in real-time as you type!
           </p>
         </div>
 

@@ -14,6 +14,8 @@ interface MemeFormProps {
   progress: number;
 }
 
+const MAX_CHARS = 100;
+
 const MemeForm = ({ onGenerate, isGenerating, progress }: MemeFormProps) => {
   const [prompt, setPrompt] = useState("");
   const [topText, setTopText] = useState("");
@@ -46,11 +48,19 @@ const MemeForm = ({ onGenerate, isGenerating, progress }: MemeFormProps) => {
           <Input
             placeholder="e.g., A funny cat wearing sunglasses and a business suit"
             value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value.length <= MAX_CHARS) {
+                setPrompt(e.target.value);
+              }
+            }}
             className="w-full"
             disabled={isGenerating}
             required
+            maxLength={MAX_CHARS}
           />
+          <p className="text-sm text-muted-foreground mt-1">
+            {prompt.length}/{MAX_CHARS} characters
+          </p>
         </div>
 
         <div>
@@ -60,10 +70,18 @@ const MemeForm = ({ onGenerate, isGenerating, progress }: MemeFormProps) => {
           <Input
             placeholder="Enter top text for your meme"
             value={topText}
-            onChange={(e) => setTopText(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value.length <= MAX_CHARS) {
+                setTopText(e.target.value);
+              }
+            }}
             className="w-full"
             disabled={isGenerating}
+            maxLength={MAX_CHARS}
           />
+          <p className="text-sm text-muted-foreground mt-1">
+            {topText.length}/{MAX_CHARS} characters
+          </p>
         </div>
 
         <div>
@@ -73,10 +91,18 @@ const MemeForm = ({ onGenerate, isGenerating, progress }: MemeFormProps) => {
           <Input
             placeholder="Enter bottom text for your meme"
             value={bottomText}
-            onChange={(e) => setBottomText(e.target.value)}
+            onChange={(e) => {
+              if (e.target.value.length <= MAX_CHARS) {
+                setBottomText(e.target.value);
+              }
+            }}
             className="w-full"
             disabled={isGenerating}
+            maxLength={MAX_CHARS}
           />
+          <p className="text-sm text-muted-foreground mt-1">
+            {bottomText.length}/{MAX_CHARS} characters
+          </p>
         </div>
 
         {isGenerating && (
