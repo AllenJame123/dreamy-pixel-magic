@@ -19,30 +19,58 @@ const MemeActions = ({ onDownload, imageUrl }: MemeActionsProps) => {
     try {
       const url = window.location.href;
       const text = 'Check out this meme I created!';
-      const imageBlob = await fetch(imageUrl).then(r => r.blob());
       
+      // Get the canvas element and convert it to a blob
+      const canvas = document.querySelector('canvas') as HTMLCanvasElement;
+      if (!canvas) {
+        throw new Error('Canvas element not found');
+      }
+      
+      const imageBlob = await new Promise<Blob>((resolve) => {
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+        }, 'image/png');
+      });
+
       let shareUrl = '';
       switch (platform) {
         case 'facebook':
+          // Facebook requires an app ID for sharing images directly
+          // Fallback to URL sharing
           shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+          window.open(shareUrl, '_blank', 'width=600,height=400');
           break;
+          
         case 'twitter':
+          // Twitter (X) only supports URL sharing through web intent
           shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+          window.open(shareUrl, '_blank', 'width=600,height=400');
           break;
+          
         case 'whatsapp':
-          shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`;
+          // Create a temporary URL for the image
+          const imageUrl = URL.createObjectURL(imageBlob);
+          shareUrl = `https://wa.me/?text=${encodeURIComponent(text + ' ' + imageUrl)}`;
+          window.open(shareUrl);
+          // Clean up the temporary URL after a delay
+          setTimeout(() => URL.revokeObjectURL(imageUrl), 5000);
           break;
+          
         case 'messenger':
           shareUrl = `https://www.facebook.com/dialog/send?link=${encodeURIComponent(url)}&app_id=YOUR_FB_APP_ID&redirect_uri=${encodeURIComponent(url)}`;
+          window.open(shareUrl, '_blank', 'width=600,height=400');
           break;
+          
         case 'instagram':
-          // For Instagram, we'll help users save the image first
+          // Instagram doesn't support direct sharing, so we help users save the image
           const link = document.createElement('a');
           link.href = URL.createObjectURL(imageBlob);
           link.download = 'meme.png';
           link.click();
+          URL.revokeObjectURL(link.href);
           toast.info("Image downloaded. You can now share it on Instagram!");
-          return;
+          break;
+          
         case 'native':
           if (navigator.share) {
             try {
@@ -50,7 +78,6 @@ const MemeActions = ({ onDownload, imageUrl }: MemeActionsProps) => {
               await navigator.share({
                 title: 'Check out my meme!',
                 text: text,
-                url: url,
                 files: [file]
               });
             } catch (error) {
@@ -62,12 +89,10 @@ const MemeActions = ({ onDownload, imageUrl }: MemeActionsProps) => {
                 url: url
               });
             }
+          } else {
+            toast.error("Native sharing is not supported on your device");
           }
-          return;
-      }
-
-      if (shareUrl) {
-        window.open(shareUrl, '_blank', 'width=600,height=400');
+          break;
       }
     } catch (error) {
       console.error('Error sharing:', error);
