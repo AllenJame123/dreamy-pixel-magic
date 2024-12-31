@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { validatePrompt } from "@/utils/contentFilter";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface MemeFormProps {
   onGenerate: (prompt: string, topText: string, bottomText: string) => void;
@@ -27,16 +28,19 @@ const MemeForm = ({ onGenerate, isGenerating, progress }: MemeFormProps) => {
       return;
     }
 
-    if (prompt.trim()) {
-      onGenerate(prompt.trim(), topText.trim(), bottomText.trim());
+    if (!prompt.trim()) {
+      toast.error("Please enter a description for your meme image");
+      return;
     }
+
+    onGenerate(prompt.trim(), topText.trim(), bottomText.trim());
   };
 
   return (
     <Card className="glass-panel p-6">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <Label className="block text-sm font-medium text-gray-700 mb-1">
+          <Label className="block text-sm font-medium mb-1">
             Describe your meme image (Required)
           </Label>
           <Input
@@ -50,7 +54,7 @@ const MemeForm = ({ onGenerate, isGenerating, progress }: MemeFormProps) => {
         </div>
 
         <div>
-          <Label className="block text-sm font-medium text-gray-700 mb-1">
+          <Label className="block text-sm font-medium mb-1">
             Top Text (Optional)
           </Label>
           <Input
@@ -63,7 +67,7 @@ const MemeForm = ({ onGenerate, isGenerating, progress }: MemeFormProps) => {
         </div>
 
         <div>
-          <Label className="block text-sm font-medium text-gray-700 mb-1">
+          <Label className="block text-sm font-medium mb-1">
             Bottom Text (Optional)
           </Label>
           <Input
@@ -90,7 +94,14 @@ const MemeForm = ({ onGenerate, isGenerating, progress }: MemeFormProps) => {
           disabled={isGenerating || !prompt.trim()}
           className="w-full"
         >
-          {isGenerating ? "Generating..." : "Generate Meme"}
+          {isGenerating ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Generating...
+            </>
+          ) : (
+            'Generate Meme'
+          )}
         </Button>
       </form>
     </Card>
