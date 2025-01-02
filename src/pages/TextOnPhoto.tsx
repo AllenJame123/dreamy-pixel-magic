@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import ImageUploader from "@/components/text-on-photo/ImageUploader";
 import TextEditor from "@/components/text-on-photo/TextEditor";
@@ -6,7 +7,6 @@ import TextAlignmentControls from "@/components/text-on-photo/TextAlignmentContr
 import FontControls from "@/components/text-on-photo/FontControls";
 import CanvasContainer from "@/components/text-on-photo/CanvasContainer";
 import { fabric } from "fabric";
-import { useRef, useState } from "react";
 
 const TextOnPhoto = () => {
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
@@ -20,11 +20,9 @@ const TextOnPhoto = () => {
       return;
     }
     
-    // Load the image onto the canvas
     fabric.Image.fromURL(imageUrl, (img) => {
       canvas.clear();
       
-      // Calculate scaling to fit the canvas while maintaining aspect ratio
       const canvasWidth = canvas.width!;
       const canvasHeight = canvas.height!;
       const scale = Math.min(
@@ -33,8 +31,6 @@ const TextOnPhoto = () => {
       );
 
       img.scale(scale);
-      
-      // Center the image
       img.set({
         left: (canvasWidth - img.width! * scale) / 2,
         top: (canvasHeight - img.height! * scale) / 2
@@ -46,9 +42,21 @@ const TextOnPhoto = () => {
   };
 
   const handleCanvasInit = (fabricCanvas: fabric.Canvas) => {
-    console.log('Canvas initialized');
     setCanvas(fabricCanvas);
   };
+
+  if (!imageUploaded) {
+    return (
+      <div className="min-h-screen py-8">
+        <div className="max-w-xl mx-auto px-4">
+          <h1 className="text-4xl font-bold mb-8 text-center">Add Text to Photos</h1>
+          <Card className="p-6">
+            <ImageUploader onImageUploaded={handleImageUploaded} />
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen py-8">
@@ -59,31 +67,23 @@ const TextOnPhoto = () => {
           {/* Controls Panel */}
           <div className="lg:col-span-4 space-y-6">
             <Card className="p-6">
-              <ImageUploader onImageUploaded={handleImageUploaded} />
+              <TextEditor canvas={canvas} />
             </Card>
-
-            {imageUploaded && (
-              <>
-                <Card className="p-6">
-                  <TextEditor canvas={canvas} />
-                </Card>
-                <Card className="p-6">
-                  <FontControls canvas={canvas} />
-                </Card>
-                <Card className="p-6">
-                  <TextAlignmentControls canvas={canvas} />
-                </Card>
-                <Card className="p-6">
-                  <TextControls 
-                    canvas={canvas}
-                    canUndo={false}
-                    canRedo={false}
-                    onUndo={() => {}}
-                    onRedo={() => {}}
-                  />
-                </Card>
-              </>
-            )}
+            <Card className="p-6">
+              <FontControls canvas={canvas} />
+            </Card>
+            <Card className="p-6">
+              <TextAlignmentControls canvas={canvas} />
+            </Card>
+            <Card className="p-6">
+              <TextControls 
+                canvas={canvas}
+                canUndo={false}
+                canRedo={false}
+                onUndo={() => {}}
+                onRedo={() => {}}
+              />
+            </Card>
           </div>
           
           {/* Canvas Area */}
