@@ -1,14 +1,13 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import ImageUploader from "@/components/text-on-photo/ImageUploader";
 import TextEditor from "@/components/text-on-photo/TextEditor";
-import { fabric } from "fabric";
 
 const TextOnPhoto = () => {
-  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
+  const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
   const [hasImage, setHasImage] = useState(false);
 
-  const handleImageUploaded = (newCanvas: fabric.Canvas) => {
+  const handleImageUploaded = (newCanvas: HTMLCanvasElement) => {
     setCanvas(newCanvas);
     setHasImage(true);
   };
@@ -23,17 +22,8 @@ const TextOnPhoto = () => {
       </div>
 
       <Card className="p-6">
-        {!hasImage ? (
-          <ImageUploader onImageUploaded={handleImageUploaded} />
-        ) : (
-          <div className="space-y-6">
-            <div 
-              id="canvas-container" 
-              className="border rounded-lg overflow-hidden bg-[#f8f9fa] w-full flex justify-center items-center min-h-[600px]"
-            />
-            <TextEditor canvas={canvas} />
-          </div>
-        )}
+        <ImageUploader onImageUploaded={handleImageUploaded} />
+        {hasImage && canvas && <TextEditor canvas={canvas} />}
       </Card>
     </div>
   );

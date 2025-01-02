@@ -1,18 +1,57 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
-import { fabric } from "fabric";
 
 interface ImageUploaderProps {
-  onImageUploaded: (canvas: fabric.Canvas) => void;
+  onImageUploaded: (canvas: HTMLCanvasElement) => void;
 }
 
 const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
-  const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [image, setImage] = useState<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    if (image && canvasRef.current) {
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Set canvas dimensions based on image size while maintaining aspect ratio
+      const maxWidth = 800;
+      const maxHeight = 600;
+      let width = image.width;
+      let height = image.height;
+
+      if (width > maxWidth) {
+        const ratio = maxWidth / width;
+        width = maxWidth;
+        height = height * ratio;
+      }
+
+      if (height > maxHeight) {
+        const ratio = maxHeight / height;
+        height = maxHeight;
+        width = width * ratio;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      // Clear canvas
+      ctx.clearRect(0, 0, width, height);
+      
+      // Draw white background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, width, height);
+      
+      // Draw image
+      ctx.drawImage(image, 0, 0, width, height);
+      
+      onImageUploaded(canvas);
+    }
+  }, [image, onImageUploaded]);
 
   const handleImageUpload = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -22,60 +61,18 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      const imgUrl = e.target?.result as string;
-      setPreviewUrl(imgUrl);
-
-      // Clean up existing canvas if it exists
-      if (fabricCanvasRef.current) {
-        fabricCanvasRef.current.dispose();
-      }
-
-      // Clear the container
-      if (canvasContainerRef.current) {
-        canvasContainerRef.current.innerHTML = '<canvas></canvas>';
-      }
-
-      // Get the new canvas element
-      const canvasElement = canvasContainerRef.current?.querySelector('canvas');
-      if (!canvasElement) return;
-
-      // Calculate dimensions
-      const containerWidth = window.innerWidth > 800 ? 800 : window.innerWidth - 40;
-      const containerHeight = 600;
-
-      // Initialize new Fabric canvas
-      const canvas = new fabric.Canvas(canvasElement, {
-        width: containerWidth,
-        height: containerHeight,
-        backgroundColor: '#ffffff'
-      });
-
-      fabricCanvasRef.current = canvas;
-
-      // Load and add image
-      fabric.Image.fromURL(imgUrl, (fabricImg) => {
-        // Scale image to fit canvas while maintaining aspect ratio
-        const scaleX = (containerWidth - 40) / fabricImg.width!;
-        const scaleY = (containerHeight - 40) / fabricImg.height!;
-        const scale = Math.min(scaleX, scaleY);
-
-        fabricImg.scale(scale);
-
-        // Center the image
-        fabricImg.set({
-          left: (containerWidth - fabricImg.width! * scale) / 2,
-          top: (containerHeight - fabricImg.height! * scale) / 2
-        });
-
-        canvas.clear();
-        canvas.add(fabricImg);
-        canvas.renderAll();
-
-        onImageUploaded(canvas);
+      const img = new Image();
+      img.onload = () => {
+        console.log('Image loaded successfully:', img.width, 'x', img.height);
+        setImage(img);
         toast.success('Image uploaded successfully');
-      });
+      };
+      img.onerror = () => {
+        console.error('Error loading image');
+        toast.error('Error loading image');
+      };
+      img.src = e.target?.result as string;
     };
-
     reader.readAsDataURL(file);
   };
 
@@ -101,12 +98,12 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
           </p>
         </div>
       </div>
-      
-      <div 
-        ref={canvasContainerRef}
-        className="min-h-[600px] w-full flex justify-center items-center border rounded-lg overflow-hidden"
-      >
-        <canvas />
+
+      <div className="border rounded-lg overflow-hidden bg-gray-50 flex justify-center items-center min-h-[400px]">
+        <canvas
+          ref={canvasRef}
+          className="max-w-full max-h-[600px] object-contain"
+        />
       </div>
 
       <input
