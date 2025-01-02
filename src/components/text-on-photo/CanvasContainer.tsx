@@ -23,40 +23,16 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
     }
 
     const container = containerRef.current;
-    const containerWidth = container.clientWidth;
-    const containerHeight = Math.min(600, window.innerHeight - 200);
-
-    console.log('Initializing new canvas with dimensions:', containerWidth, 'x', containerHeight);
-
     const canvas = new fabric.Canvas(canvasRef.current, {
-      width: containerWidth,
-      height: containerHeight,
-      backgroundColor: "#ffffff",
+      backgroundColor: 'transparent',
       preserveObjectStacking: true,
     });
 
     canvasInstanceRef.current = canvas;
     onCanvasInit(canvas);
 
-    const handleResize = () => {
-      if (!container) return;
-      
-      const newWidth = container.clientWidth;
-      const newHeight = Math.min(600, window.innerHeight - 200);
-      
-      canvas.setDimensions({
-        width: newWidth,
-        height: newHeight,
-      });
-      
-      canvas.renderAll();
-    };
-
-    window.addEventListener('resize', handleResize);
-
     return () => {
       console.log('Cleaning up canvas');
-      window.removeEventListener('resize', handleResize);
       if (canvasInstanceRef.current) {
         canvasInstanceRef.current.dispose();
         canvasInstanceRef.current = null;
@@ -67,7 +43,7 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
   return (
     <div 
       ref={containerRef}
-      className="border rounded-lg overflow-hidden bg-[#f8f9fa] w-full aspect-[4/3]"
+      className="overflow-hidden bg-transparent w-full"
     >
       <canvas ref={canvasRef} />
     </div>

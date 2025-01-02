@@ -13,7 +13,7 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<fabric.Canvas | null>(null);
 
-  const initCanvas = () => {
+  const initCanvas = (width: number, height: number) => {
     if (!canvasRef.current) return null;
     
     // Clean up existing canvas if it exists
@@ -22,9 +22,9 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
     }
 
     const canvas = new fabric.Canvas(canvasRef.current, {
-      width: 800,
-      height: 600,
-      backgroundColor: '#ffffff'
+      width,
+      height,
+      backgroundColor: 'transparent'
     });
 
     setFabricCanvas(canvas);
@@ -39,43 +39,34 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      const canvas = initCanvas();
-      if (!canvas) return;
+      // Create a temporary image to get the natural dimensions
+      const img = new Image();
+      img.onload = () => {
+        const naturalWidth = img.naturalWidth;
+        const naturalHeight = img.naturalHeight;
+        
+        // Initialize canvas with natural image dimensions
+        const canvas = initCanvas(naturalWidth, naturalHeight);
+        if (!canvas) return;
 
-      fabric.Image.fromURL(e.target?.result as string, (img) => {
-        // Scale image to fit canvas while maintaining aspect ratio
-        const maxWidth = 800;
-        const maxHeight = 600;
-        let width = img.width || 0;
-        let height = img.height || 0;
+        fabric.Image.fromURL(e.target?.result as string, (fabricImg) => {
+          fabricImg.set({
+            scaleX: 1,
+            scaleY: 1,
+            left: 0,
+            top: 0,
+            originX: 'left',
+            originY: 'top'
+          });
 
-        if (width > maxWidth) {
-          const ratio = maxWidth / width;
-          width = maxWidth;
-          height = height * ratio;
-        }
-
-        if (height > maxHeight) {
-          const ratio = maxHeight / height;
-          height = maxHeight;
-          width = width * ratio;
-        }
-
-        img.set({
-          scaleX: width / (img.width || 1),
-          scaleY: height / (img.height || 1),
-          left: (canvas.width || 0) / 2,
-          top: (canvas.height || 0) / 2,
-          originX: 'center',
-          originY: 'center'
-        });
-
-        canvas.clear();
-        canvas.add(img);
-        canvas.renderAll();
-        onImageUploaded(canvas);
-        toast.success('Image uploaded successfully');
-      }, { crossOrigin: 'anonymous' });
+          canvas.clear();
+          canvas.add(fabricImg);
+          canvas.renderAll();
+          onImageUploaded(canvas);
+          toast.success('Image uploaded successfully');
+        }, { crossOrigin: 'anonymous' });
+      };
+      img.src = e.target?.result as string;
     };
     reader.readAsDataURL(file);
   };
@@ -103,10 +94,10 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
         </div>
       </div>
 
-      <div className="border rounded-lg overflow-hidden bg-gray-50 flex justify-center items-center min-h-[400px]">
+      <div className="border rounded-lg overflow-hidden bg-gray-50">
         <canvas
           ref={canvasRef}
-          className="max-w-full max-h-[600px] object-contain"
+          className="max-w-full h-auto"
         />
       </div>
 

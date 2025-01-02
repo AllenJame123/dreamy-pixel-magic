@@ -34,12 +34,18 @@ const TextEditor = ({ canvas }: TextEditorProps) => {
     if (!canvas) return;
     
     try {
+      // Get the canvas data with transparent background
+      const dataURL = canvas.toDataURL({
+        format: 'png',
+        quality: 1,
+        multiplier: 1, // Maintain original resolution
+        withoutTransform: false,
+        enableRetinaScaling: true,
+      });
+
       const link = document.createElement('a');
       link.download = 'text-on-photo.png';
-      link.href = canvas.toDataURL({
-        format: 'png',
-        quality: 1
-      });
+      link.href = dataURL;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
