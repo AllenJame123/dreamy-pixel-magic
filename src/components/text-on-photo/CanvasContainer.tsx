@@ -34,11 +34,13 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
     const initialWidth = container.clientWidth;
     const initialHeight = Math.min(600, window.innerHeight - 200); // Reasonable max height
 
+    // Only initialize canvas once
     if (!fabricCanvasRef.current) {
       fabricCanvasRef.current = new fabric.Canvas(canvasRef.current, {
         width: initialWidth,
         height: initialHeight,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        preserveObjectStacking: true
       });
       onCanvasInit(fabricCanvasRef.current);
     }

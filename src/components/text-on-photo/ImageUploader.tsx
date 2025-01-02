@@ -18,20 +18,29 @@ const ImageUploader = ({ canvas, saveState }: ImageUploaderProps) => {
       if (!e.target?.result) return;
       
       fabric.Image.fromURL(e.target.result.toString(), (img) => {
-        if (!img) {
+        if (!canvas || !img) {
           toast.error("Failed to load image");
           return;
         }
 
-        // Clear existing objects but keep the canvas instance
-        canvas.remove(...canvas.getObjects());
+        // Remove existing objects but keep the canvas instance
+        canvas.getObjects().forEach(obj => canvas.remove(obj));
         
-        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-          scaleX: canvas.width! / img.width!,
-          scaleY: canvas.height! / img.height!,
-          selectable: false
+        // Calculate scaling to fit the image within the canvas
+        const scaleX = canvas.width! / img.width!;
+        const scaleY = canvas.height! / img.height!;
+        const scale = Math.min(scaleX, scaleY);
+        
+        img.scale(scale);
+        img.set({
+          left: (canvas.width! - img.width! * scale) / 2,
+          top: (canvas.height! - img.height! * scale) / 2,
+          selectable: false,
+          evented: false
         });
         
+        canvas.add(img);
+        canvas.renderAll();
         saveState();
         toast.success("Image uploaded successfully");
       });
