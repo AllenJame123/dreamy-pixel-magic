@@ -17,33 +17,37 @@ const ImageUploader = ({ canvas, saveState }: ImageUploaderProps) => {
     reader.onload = (e) => {
       if (!e.target?.result) return;
       
-      fabric.Image.fromURL(e.target.result.toString(), (img) => {
-        if (!canvas || !img) {
-          toast.error("Failed to load image");
-          return;
-        }
+      // Create a new image object
+      const img = new Image();
+      img.onload = () => {
+        if (!canvas) return;
 
         // Remove existing objects but keep the canvas instance
         canvas.getObjects().forEach(obj => canvas.remove(obj));
         
-        // Calculate scaling to fit the image within the canvas
-        const scaleX = canvas.width! / img.width!;
-        const scaleY = canvas.height! / img.height!;
-        const scale = Math.min(scaleX, scaleY);
-        
-        img.scale(scale);
-        img.set({
-          left: (canvas.width! - img.width! * scale) / 2,
-          top: (canvas.height! - img.height! * scale) / 2,
+        // Create fabric image
+        const fabricImage = new fabric.Image(img, {
           selectable: false,
           evented: false
         });
+
+        // Calculate scaling to fit the image within the canvas
+        const scaleX = canvas.width! / fabricImage.width!;
+        const scaleY = canvas.height! / fabricImage.height!;
+        const scale = Math.min(scaleX, scaleY);
         
-        canvas.add(img);
-        canvas.renderAll();
+        fabricImage.scale(scale);
+        fabricImage.set({
+          left: (canvas.width! - fabricImage.width! * scale) / 2,
+          top: (canvas.height! - fabricImage.height! * scale) / 2
+        });
+        
+        canvas.add(fabricImage);
+        canvas.requestRenderAll();
         saveState();
         toast.success("Image uploaded successfully");
-      });
+      };
+      img.src = e.target.result.toString();
     };
     reader.readAsDataURL(file);
   }, [canvas, saveState]);
