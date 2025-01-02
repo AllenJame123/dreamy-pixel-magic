@@ -10,9 +10,9 @@ const TextOnPhoto = () => {
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [hasImage, setHasImage] = useState(false);
 
-  const handleImageUploaded = (fabricCanvas: fabric.Canvas) => {
-    setCanvas(fabricCanvas);
+  const handleImageUploaded = (imageUrl: string) => {
     setHasImage(true);
+    // We'll implement Fabric.js functionality here later
   };
 
   return (

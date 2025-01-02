@@ -2,36 +2,14 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
-import { fabric } from "fabric";
 
 interface ImageUploaderProps {
-  onImageUploaded: (canvas: fabric.Canvas) => void;
+  onImageUploaded: (imageUrl: string) => void;
 }
 
 const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [fabricCanvas, setFabricCanvas] = useState<fabric.Canvas | null>(null);
-  const [hasImage, setHasImage] = useState(false);
-
-  const initCanvas = (width: number, height: number) => {
-    if (!canvasRef.current) return null;
-    
-    // Dispose of existing canvas if it exists
-    if (fabricCanvas) {
-      fabricCanvas.dispose();
-    }
-
-    const canvas = new fabric.Canvas(canvasRef.current, {
-      width,
-      height,
-      backgroundColor: 'transparent',
-      preserveObjectStacking: true
-    });
-
-    setFabricCanvas(canvas);
-    return canvas;
-  };
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   const handleImageUpload = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -41,64 +19,17 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const maxWidth = 800;
-        const maxHeight = 600;
-        
-        let width = img.width;
-        let height = img.height;
-        
-        // Scale down the image if it's too large
-        if (width > maxWidth || height > maxHeight) {
-          const ratio = Math.min(maxWidth / width, maxHeight / height);
-          width = Math.floor(width * ratio);
-          height = Math.floor(height * ratio);
-        }
-        
-        const canvas = initCanvas(width, height);
-        if (!canvas) return;
-
-        // Create fabric image object
-        fabric.Image.fromURL(e.target?.result as string, (fabricImg) => {
-          // Set canvas size to match image
-          canvas.setDimensions({
-            width: width,
-            height: height
-          });
-
-          // Scale image to fit canvas
-          fabricImg.scaleToWidth(width);
-          fabricImg.scaleToHeight(height);
-          
-          // Position image
-          fabricImg.set({
-            left: 0,
-            top: 0,
-            originX: 'left',
-            originY: 'top',
-            selectable: false,
-            evented: false
-          });
-
-          // Clear canvas and add image
-          canvas.clear();
-          canvas.add(fabricImg);
-          canvas.renderAll();
-          
-          onImageUploaded(canvas);
-          setHasImage(true);
-          toast.success('Image uploaded successfully');
-        });
-      };
-      img.src = e.target?.result as string;
+      const imageDataUrl = e.target?.result as string;
+      setImageUrl(imageDataUrl);
+      onImageUploaded(imageDataUrl);
+      toast.success('Image uploaded successfully');
     };
     reader.readAsDataURL(file);
   };
 
   return (
     <div className="space-y-4">
-      {!hasImage ? (
+      {!imageUrl ? (
         <div 
           className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer"
           onClick={() => fileInputRef.current?.click()}
@@ -122,10 +53,11 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
           </div>
         </div>
       ) : (
-        <div className="border rounded-lg overflow-hidden bg-transparent">
-          <canvas
-            ref={canvasRef}
-            style={{ width: '100%', height: 'auto', display: 'block' }}
+        <div className="border rounded-lg overflow-hidden">
+          <img 
+            src={imageUrl} 
+            alt="Uploaded image"
+            className="w-full h-auto object-contain"
           />
         </div>
       )}
