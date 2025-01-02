@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { fabric } from "fabric";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
@@ -10,7 +10,6 @@ interface ImageUploaderProps {
 
 const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
 
   const handleImageUpload = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -19,110 +18,73 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
     }
 
     const reader = new FileReader();
-    reader.onload = (event) => {
-      // Create a new image element
+    reader.onload = () => {
       const img = new Image();
       img.onload = () => {
-        // Get container
-        const container = document.getElementById('canvas-container');
-        if (!container) {
-          console.error('Canvas container not found');
-          return;
-        }
-
-        // Clear previous content
-        container.innerHTML = '';
-
-        // Create canvas element
+        // Create a new canvas element
         const canvasEl = document.createElement('canvas');
-        container.appendChild(canvasEl);
-
-        // Calculate dimensions
-        const maxWidth = container.clientWidth;
-        const maxHeight = 600;
+        canvasEl.id = 'fabric-canvas';
         
-        // Initialize Fabric canvas
+        // Set initial dimensions
+        const containerWidth = window.innerWidth > 800 ? 800 : window.innerWidth - 40;
+        const containerHeight = 600;
+        
+        // Initialize fabric canvas
         const canvas = new fabric.Canvas(canvasEl, {
-          width: maxWidth,
-          height: maxHeight,
+          width: containerWidth,
+          height: containerHeight,
           backgroundColor: '#ffffff'
         });
 
         // Create fabric image
         const fabricImage = new fabric.Image(img);
         
-        // Calculate scale to fit
-        const scale = Math.min(
-          (maxWidth - 40) / fabricImage.width!,
-          (maxHeight - 40) / fabricImage.height!
-        );
-
-        // Set image properties
+        // Scale image to fit canvas
+        const scaleX = (containerWidth - 40) / fabricImage.width!;
+        const scaleY = (containerHeight - 40) / fabricImage.height!;
+        const scale = Math.min(scaleX, scaleY);
+        
         fabricImage.scale(scale);
+        
+        // Center the image
         fabricImage.set({
-          left: (maxWidth - fabricImage.width! * scale) / 2,
-          top: (maxHeight - fabricImage.height! * scale) / 2
+          left: (containerWidth - fabricImage.width! * scale) / 2,
+          top: (containerHeight - fabricImage.height! * scale) / 2
         });
 
-        // Add image to canvas
+        // Add to canvas
         canvas.add(fabricImage);
         canvas.renderAll();
 
-        // Notify parent
+        // Clear previous canvas if exists
+        const container = document.getElementById('canvas-container');
+        if (container) {
+          container.innerHTML = '';
+          container.appendChild(canvasEl);
+        }
+
         onImageUploaded(canvas);
         toast.success('Image uploaded successfully');
       };
-
-      // Set image source
-      img.src = event.target?.result as string;
+      img.src = reader.result as string;
     };
-
     reader.readAsDataURL(file);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      handleImageUpload(file);
-    }
-  };
-
   return (
-    <div
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-        isDragging ? "border-primary bg-primary/5" : "border-gray-200"
-      }`}
-    >
+    <div className="border-2 border-dashed rounded-lg p-8 text-center">
       <div className="space-y-4">
         <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
           <Upload className="w-6 h-6 text-primary" />
         </div>
         <div>
-          <p className="text-sm font-medium">
-            Drag and drop your image here, or
-          </p>
+          <p className="text-sm font-medium">Click to upload an image</p>
           <Button
             onClick={() => fileInputRef.current?.click()}
             variant="link"
             className="text-primary"
           >
-            click to browse
+            Browse files
           </Button>
         </div>
         <p className="text-xs text-muted-foreground">
