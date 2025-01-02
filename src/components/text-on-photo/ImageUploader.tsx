@@ -73,30 +73,30 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
 
   return (
     <div className="space-y-4">
-      <div 
-        className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer"
-        onClick={() => fileInputRef.current?.click()}
-      >
-        <div className="space-y-4">
-          <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-            <Upload className="w-6 h-6 text-primary" />
+      {!hasImage ? (
+        <div 
+          className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <div className="space-y-4">
+            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Upload className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-medium">Click to upload an image</p>
+              <Button
+                variant="link"
+                className="text-primary"
+              >
+                Browse files
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Supports: JPG, PNG
+            </p>
           </div>
-          <div>
-            <p className="text-sm font-medium">Click to upload an image</p>
-            <Button
-              variant="link"
-              className="text-primary"
-            >
-              Browse files
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Supports: JPG, PNG
-          </p>
         </div>
-      </div>
-
-      {hasImage && (
+      ) : (
         <div className="border rounded-lg overflow-hidden bg-transparent">
           <canvas
             ref={canvasRef}
