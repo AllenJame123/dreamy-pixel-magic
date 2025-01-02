@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -6,9 +6,11 @@ import { fabric } from "fabric";
 import { toast } from "sonner";
 import ImageUploader from "@/components/text-on-photo/ImageUploader";
 import CanvasControls from "@/components/text-on-photo/CanvasControls";
+import CanvasContainer from "@/components/text-on-photo/CanvasContainer";
 
 const TextOnPhoto = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
@@ -41,24 +43,10 @@ const TextOnPhoto = () => {
     toast.success("Text added successfully!");
   }, [canvas, saveState]);
 
-  useEffect(() => {
-    if (!canvasRef.current) return;
-    
-    const fabricCanvas = new fabric.Canvas(canvasRef.current, {
-      width: 800,
-      height: 500,
-      preserveObjectStacking: true
-    });
-    
+  const handleCanvasInit = useCallback((fabricCanvas: fabric.Canvas) => {
     setCanvas(fabricCanvas);
-    
-    fabricCanvas.on('mouse:down', () => {
-      saveState();
-    });
-
-    return () => {
-      fabricCanvas.dispose();
-    };
+    fabricCanvas.on('object:modified', saveState);
+    fabricCanvas.on('object:added', saveState);
   }, [saveState]);
 
   return (
@@ -70,7 +58,11 @@ const TextOnPhoto = () => {
           <div className="space-y-4">
             <ImageUploader canvas={canvas} saveState={saveState} />
 
-            <canvas ref={canvasRef} className="border border-gray-200 rounded-lg w-full" />
+            <CanvasContainer 
+              canvasRef={canvasRef}
+              containerRef={containerRef}
+              onCanvasInit={handleCanvasInit}
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
