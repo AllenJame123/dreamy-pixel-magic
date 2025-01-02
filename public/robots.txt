@@ -1,7 +1,4 @@
 User-agent: *
-Disallow: /admin/
-Disallow: /login/
-Disallow: /wp-admin/
 Allow: /
 
 Sitemap: https://www.aiimagegenerator.site/sitemap.xml
