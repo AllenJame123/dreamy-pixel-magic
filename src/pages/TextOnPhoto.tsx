@@ -1,104 +1,154 @@
-import { useRef, useState } from "react";
-import { Card } from "@/components/ui/card";
-import ImageUploader from "@/components/text-on-photo/ImageUploader";
-import TextEditor from "@/components/text-on-photo/TextEditor";
-import FontControls from "@/components/text-on-photo/FontControls";
-import TextAlignmentControls from "@/components/text-on-photo/TextAlignmentControls";
-import TextControls from "@/components/text-on-photo/TextControls";
-import CanvasContainer from "@/components/text-on-photo/CanvasContainer";
+import { useState, useRef } from "react";
 import { fabric } from "fabric";
-import HowItWorks from "@/components/text-on-photo/HowItWorks";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { Card } from "@/components/ui/card";
 
 const TextOnPhoto = () => {
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
+  const [text, setText] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [imageUploaded, setImageUploaded] = useState(false);
 
-  const handleCanvasInit = (fabricCanvas: fabric.Canvas) => {
-    console.log('Canvas initialized');
-    setCanvas(fabricCanvas);
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (!canvasRef.current) return;
+
+      // Initialize canvas if not already done
+      if (!canvas) {
+        const newCanvas = new fabric.Canvas(canvasRef.current, {
+          width: 800,
+          height: 600,
+        });
+        setCanvas(newCanvas);
+      }
+
+      // Load the image
+      fabric.Image.fromURL(e.target?.result as string, (img) => {
+        if (!canvas) return;
+        
+        // Scale image to fit canvas
+        const scale = Math.min(
+          800 / img.width!,
+          600 / img.height!
+        );
+        
+        img.scale(scale);
+        
+        // Center the image
+        img.set({
+          left: (800 - img.width! * scale) / 2,
+          top: (600 - img.height! * scale) / 2
+        });
+
+        canvas.clear();
+        canvas.add(img);
+        canvas.renderAll();
+        toast.success("Image uploaded successfully!");
+      });
+    };
+    reader.readAsDataURL(file);
   };
 
-  const handleImageUploaded = (imageUrl: string) => {
-    if (!canvas) return;
-    
-    fabric.Image.fromURL(imageUrl, (img) => {
-      canvas.clear();
-      
-      // Calculate scaling to fit the canvas while maintaining aspect ratio
-      const canvasWidth = canvas.width!;
-      const canvasHeight = canvas.height!;
-      const scale = Math.min(
-        canvasWidth / img.width!,
-        canvasHeight / img.height!
-      );
+  const addText = () => {
+    if (!canvas || !text.trim()) {
+      toast.error("Please enter some text first!");
+      return;
+    }
 
-      img.scale(scale);
-      img.set({
-        left: (canvasWidth - img.width! * scale) / 2,
-        top: (canvasHeight - img.height! * scale) / 2
+    const fabricText = new fabric.IText(text, {
+      left: canvas.width! / 2,
+      top: canvas.height! / 2,
+      fontSize: 40,
+      fill: '#000000',
+      fontFamily: 'Arial',
+      originX: 'center',
+      originY: 'center',
+      editable: true
+    });
+
+    canvas.add(fabricText);
+    canvas.setActiveObject(fabricText);
+    canvas.renderAll();
+    setText("");
+    toast.success("Text added! You can now drag, resize, and edit it directly on the image.");
+  };
+
+  const handleDownload = () => {
+    if (!canvas) {
+      toast.error("Please add an image first!");
+      return;
+    }
+    
+    try {
+      const dataURL = canvas.toDataURL({
+        format: 'png',
+        quality: 1
       });
 
-      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-      setImageUploaded(true);
-    });
+      const link = document.createElement('a');
+      link.download = 'text-on-photo.png';
+      link.href = dataURL;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Image downloaded successfully!");
+    } catch (error) {
+      toast.error("Failed to download image");
+      console.error("Download error:", error);
+    }
   };
 
   return (
-    <div className="min-h-screen py-8 bg-gray-50">
-      <div className="container mx-auto px-4">
-        <h1 className="text-4xl font-bold mb-8 text-center">Add Text to Photos</h1>
-        
-        <div className="max-w-4xl mx-auto">
-          {!imageUploaded ? (
-            <>
-              <HowItWorks />
-              <div className="mt-8">
-                <Card className="p-6">
-                  <ImageUploader onImageUploaded={handleImageUploaded} />
-                </Card>
-              </div>
-            </>
-          ) : (
-            <div className="space-y-6">
-              {/* Text Editor - Always at the top */}
-              <Card className="p-6">
-                <TextEditor canvas={canvas} />
-              </Card>
-
-              {/* Canvas Area */}
-              <Card className="p-6">
-                <div className="aspect-video">
-                  <CanvasContainer
-                    canvasRef={canvasRef}
-                    containerRef={containerRef}
-                    onCanvasInit={handleCanvasInit}
-                  />
-                </div>
-              </Card>
-
-              {/* Controls */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="p-4">
-                  <FontControls canvas={canvas} />
-                </Card>
-                <Card className="p-4">
-                  <TextAlignmentControls canvas={canvas} />
-                </Card>
-                <Card className="p-4">
-                  <TextControls 
-                    canvas={canvas}
-                    canUndo={false}
-                    canRedo={false}
-                    onUndo={() => {}}
-                    onRedo={() => {}}
-                  />
-                </Card>
-              </div>
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <Card className="p-6">
+          <div className="space-y-4">
+            <div className="flex gap-4">
+              <Input
+                type="text"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Type your text here..."
+                className="flex-grow text-lg"
+              />
+              <Button onClick={addText} size="lg">
+                Add Text
+              </Button>
+              <Button onClick={handleDownload} variant="outline" size="lg">
+                Download
+              </Button>
             </div>
-          )}
-        </div>
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+            
+            <Button 
+              onClick={() => fileInputRef.current?.click()}
+              variant="outline"
+              className="w-full h-16"
+            >
+              Click to Upload Image
+            </Button>
+          </div>
+        </Card>
+
+        <Card className="p-6 bg-white">
+          <canvas 
+            ref={canvasRef}
+            className="w-full max-w-4xl mx-auto border rounded-lg"
+          />
+        </Card>
       </div>
     </div>
   );
