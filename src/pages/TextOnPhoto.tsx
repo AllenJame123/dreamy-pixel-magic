@@ -16,6 +16,11 @@ const TextOnPhoto = () => {
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
 
+  const handleCanvasInit = (fabricCanvas: fabric.Canvas) => {
+    console.log('Canvas initialized');
+    setCanvas(fabricCanvas);
+  };
+
   const handleImageUploaded = (imageUrl: string) => {
     if (!canvas) {
       console.error('Canvas not initialized');
@@ -43,13 +48,8 @@ const TextOnPhoto = () => {
     });
   };
 
-  const handleCanvasInit = (fabricCanvas: fabric.Canvas) => {
-    console.log('Canvas initialized');
-    setCanvas(fabricCanvas);
-  };
-
   return (
-    <div className="min-h-screen py-8">
+    <div className="min-h-screen py-8 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
         <h1 className="text-4xl font-bold mb-8 text-center">Add Text to Photos</h1>
         
