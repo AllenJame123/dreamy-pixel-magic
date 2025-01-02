@@ -44,11 +44,31 @@
   .shimmer {
     @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent;
   }
+
+  /* Add responsive padding for mobile */
+  @media (max-width: 640px) {
+    .container {
+      @apply px-4;
+    }
+  }
+
+  /* Improve text readability on mobile */
+  @media (max-width: 640px) {
+    h1 {
+      @apply text-3xl;
+    }
+    h2 {
+      @apply text-2xl;
+    }
+    p {
+      @apply text-base;
+    }
+  }
 }
 
 @layer components {
   .blog-content {
-    @apply max-w-4xl mx-auto leading-relaxed;
+    @apply max-w-4xl mx-auto leading-relaxed px-4 sm:px-0;
   }
 
   .blog-content h2 {
@@ -66,10 +86,21 @@
   }
 
   .blog-content article {
-    @apply py-8 px-4 sm:px-6 lg:px-8;
+    @apply py-8;
   }
 
   .blog-title {
     @apply text-4xl font-bold tracking-tight text-gray-900 font-serif;
+  }
+
+  /* Responsive card grid */
+  .card-grid {
+    @apply grid gap-6;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  /* Responsive image container */
+  .responsive-image {
+    @apply w-full h-auto object-cover rounded-lg;
   }
 }
