@@ -1,152 +1,143 @@
-import { useState, useRef } from "react";
-import { fabric } from "fabric";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import { useRef, useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
 const TextOnPhoto = () => {
-  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
-  const [text, setText] = useState("");
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
+  const [uploadedImage, setUploadedImage] = useState<HTMLImageElement | null>(null);
+  
+  useEffect(() => {
+    if (canvasRef.current) {
+      const context = canvasRef.current.getContext('2d');
+      setCtx(context);
+    }
+  }, []);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file || !canvasRef.current || !ctx) return;
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      if (!canvasRef.current) return;
-
-      // Initialize canvas if not already done
-      if (!canvas) {
-        const newCanvas = new fabric.Canvas(canvasRef.current, {
-          width: 800,
-          height: 600,
-        });
-        setCanvas(newCanvas);
-      }
-
-      // Load the image
-      fabric.Image.fromURL(e.target?.result as string, (img) => {
-        if (!canvas) return;
-        
-        // Scale image to fit canvas
-        const scale = Math.min(
-          800 / img.width!,
-          600 / img.height!
-        );
-        
-        img.scale(scale);
-        
-        // Center the image
-        img.set({
-          left: (800 - img.width! * scale) / 2,
-          top: (600 - img.height! * scale) / 2
-        });
-
-        canvas.clear();
-        canvas.add(img);
-        canvas.renderAll();
+      const img = new Image();
+      img.onload = () => {
+        canvasRef.current!.width = img.width;
+        canvasRef.current!.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        setUploadedImage(img);
         toast.success("Image uploaded successfully!");
-      });
+      };
+      img.src = e.target.result as string;
     };
     reader.readAsDataURL(file);
   };
 
   const addText = () => {
-    if (!canvas || !text.trim()) {
-      toast.error("Please enter some text first!");
+    if (!ctx || !uploadedImage) {
+      toast.error("Please upload an image first!");
       return;
     }
 
-    const fabricText = new fabric.IText(text, {
-      left: canvas.width! / 2,
-      top: canvas.height! / 2,
-      fontSize: 40,
-      fill: '#000000',
-      fontFamily: 'Arial',
-      originX: 'center',
-      originY: 'center',
-      editable: true
-    });
+    const text = (document.getElementById('textInput') as HTMLInputElement).value;
+    const font = (document.getElementById('fontSelect') as HTMLSelectElement).value;
+    const size = (document.getElementById('fontSize') as HTMLInputElement).value + 'px';
+    const color = (document.getElementById('fontColor') as HTMLInputElement).value;
 
-    canvas.add(fabricText);
-    canvas.setActiveObject(fabricText);
-    canvas.renderAll();
-    setText("");
-    toast.success("Text added! You can now drag, resize, and edit it directly on the image.");
+    // Redraw the original image
+    ctx.drawImage(uploadedImage, 0, 0);
+
+    // Add the new text
+    ctx.font = `${size} ${font}`;
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.fillText(text, canvasRef.current!.width / 2, canvasRef.current!.height / 2);
+    
+    toast.success("Text added successfully!");
   };
 
-  const handleDownload = () => {
-    if (!canvas) {
-      toast.error("Please add an image first!");
+  const downloadImage = () => {
+    if (!canvasRef.current) {
+      toast.error("No image to download!");
       return;
     }
-    
-    try {
-      const dataURL = canvas.toDataURL({
-        format: 'png',
-        quality: 1
-      });
 
-      const link = document.createElement('a');
-      link.download = 'text-on-photo.png';
-      link.href = dataURL;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      toast.success("Image downloaded successfully!");
-    } catch (error) {
-      toast.error("Failed to download image");
-      console.error("Download error:", error);
-    }
+    const link = document.createElement('a');
+    link.download = 'edited-image.png';
+    link.href = canvasRef.current.toDataURL('image/png');
+    link.click();
+    toast.success("Image downloaded successfully!");
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-4xl mx-auto space-y-6">
         <Card className="p-6">
+          <h1 className="text-2xl font-bold mb-6 text-center">Add Text to Photo</h1>
+          
           <div className="space-y-4">
-            <div className="flex gap-4">
+            <Input
+              type="file"
+              onChange={handleImageUpload}
+              accept="image/*"
+              className="w-full"
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
+                id="textInput"
                 type="text"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Type your text here..."
-                className="flex-grow text-lg"
+                placeholder="Enter text"
+                className="w-full"
               />
-              <Button onClick={addText} size="lg">
+
+              <Select id="fontSelect" defaultValue="Arial">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select font" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Arial">Arial</SelectItem>
+                  <SelectItem value="Courier New">Courier New</SelectItem>
+                  <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Input
+                id="fontSize"
+                type="number"
+                defaultValue="20"
+                placeholder="Font Size"
+                className="w-full"
+              />
+
+              <Input
+                id="fontColor"
+                type="color"
+                defaultValue="#000000"
+                className="w-full h-10"
+              />
+            </div>
+
+            <div className="flex gap-4">
+              <Button onClick={addText} className="flex-1">
                 Add Text
               </Button>
-              <Button onClick={handleDownload} variant="outline" size="lg">
-                Download
+              <Button onClick={downloadImage} variant="outline" className="flex-1">
+                Download Image
               </Button>
             </div>
-            
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-            
-            <Button 
-              onClick={() => fileInputRef.current?.click()}
-              variant="outline"
-              className="w-full h-16"
-            >
-              Click to Upload Image
-            </Button>
           </div>
         </Card>
 
         <Card className="p-6 bg-white">
           <canvas 
             ref={canvasRef}
-            className="w-full max-w-4xl mx-auto border rounded-lg"
+            className="max-w-full mx-auto border rounded-lg"
+            width="800"
+            height="500"
           />
         </Card>
       </div>
