@@ -21,7 +21,7 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
       fabricCanvas.dispose();
     }
 
-    const canvas = new FabricCanvas(canvasRef.current, {
+    const canvas = new fabric.Canvas(canvasRef.current, {
       width,
       height,
       backgroundColor: 'transparent'
