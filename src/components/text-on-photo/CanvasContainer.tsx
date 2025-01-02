@@ -16,17 +16,17 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
       return;
     }
 
+    // If canvas is already initialized, skip
     if (canvasInstanceRef.current) {
       console.log('Canvas already initialized, skipping');
       return;
     }
 
-    console.log('Initializing canvas');
     const container = containerRef.current;
     const containerWidth = container.clientWidth;
     const containerHeight = Math.min(600, window.innerHeight - 200);
 
-    console.log('Canvas dimensions:', containerWidth, 'x', containerHeight);
+    console.log('Initializing new canvas with dimensions:', containerWidth, 'x', containerHeight);
 
     const canvas = new fabric.Canvas(canvasRef.current, {
       width: containerWidth,
@@ -36,17 +36,6 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
     });
 
     canvasInstanceRef.current = canvas;
-
-    // Enable text editing on double click
-    canvas.on('mouse:dblclick', (options) => {
-      if (options.target && options.target.type === 'i-text') {
-        const textObject = options.target as fabric.IText;
-        textObject.enterEditing();
-        textObject.selectAll();
-      }
-    });
-
-    console.log('Canvas initialized successfully');
     onCanvasInit(canvas);
 
     const handleResize = () => {
@@ -54,8 +43,6 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
       
       const newWidth = container.clientWidth;
       const newHeight = Math.min(600, window.innerHeight - 200);
-      
-      console.log('Resizing canvas to:', newWidth, 'x', newHeight);
       
       canvas.setDimensions({
         width: newWidth,
@@ -82,7 +69,7 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
       ref={containerRef}
       className="border rounded-lg overflow-hidden bg-[#f8f9fa] w-full aspect-[4/3]"
     >
-      <canvas ref={canvasRef} className="max-w-full" />
+      <canvas ref={canvasRef} />
     </div>
   );
 };

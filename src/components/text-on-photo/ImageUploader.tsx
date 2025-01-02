@@ -24,91 +24,53 @@ const ImageUploader = ({ canvas }: ImageUploaderProps) => {
       return;
     }
 
-    console.log('Starting image upload process for file:', file.name);
-
     const reader = new FileReader();
     reader.onload = (e) => {
-      console.log('FileReader loaded successfully');
-      
+      if (!e.target?.result) {
+        toast.error('Failed to read image file');
+        return;
+      }
+
       const imgElement = new Image();
-      imgElement.crossOrigin = "anonymous";
-      
       imgElement.onload = () => {
-        console.log('Image loaded successfully, dimensions:', imgElement.width, 'x', imgElement.height);
-        
-        try {
-          // Create a temporary canvas to handle the image
-          const tempCanvas = document.createElement('canvas');
-          const ctx = tempCanvas.getContext('2d');
-          if (!ctx) {
-            throw new Error('Could not get canvas context');
-          }
+        // Create a fabric image directly from the loaded image element
+        const fabricImage = new fabric.Image(imgElement, {
+          left: 0,
+          top: 0,
+          selectable: true,
+          hasControls: true,
+        });
 
-          // Set dimensions
-          tempCanvas.width = imgElement.width;
-          tempCanvas.height = imgElement.height;
+        // Calculate scaling to fit the canvas while maintaining aspect ratio
+        const canvasWidth = canvas.width!;
+        const canvasHeight = canvas.height!;
+        const scaleX = canvasWidth / imgElement.width;
+        const scaleY = canvasHeight / imgElement.height;
+        const scale = Math.min(scaleX, scaleY);
 
-          // Draw image to temp canvas
-          ctx.drawImage(imgElement, 0, 0);
+        fabricImage.scale(scale);
 
-          // Create fabric image from temp canvas
-          fabric.Image.fromURL(tempCanvas.toDataURL('image/png'), (fabricImage) => {
-            // Calculate dimensions to fit the canvas while maintaining aspect ratio
-            const canvasWidth = canvas.width!;
-            const canvasHeight = canvas.height!;
-            const imgAspectRatio = imgElement.width / imgElement.height;
-            const canvasAspectRatio = canvasWidth / canvasHeight;
-            
-            let scaledWidth, scaledHeight;
-            
-            if (imgAspectRatio > canvasAspectRatio) {
-              // Image is wider than canvas (relative to height)
-              scaledWidth = canvasWidth;
-              scaledHeight = canvasWidth / imgAspectRatio;
-            } else {
-              // Image is taller than canvas (relative to width)
-              scaledHeight = canvasHeight;
-              scaledWidth = canvasHeight * imgAspectRatio;
-            }
-            
-            console.log('Scaling image to:', scaledWidth, 'x', scaledHeight);
-            
-            // Set the image dimensions
-            fabricImage.scaleToWidth(scaledWidth);
-            fabricImage.scaleToHeight(scaledHeight);
-            
-            // Center the image on canvas
-            fabricImage.set({
-              left: (canvasWidth - scaledWidth) / 2,
-              top: (canvasHeight - scaledHeight) / 2,
-              selectable: true,
-              hasControls: true,
-              backgroundColor: undefined // Remove any background color
-            });
+        // Center the image
+        fabricImage.left = (canvasWidth - imgElement.width * scale) / 2;
+        fabricImage.top = (canvasHeight - imgElement.height * scale) / 2;
 
-            canvas.clear();
-            canvas.add(fabricImage);
-            canvas.renderAll();
-            
-            console.log('Image added to canvas successfully');
-            toast.success('Image uploaded successfully!');
-          }, { crossOrigin: 'anonymous' });
-        } catch (error) {
-          console.error('Error creating fabric image:', error);
-          toast.error('Failed to process image. Please try again.');
-        }
+        // Clear canvas and add the new image
+        canvas.clear();
+        canvas.add(fabricImage);
+        canvas.renderAll();
+
+        toast.success('Image uploaded successfully!');
       };
 
-      imgElement.onerror = (error) => {
-        console.error('Error loading image:', error);
+      imgElement.onerror = () => {
         toast.error('Failed to load image. Please try again.');
       };
 
-      imgElement.src = e.target?.result as string;
+      // Set source after defining handlers
+      imgElement.src = e.target.result as string;
     };
 
-    reader.onerror = (error) => {
-      console.error('Error reading file:', error);
+    reader.onerror = () => {
       toast.error('Failed to read image file. Please try again.');
     };
 
