@@ -11,7 +11,8 @@ interface ImageUploaderProps {
 const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const canvasRef = useRef<fabric.Canvas | null>(null);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
+  const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
 
   const handleImageUpload = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -24,52 +25,55 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
       const imgUrl = e.target?.result as string;
       setPreviewUrl(imgUrl);
 
-      // Create a new image object
-      const img = new Image();
-      img.onload = () => {
-        // Calculate container dimensions
-        const containerWidth = window.innerWidth > 800 ? 800 : window.innerWidth - 40;
-        const containerHeight = 600;
+      // Clean up existing canvas if it exists
+      if (fabricCanvasRef.current) {
+        fabricCanvasRef.current.dispose();
+      }
 
-        // If there's an existing canvas, dispose of it
-        if (canvasRef.current) {
-          canvasRef.current.dispose();
-        }
+      // Clear the container
+      if (canvasContainerRef.current) {
+        canvasContainerRef.current.innerHTML = '<canvas></canvas>';
+      }
 
-        // Create new canvas
-        const canvas = new fabric.Canvas('canvas-container', {
-          width: containerWidth,
-          height: containerHeight,
-          backgroundColor: '#ffffff'
+      // Get the new canvas element
+      const canvasElement = canvasContainerRef.current?.querySelector('canvas');
+      if (!canvasElement) return;
+
+      // Calculate dimensions
+      const containerWidth = window.innerWidth > 800 ? 800 : window.innerWidth - 40;
+      const containerHeight = 600;
+
+      // Initialize new Fabric canvas
+      const canvas = new fabric.Canvas(canvasElement, {
+        width: containerWidth,
+        height: containerHeight,
+        backgroundColor: '#ffffff'
+      });
+
+      fabricCanvasRef.current = canvas;
+
+      // Load and add image
+      fabric.Image.fromURL(imgUrl, (fabricImg) => {
+        // Scale image to fit canvas while maintaining aspect ratio
+        const scaleX = (containerWidth - 40) / fabricImg.width!;
+        const scaleY = (containerHeight - 40) / fabricImg.height!;
+        const scale = Math.min(scaleX, scaleY);
+
+        fabricImg.scale(scale);
+
+        // Center the image
+        fabricImg.set({
+          left: (containerWidth - fabricImg.width! * scale) / 2,
+          top: (containerHeight - fabricImg.height! * scale) / 2
         });
 
-        canvasRef.current = canvas;
+        canvas.clear();
+        canvas.add(fabricImg);
+        canvas.renderAll();
 
-        // Create fabric image
-        fabric.Image.fromURL(imgUrl, (fabricImg) => {
-          // Scale image to fit canvas while maintaining aspect ratio
-          const scaleX = (containerWidth - 40) / fabricImg.width!;
-          const scaleY = (containerHeight - 40) / fabricImg.height!;
-          const scale = Math.min(scaleX, scaleY);
-
-          fabricImg.scale(scale);
-
-          // Center the image
-          fabricImg.set({
-            left: (containerWidth - fabricImg.width! * scale) / 2,
-            top: (containerHeight - fabricImg.height! * scale) / 2
-          });
-
-          // Clear canvas and add image
-          canvas.clear();
-          canvas.add(fabricImg);
-          canvas.renderAll();
-
-          onImageUploaded(canvas);
-          toast.success('Image uploaded successfully');
-        });
-      };
-      img.src = imgUrl;
+        onImageUploaded(canvas);
+        toast.success('Image uploaded successfully');
+      });
     };
 
     reader.readAsDataURL(file);
@@ -97,16 +101,14 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
           </p>
         </div>
       </div>
-      {previewUrl && (
-        <div className="mt-4">
-          <img 
-            src={previewUrl} 
-            alt="Preview" 
-            className="max-w-full h-auto rounded-lg shadow-lg"
-            style={{ maxHeight: '400px', objectFit: 'contain' }}
-          />
-        </div>
-      )}
+      
+      <div 
+        ref={canvasContainerRef}
+        className="min-h-[600px] w-full flex justify-center items-center border rounded-lg overflow-hidden"
+      >
+        <canvas />
+      </div>
+
       <input
         ref={fileInputRef}
         type="file"
@@ -119,7 +121,6 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
         }}
         className="hidden"
       />
-      <canvas id="canvas-container" className="hidden" />
     </div>
   );
 };
