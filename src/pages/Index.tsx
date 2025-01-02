@@ -1,7 +1,7 @@
-import { Navigate } from "react-router-dom";
+import ImageGenerator from "@/components/ImageGenerator";
 
 const Index = () => {
-  return <Navigate to="/text-on-photo" replace />;
+  return <ImageGenerator />;
 };
 
 export default Index;
