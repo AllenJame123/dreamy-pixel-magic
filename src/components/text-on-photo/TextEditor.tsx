@@ -15,19 +15,22 @@ const TextEditor = ({ canvas }: TextEditorProps) => {
   const addText = () => {
     if (!canvas || !text.trim()) return;
 
-    const fabricText = new fabric.Text(text, {
+    const fabricText = new fabric.IText(text, {
       left: canvas.width! / 2,
       top: canvas.height! / 2,
       fontSize: 40,
       fill: '#000000',
+      fontFamily: 'Arial',
       originX: 'center',
-      originY: 'center'
+      originY: 'center',
+      editable: true
     });
 
     canvas.add(fabricText);
     canvas.setActiveObject(fabricText);
     canvas.renderAll();
     setText("");
+    toast.success("Text added! You can now drag, resize, and edit it.");
   };
 
   const handleDownload = () => {
@@ -38,7 +41,7 @@ const TextEditor = ({ canvas }: TextEditorProps) => {
       const dataURL = canvas.toDataURL({
         format: 'png',
         quality: 1,
-        multiplier: 1, // Maintain original resolution
+        multiplier: 1,
         withoutTransform: false,
         enableRetinaScaling: true,
       });
