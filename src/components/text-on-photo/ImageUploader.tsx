@@ -21,42 +21,55 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const imgElement = new Image();
+      imgElement.crossOrigin = "anonymous";
+      
       imgElement.onload = () => {
+        // Get container and create canvas
         const container = document.getElementById('canvas-container');
-        if (!container) return;
+        if (!container) {
+          console.error('Canvas container not found');
+          return;
+        }
 
-        // Create a canvas element
-        const canvasElement = document.createElement('canvas');
-        container.appendChild(canvasElement);
+        // Set canvas dimensions
+        const containerWidth = container.clientWidth;
+        const containerHeight = Math.min(600, window.innerHeight - 200);
 
-        // Initialize Fabric canvas with the canvas element
-        const canvas = new fabric.Canvas(canvasElement, {
-          width: container.clientWidth,
-          height: Math.min(600, window.innerHeight - 200),
-          backgroundColor: "#ffffff",
+        // Create and append canvas element
+        const canvasEl = document.createElement('canvas');
+        container.innerHTML = ''; // Clear any existing content
+        container.appendChild(canvasEl);
+
+        // Initialize Fabric.js canvas
+        const canvas = new fabric.Canvas(canvasEl, {
+          width: containerWidth,
+          height: containerHeight,
+          backgroundColor: '#ffffff'
         });
 
-        const fabricImage = new fabric.Image(imgElement);
-        
-        // Scale image to fit canvas
-        const scale = Math.min(
-          canvas.width! / fabricImage.width!,
-          canvas.height! / fabricImage.height!
-        );
-        
-        fabricImage.scale(scale);
-        
-        // Center the image
-        fabricImage.set({
-          left: (canvas.width! - fabricImage.width! * scale) / 2,
-          top: (canvas.height! - fabricImage.height! * scale) / 2
-        });
+        // Create Fabric image object
+        fabric.Image.fromURL(e.target?.result as string, (fabricImg) => {
+          // Calculate scale to fit canvas while maintaining aspect ratio
+          const scale = Math.min(
+            (canvas.width! - 40) / fabricImg.width!,
+            (canvas.height! - 40) / fabricImg.height!
+          );
 
-        canvas.add(fabricImage);
-        canvas.renderAll();
-        
-        onImageUploaded(canvas);
-        toast.success('Image uploaded successfully!');
+          // Scale and center the image
+          fabricImg.scale(scale);
+          fabricImg.set({
+            left: (canvas.width! - fabricImg.width! * scale) / 2,
+            top: (canvas.height! - fabricImg.height! * scale) / 2
+          });
+
+          // Add image to canvas
+          canvas.add(fabricImg);
+          canvas.renderAll();
+          
+          // Notify parent component
+          onImageUploaded(canvas);
+          toast.success('Image uploaded successfully!');
+        });
       };
 
       imgElement.src = e.target?.result as string;

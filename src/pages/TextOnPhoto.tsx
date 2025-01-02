@@ -8,6 +8,11 @@ const TextOnPhoto = () => {
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [hasImage, setHasImage] = useState(false);
 
+  const handleImageUploaded = (newCanvas: fabric.Canvas) => {
+    setCanvas(newCanvas);
+    setHasImage(true);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
       <div className="text-center space-y-3">
@@ -19,15 +24,10 @@ const TextOnPhoto = () => {
 
       <Card className="p-6">
         {!hasImage ? (
-          <ImageUploader 
-            onImageUploaded={(fabricCanvas) => {
-              setCanvas(fabricCanvas);
-              setHasImage(true);
-            }}
-          />
+          <ImageUploader onImageUploaded={handleImageUploaded} />
         ) : (
           <div className="space-y-6">
-            <div id="canvas-container" className="border rounded-lg overflow-hidden bg-[#f8f9fa]" />
+            <div id="canvas-container" />
             <TextEditor canvas={canvas} />
           </div>
         )}

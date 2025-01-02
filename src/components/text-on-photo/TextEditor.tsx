@@ -16,10 +16,12 @@ const TextEditor = ({ canvas }: TextEditorProps) => {
     if (!canvas || !text.trim()) return;
 
     const fabricText = new fabric.Text(text, {
-      left: 50,
-      top: 50,
+      left: canvas.width! / 2,
+      top: canvas.height! / 2,
       fontSize: 40,
       fill: '#000000',
+      originX: 'center',
+      originY: 'center'
     });
 
     canvas.add(fabricText);
@@ -36,8 +38,7 @@ const TextEditor = ({ canvas }: TextEditorProps) => {
       link.download = 'text-on-photo.png';
       link.href = canvas.toDataURL({
         format: 'png',
-        quality: 1,
-        multiplier: 2
+        quality: 1
       });
       document.body.appendChild(link);
       link.click();
