@@ -8,9 +8,16 @@ interface CanvasContainerProps {
 }
 
 const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContainerProps) => {
+  const canvasInstanceRef = useRef<fabric.Canvas | null>(null);
+
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) {
       console.error('Canvas or container ref not ready');
+      return;
+    }
+
+    if (canvasInstanceRef.current) {
+      console.log('Canvas already initialized, skipping');
       return;
     }
 
@@ -28,6 +35,8 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
       preserveObjectStacking: true,
     });
 
+    canvasInstanceRef.current = canvas;
+
     // Enable text editing on double click
     canvas.on('mouse:dblclick', (options) => {
       if (options.target && options.target.type === 'i-text') {
@@ -41,6 +50,8 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
     onCanvasInit(canvas);
 
     const handleResize = () => {
+      if (!container) return;
+      
       const newWidth = container.clientWidth;
       const newHeight = Math.min(600, window.innerHeight - 200);
       
@@ -57,9 +68,12 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
     window.addEventListener('resize', handleResize);
 
     return () => {
-      console.log('Disposing canvas');
-      canvas.dispose();
+      console.log('Cleaning up canvas');
       window.removeEventListener('resize', handleResize);
+      if (canvasInstanceRef.current) {
+        canvasInstanceRef.current.dispose();
+        canvasInstanceRef.current = null;
+      }
     };
   }, [canvasRef, containerRef, onCanvasInit]);
 
