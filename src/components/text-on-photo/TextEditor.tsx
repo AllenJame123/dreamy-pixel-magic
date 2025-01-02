@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { fabric } from "fabric";
-import { Download } from "lucide-react";
+import { Download, Type } from "lucide-react";
 import { toast } from "sonner";
 
 interface TextEditorProps {
@@ -13,7 +13,10 @@ const TextEditor = ({ canvas }: TextEditorProps) => {
   const [text, setText] = useState("");
 
   const addText = () => {
-    if (!canvas || !text.trim()) return;
+    if (!canvas || !text.trim()) {
+      toast.error("Please enter some text first!");
+      return;
+    }
 
     const fabricText = new fabric.IText(text, {
       left: canvas.width! / 2,
@@ -30,14 +33,13 @@ const TextEditor = ({ canvas }: TextEditorProps) => {
     canvas.setActiveObject(fabricText);
     canvas.renderAll();
     setText("");
-    toast.success("Text added! You can now drag, resize, and edit it.");
+    toast.success("Text added! You can now drag, resize, and edit it directly on the image.");
   };
 
   const handleDownload = () => {
     if (!canvas) return;
     
     try {
-      // Get the canvas data with transparent background
       const dataURL = canvas.toDataURL({
         format: 'png',
         quality: 1,
@@ -61,17 +63,29 @@ const TextEditor = ({ canvas }: TextEditorProps) => {
 
   return (
     <div className="space-y-4">
+      <h3 className="text-lg font-semibold mb-2">Add Text to Image</h3>
       <div className="flex gap-2">
         <Input
           type="text"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Enter text to add"
+          placeholder="Type your text here..."
           className="flex-grow"
         />
-        <Button onClick={addText}>Add Text</Button>
+        <Button onClick={addText} className="flex items-center gap-2">
+          <Type className="w-4 h-4" />
+          Add Text
+        </Button>
       </div>
-      <Button onClick={handleDownload} className="w-full">
+      <div className="text-sm text-muted-foreground">
+        Tip: After adding text, you can:
+        <ul className="list-disc list-inside mt-1 space-y-1">
+          <li>Drag to reposition</li>
+          <li>Double-click to edit</li>
+          <li>Use corners to resize</li>
+        </ul>
+      </div>
+      <Button onClick={handleDownload} className="w-full mt-4">
         <Download className="w-4 h-4 mr-2" />
         Download Image
       </Button>
