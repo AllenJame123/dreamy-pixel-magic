@@ -9,6 +9,7 @@ const TextOnPhoto = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
   const [uploadedImage, setUploadedImage] = useState<HTMLImageElement | null>(null);
+  const [selectedFont, setSelectedFont] = useState("Arial");
   
   useEffect(() => {
     if (canvasRef.current) {
@@ -43,7 +44,6 @@ const TextOnPhoto = () => {
     }
 
     const text = (document.getElementById('textInput') as HTMLInputElement).value;
-    const font = (document.getElementById('fontSelect') as HTMLSelectElement).value;
     const size = (document.getElementById('fontSize') as HTMLInputElement).value + 'px';
     const color = (document.getElementById('fontColor') as HTMLInputElement).value;
 
@@ -51,7 +51,7 @@ const TextOnPhoto = () => {
     ctx.drawImage(uploadedImage, 0, 0);
 
     // Add the new text
-    ctx.font = `${size} ${font}`;
+    ctx.font = `${size} ${selectedFont}`;
     ctx.fillStyle = color;
     ctx.textAlign = 'center';
     ctx.fillText(text, canvasRef.current!.width / 2, canvasRef.current!.height / 2);
@@ -94,7 +94,7 @@ const TextOnPhoto = () => {
                 className="w-full"
               />
 
-              <Select id="fontSelect" defaultValue="Arial">
+              <Select value={selectedFont} onValueChange={setSelectedFont}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select font" />
                 </SelectTrigger>
