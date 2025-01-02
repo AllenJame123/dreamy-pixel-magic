@@ -111,7 +111,8 @@ const TextOnPhoto = () => {
 
     const link = document.createElement('a');
     link.download = 'edited-image.png';
-    link.href = canvas.toDataURL('image/png');
+    // Fix: Pass the correct options object for toDataURL
+    link.href = canvas.toDataURL({ format: 'png' });
     link.click();
   };
 
