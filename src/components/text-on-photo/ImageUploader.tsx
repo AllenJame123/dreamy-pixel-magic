@@ -13,17 +13,29 @@ const ImageUploader = ({ canvas }: ImageUploaderProps) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const handleImageUpload = (file: File) => {
-    if (!canvas) return;
+    if (!canvas) {
+      console.error('Canvas is not initialized');
+      toast.error('Canvas not ready. Please try again.');
+      return;
+    }
 
     if (!file.type.startsWith('image/')) {
       toast.error('Please upload an image file');
       return;
     }
 
+    console.log('Starting image upload process for file:', file.name);
+
     const reader = new FileReader();
     reader.onload = (e) => {
+      console.log('FileReader loaded successfully');
+      
       const img = new Image();
+      img.crossOrigin = "anonymous";
+      
       img.onload = () => {
+        console.log('Image loaded successfully, dimensions:', img.width, 'x', img.height);
+        
         const fabricImage = new fabric.Image(img);
         
         // Calculate dimensions to fit the canvas while maintaining aspect ratio
@@ -44,6 +56,8 @@ const ImageUploader = ({ canvas }: ImageUploaderProps) => {
           scaledWidth = canvasHeight * imgAspectRatio;
         }
         
+        console.log('Scaling image to:', scaledWidth, 'x', scaledHeight);
+        
         // Set the image dimensions
         fabricImage.scaleToWidth(scaledWidth);
         fabricImage.scaleToHeight(scaledHeight);
@@ -57,10 +71,24 @@ const ImageUploader = ({ canvas }: ImageUploaderProps) => {
         canvas.clear();
         canvas.add(fabricImage);
         canvas.renderAll();
+        
+        console.log('Image added to canvas successfully');
         toast.success('Image uploaded successfully!');
       };
+
+      img.onerror = (error) => {
+        console.error('Error loading image:', error);
+        toast.error('Failed to load image. Please try again.');
+      };
+
       img.src = e.target?.result as string;
     };
+
+    reader.onerror = (error) => {
+      console.error('Error reading file:', error);
+      toast.error('Failed to read image file. Please try again.');
+    };
+
     reader.readAsDataURL(file);
   };
 

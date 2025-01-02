@@ -9,11 +9,17 @@ interface CanvasContainerProps {
 
 const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContainerProps) => {
   useEffect(() => {
-    if (!canvasRef.current || !containerRef.current) return;
+    if (!canvasRef.current || !containerRef.current) {
+      console.error('Canvas or container ref not ready');
+      return;
+    }
 
+    console.log('Initializing canvas');
     const container = containerRef.current;
     const containerWidth = container.clientWidth;
     const containerHeight = Math.min(600, window.innerHeight - 200);
+
+    console.log('Canvas dimensions:', containerWidth, 'x', containerHeight);
 
     const canvas = new fabric.Canvas(canvasRef.current, {
       width: containerWidth,
@@ -31,11 +37,14 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
       }
     });
 
+    console.log('Canvas initialized successfully');
     onCanvasInit(canvas);
 
     const handleResize = () => {
       const newWidth = container.clientWidth;
       const newHeight = Math.min(600, window.innerHeight - 200);
+      
+      console.log('Resizing canvas to:', newWidth, 'x', newHeight);
       
       canvas.setDimensions({
         width: newWidth,
@@ -48,6 +57,7 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
     window.addEventListener('resize', handleResize);
 
     return () => {
+      console.log('Disposing canvas');
       canvas.dispose();
       window.removeEventListener('resize', handleResize);
     };
