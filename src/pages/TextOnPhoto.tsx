@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { fabric } from "fabric";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 
 const TextOnPhoto = () => {
@@ -189,7 +188,12 @@ const TextOnPhoto = () => {
         <Button onClick={() => toggleStyle('bold')}>Bold</Button>
         <Button onClick={() => toggleStyle('italic')}>Italic</Button>
         <Button onClick={() => toggleStyle('underline')}>Underline</Button>
-        <Button onClick={addText}>Add Text</Button>
+        <Button 
+          onClick={addText} 
+          className="bg-primary hover:bg-primary/90 text-white font-semibold py-6 px-8 text-lg"
+        >
+          Add Text
+        </Button>
         <Button onClick={undo} variant="outline">Undo</Button>
         <Button onClick={downloadImage} variant="default" className="bg-green-600 hover:bg-green-700">
           Download Image
