@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import TextFormatControls from "@/components/text-on-photo/TextFormatControls";
+import { Upload, Download } from "lucide-react";
 
 const TextOnPhoto = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -13,7 +15,6 @@ const TextOnPhoto = () => {
   const [selectedFont, setSelectedFont] = useState("Arial");
   const [fontsLoaded, setFontsLoaded] = useState(false);
 
-  // Initialize canvas on component mount
   const initCanvas = () => {
     if (!canvasRef.current || canvas) return;
     
@@ -27,7 +28,6 @@ const TextOnPhoto = () => {
     return newCanvas;
   };
 
-  // Load fonts
   useEffect(() => {
     const loadFonts = async () => {
       try {
@@ -54,14 +54,12 @@ const TextOnPhoto = () => {
     loadFonts();
   }, []);
 
-  // Save current state
   const saveState = () => {
     if (!canvas) return;
     setUndoStack([...undoStack, JSON.stringify(canvas)]);
     setRedoStack([]);
   };
 
-  // Handle image upload
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !canvas) return;
@@ -84,7 +82,6 @@ const TextOnPhoto = () => {
     reader.readAsDataURL(file);
   };
 
-  // Add text to canvas
   const handleAddText = () => {
     if (!canvas || !fontsLoaded) {
       toast.error("Please wait for fonts to load");
@@ -100,7 +97,7 @@ const TextOnPhoto = () => {
     const size = parseInt((document.getElementById('fontSize') as HTMLInputElement)?.value || "20", 10);
     const color = (document.getElementById('fontColor') as HTMLInputElement)?.value;
 
-    const textBox = new fabric.Textbox(text, {
+    const textBox = new fabric.IText(text, {
       left: 100,
       top: 100,
       fontFamily: selectedFont,
@@ -116,7 +113,6 @@ const TextOnPhoto = () => {
     toast.success("Text added successfully");
   };
 
-  // Handle undo
   const handleUndo = () => {
     if (!canvas || undoStack.length === 0) return;
     
@@ -127,7 +123,6 @@ const TextOnPhoto = () => {
     toast.info("Undo successful");
   };
 
-  // Handle redo
   const handleRedo = () => {
     if (!canvas || redoStack.length === 0) return;
     
@@ -138,7 +133,6 @@ const TextOnPhoto = () => {
     toast.info("Redo successful");
   };
 
-  // Handle download
   const handleDownload = () => {
     if (!canvas) return;
     const link = document.createElement('a');
@@ -148,7 +142,6 @@ const TextOnPhoto = () => {
     toast.success("Image downloaded successfully!");
   };
 
-  // Initialize canvas
   useEffect(() => {
     initCanvas();
   }, []);
@@ -157,60 +150,92 @@ const TextOnPhoto = () => {
     <div className="flex flex-col items-center gap-4 max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Online Image Text Editor</h1>
       
-      <Input
-        type="file"
-        accept="image/*"
-        onChange={handleImageUpload}
-        className="w-full max-w-md"
-      />
+      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+        <div className="relative flex-1">
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+          />
+          <Button className="w-full bg-primary hover:bg-primary/90" size="lg">
+            <Upload className="mr-2 h-4 w-4" />
+            Choose Image
+          </Button>
+        </div>
+        
+        <Button 
+          onClick={handleDownload} 
+          className="flex-1 bg-primary hover:bg-primary/90"
+          size="lg"
+        >
+          <Download className="mr-2 h-4 w-4" />
+          Download
+        </Button>
+      </div>
 
       <div className="w-full overflow-hidden border border-gray-200 rounded-lg">
         <canvas ref={canvasRef} className="max-w-full" />
       </div>
 
-      <div className="flex flex-wrap gap-2 items-center justify-center w-full">
-        <Input
-          id="textInput"
-          placeholder="Enter text"
-          className="max-w-[200px]"
-        />
-        
-        <Select value={selectedFont} onValueChange={setSelectedFont}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select font" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Arial">Arial</SelectItem>
-            <SelectItem value="Courier New">Courier New</SelectItem>
-            <SelectItem value="Times New Roman">Times New Roman</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="grid gap-4 w-full max-w-2xl">
+        <div className="flex flex-wrap gap-2 items-center">
+          <Input
+            id="textInput"
+            placeholder="Enter text"
+            className="flex-1 min-w-[200px]"
+          />
+          
+          <Select value={selectedFont} onValueChange={setSelectedFont}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select font" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Arial">Arial</SelectItem>
+              <SelectItem value="Courier New">Courier New</SelectItem>
+              <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+            </SelectContent>
+          </Select>
 
-        <Input
-          id="fontSize"
-          type="number"
-          placeholder="Font Size"
-          defaultValue="20"
-          className="w-24"
-        />
-        
-        <Input
-          id="fontColor"
-          type="color"
-          defaultValue="#000000"
-          className="w-24 h-10"
-        />
+          <Input
+            id="fontSize"
+            type="number"
+            placeholder="Font Size"
+            defaultValue="20"
+            className="w-24"
+          />
+          
+          <Input
+            id="fontColor"
+            type="color"
+            defaultValue="#000000"
+            className="w-24 h-10"
+          />
+        </div>
 
-        <Button onClick={handleAddText}>Add Text</Button>
-        <Button variant="outline" onClick={handleUndo} disabled={undoStack.length === 0}>
-          Undo
-        </Button>
-        <Button variant="outline" onClick={handleRedo} disabled={redoStack.length === 0}>
-          Redo
-        </Button>
-        <Button variant="secondary" onClick={handleDownload}>
-          Download Image
-        </Button>
+        <div className="flex flex-wrap gap-2 items-center justify-between">
+          <div className="flex gap-2">
+            <Button onClick={handleAddText}>Add Text</Button>
+            <TextFormatControls canvas={canvas} />
+          </div>
+          
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={handleUndo} 
+              disabled={undoStack.length === 0}
+            >
+              Undo
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleRedo} 
+              disabled={redoStack.length === 0}
+            >
+              Redo
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
