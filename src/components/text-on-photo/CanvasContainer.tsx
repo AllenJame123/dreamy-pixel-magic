@@ -8,27 +8,13 @@ interface CanvasContainerProps {
 }
 
 const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContainerProps) => {
-  const canvasInstanceRef = useRef<fabric.Canvas | null>(null);
-
   useEffect(() => {
-    if (!canvasRef.current || !containerRef.current) {
-      console.error('Canvas or container ref not ready');
-      return;
-    }
-
-    // If canvas is already initialized, skip
-    if (canvasInstanceRef.current) {
-      console.log('Canvas already initialized, skipping');
-      return;
-    }
+    if (!canvasRef.current || !containerRef.current) return;
 
     const container = containerRef.current;
-    const canvas = new fabric.Canvas(canvasRef.current, {
-      backgroundColor: 'transparent',
-      preserveObjectStacking: true,
-    });
+    const canvas = new fabric.Canvas(canvasRef.current);
 
-    // Set canvas dimensions to match container
+    // Set initial dimensions
     const updateCanvasSize = () => {
       const containerWidth = container.clientWidth;
       const containerHeight = container.clientHeight;
@@ -45,28 +31,22 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
     // Update canvas size when window resizes
     window.addEventListener('resize', updateCanvasSize);
 
-    canvasInstanceRef.current = canvas;
+    // Call the initialization callback
     onCanvasInit(canvas);
 
     return () => {
-      console.log('Cleaning up canvas');
       window.removeEventListener('resize', updateCanvasSize);
-      if (canvasInstanceRef.current) {
-        canvasInstanceRef.current.dispose();
-        canvasInstanceRef.current = null;
-      }
+      canvas.dispose();
     };
   }, [canvasRef, containerRef, onCanvasInit]);
 
   return (
     <div 
       ref={containerRef}
-      className="w-full h-full bg-transparent"
+      className="w-full h-full relative bg-white"
+      style={{ minHeight: "400px" }}
     >
-      <canvas 
-        ref={canvasRef} 
-        className="w-full h-full"
-      />
+      <canvas ref={canvasRef} />
     </div>
   );
 };
