@@ -1,131 +1,199 @@
-import { useRef, useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { fabric } from "fabric";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Upload, Download } from "lucide-react";
-import TextFormatControls from "@/components/text-on-photo/TextFormatControls";
-import FontControls from "@/components/text-on-photo/FontControls";
-import ImageUploader from "@/components/text-on-photo/ImageUploader";
-import CanvasContainer from "@/components/text-on-photo/CanvasContainer";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 const TextOnPhoto = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
-  const [selectedFont, setSelectedFont] = useState("Arial");
-  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [undoStack, setUndoStack] = useState<string[]>([]);
+  const [redoStack, setRedoStack] = useState<string[]>([]);
 
   useEffect(() => {
-    const loadFonts = async () => {
-      try {
-        await document.fonts.ready;
-        setFontsLoaded(true);
-      } catch (error) {
-        console.error('Error loading fonts:', error);
-        toast.error("Error loading fonts");
-      }
-    };
+    if (!canvasRef.current) return;
 
-    loadFonts();
+    const fabricCanvas = new fabric.Canvas(canvasRef.current, {
+      width: 800,
+      height: 500,
+      preserveObjectStacking: true
+    });
+
+    setCanvas(fabricCanvas);
+
+    return () => {
+      fabricCanvas.dispose();
+    };
   }, []);
 
-  const handleCanvasInit = (fabricCanvas: fabric.Canvas) => {
-    setCanvas(fabricCanvas);
-    
-    // Setup text editing events
-    fabricCanvas.on('text:selection', (e) => {
-      const textObject = e.target as fabric.IText;
-      if (textObject) {
-        setSelectedFont(textObject.fontFamily || 'Arial');
-      }
-    });
+  const saveState = () => {
+    if (!canvas) return;
+    setUndoStack(prev => [...prev, JSON.stringify(canvas)]);
+    setRedoStack([]);
   };
 
-  const handleAddText = () => {
-    if (!canvas || !fontsLoaded) {
-      toast.error("Please wait for fonts to load");
-      return;
-    }
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!canvas || !event.target.files?.[0]) return;
+
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      if (!e.target?.result) return;
+
+      fabric.Image.fromURL(e.target.result.toString(), (img) => {
+        img.set({
+          selectable: false,
+        });
+        canvas.clear();
+        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+          scaleX: canvas.width! / img.width!,
+          scaleY: canvas.height! / img.height!,
+        });
+        saveState();
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const addText = () => {
+    if (!canvas) return;
 
     const text = (document.getElementById('textInput') as HTMLInputElement)?.value;
-    if (!text) {
-      toast.error("Please enter some text");
-      return;
-    }
+    const font = (document.getElementById('fontSelect') as HTMLSelectElement)?.value;
+    const size = parseInt((document.getElementById('fontSize') as HTMLInputElement)?.value || "20", 10);
+    const color = (document.getElementById('fontColor') as HTMLInputElement)?.value;
 
-    const textBox = new fabric.IText(text, {
+    const textBox = new fabric.Textbox(text, {
       left: 100,
       top: 100,
-      fontFamily: selectedFont,
-      fontSize: 40,
-      fill: '#000000',
+      fontFamily: font,
+      fontSize: size,
+      fill: color,
       editable: true,
     });
 
     canvas.add(textBox);
     canvas.setActiveObject(textBox);
-    canvas.renderAll();
-    toast.success("Text added successfully");
+    saveState();
   };
 
-  const handleDownload = () => {
+  const toggleStyle = (style: 'bold' | 'italic' | 'underline') => {
     if (!canvas) return;
+
+    const activeObject = canvas.getActiveObject() as fabric.Textbox;
+    if (!activeObject || activeObject.type !== 'textbox') return;
+
+    switch (style) {
+      case 'bold':
+        activeObject.set('fontWeight', activeObject.fontWeight === 'bold' ? 'normal' : 'bold');
+        break;
+      case 'italic':
+        activeObject.set('fontStyle', activeObject.fontStyle === 'italic' ? 'normal' : 'italic');
+        break;
+      case 'underline':
+        activeObject.set('underline', !activeObject.underline);
+        break;
+    }
+
+    canvas.renderAll();
+    saveState();
+  };
+
+  const undo = () => {
+    if (!canvas || undoStack.length === 0) return;
+
+    setRedoStack(prev => [...prev, JSON.stringify(canvas)]);
+    const state = undoStack[undoStack.length - 1];
+    setUndoStack(prev => prev.slice(0, -1));
+    canvas.loadFromJSON(state, canvas.renderAll.bind(canvas));
+  };
+
+  const redo = () => {
+    if (!canvas || redoStack.length === 0) return;
+
+    setUndoStack(prev => [...prev, JSON.stringify(canvas)]);
+    const state = redoStack[redoStack.length - 1];
+    setRedoStack(prev => prev.slice(0, -1));
+    canvas.loadFromJSON(state, canvas.renderAll.bind(canvas));
+  };
+
+  const downloadImage = () => {
+    if (!canvas) return;
+
     const link = document.createElement('a');
     link.download = 'edited-image.png';
-    link.href = canvas.toDataURL();
+    link.href = canvas.toDataURL('image/png');
     link.click();
-    toast.success("Image downloaded successfully!");
   };
 
+  useEffect(() => {
+    if (!canvas) return;
+    canvas.on('mouse:down', saveState);
+  }, [canvas]);
+
   return (
-    <div className="flex flex-col items-center gap-6 max-w-4xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Online Image Text Editor</h1>
+    <div className="flex flex-col items-center gap-4 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold">Online Image Text Editor</h1>
       
-      <div className="w-full">
-        <ImageUploader canvas={canvas} saveState={() => {}} />
-      </div>
+      <Input 
+        type="file" 
+        accept="image/*" 
+        onChange={handleImageUpload}
+        className="max-w-sm"
+      />
 
-      <div className="w-full overflow-hidden border border-gray-200 rounded-lg">
-        <CanvasContainer
-          canvasRef={canvasRef}
-          containerRef={containerRef}
-          onCanvasInit={handleCanvasInit}
-        />
-      </div>
+      <canvas ref={canvasRef} className="border border-gray-200 rounded-lg max-w-full" />
 
-      <Button 
-        onClick={handleDownload} 
-        className="w-full sm:w-auto bg-primary hover:bg-primary/90"
-        size="lg"
-      >
-        <Download className="mr-2 h-4 w-4" />
-        Download Image
-      </Button>
-
-      <div className="grid gap-4 w-full max-w-2xl">
-        <div className="flex flex-wrap gap-4">
-          <div className="flex-1 min-w-[200px]">
-            <Input
-              id="textInput"
-              placeholder="Enter text"
-              className="w-full"
-            />
-          </div>
-          
-          <Button onClick={handleAddText} className="bg-primary">
-            Add Text
-          </Button>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+        <div className="space-y-2">
+          <Label htmlFor="textInput">Text</Label>
+          <Input id="textInput" placeholder="Enter text" />
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-4">
-          <FontControls
-            canvas={canvas}
-            selectedFont={selectedFont}
-            onFontChange={setSelectedFont}
+        <div className="space-y-2">
+          <Label htmlFor="fontSelect">Font Style</Label>
+          <select 
+            id="fontSelect" 
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          >
+            <option value="Arial">Arial</option>
+            <option value="Courier New">Courier New</option>
+            <option value="Times New Roman">Times New Roman</option>
+          </select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="fontSize">Font Size</Label>
+          <Input 
+            type="number" 
+            id="fontSize" 
+            placeholder="Font Size" 
+            defaultValue="20"
           />
-          <TextFormatControls canvas={canvas} />
         </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="fontColor">Font Color</Label>
+          <Input 
+            type="color" 
+            id="fontColor" 
+            defaultValue="#000000"
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-wrap gap-2 justify-center">
+        <Button onClick={() => toggleStyle('bold')}>Bold</Button>
+        <Button onClick={() => toggleStyle('italic')}>Italic</Button>
+        <Button onClick={() => toggleStyle('underline')}>Underline</Button>
+        <Button onClick={addText}>Add Text</Button>
+        <Button onClick={undo} variant="outline">Undo</Button>
+        <Button onClick={redo} variant="outline">Redo</Button>
+        <Button onClick={downloadImage} variant="default" className="bg-green-600 hover:bg-green-700">
+          Download Image
+        </Button>
       </div>
     </div>
   );
