@@ -12,11 +12,11 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<fabric.Canvas | null>(null);
+  const [hasImage, setHasImage] = useState(false);
 
   const initCanvas = (width: number, height: number) => {
     if (!canvasRef.current) return null;
     
-    // Clean up existing canvas if it exists
     if (fabricCanvas) {
       fabricCanvas.dispose();
     }
@@ -44,12 +44,10 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
         const naturalWidth = img.naturalWidth;
         const naturalHeight = img.naturalHeight;
         
-        // Initialize canvas with natural image dimensions
         const canvas = initCanvas(naturalWidth, naturalHeight);
         if (!canvas) return;
 
         fabric.Image.fromURL(e.target?.result as string, (fabricImg) => {
-          // Set image dimensions to match canvas
           fabricImg.scaleToWidth(canvas.width!);
           fabricImg.scaleToHeight(canvas.height!);
           
@@ -64,6 +62,7 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
           canvas.add(fabricImg);
           canvas.renderAll();
           onImageUploaded(canvas);
+          setHasImage(true);
           toast.success('Image uploaded successfully');
         }, { crossOrigin: 'anonymous' });
       };
@@ -74,7 +73,10 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="border-2 border-dashed rounded-lg p-8 text-center">
+      <div 
+        className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer"
+        onClick={() => fileInputRef.current?.click()}
+      >
         <div className="space-y-4">
           <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
             <Upload className="w-6 h-6 text-primary" />
@@ -82,7 +84,6 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
           <div>
             <p className="text-sm font-medium">Click to upload an image</p>
             <Button
-              onClick={() => fileInputRef.current?.click()}
               variant="link"
               className="text-primary"
             >
@@ -95,12 +96,14 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
         </div>
       </div>
 
-      <div className="border rounded-lg overflow-hidden bg-gray-50">
-        <canvas
-          ref={canvasRef}
-          style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
-        />
-      </div>
+      {hasImage && (
+        <div className="border rounded-lg overflow-hidden bg-transparent">
+          <canvas
+            ref={canvasRef}
+            style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
+          />
+        </div>
+      )}
 
       <input
         ref={fileInputRef}

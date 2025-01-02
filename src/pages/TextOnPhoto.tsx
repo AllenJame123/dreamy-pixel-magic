@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import ImageUploader from "@/components/text-on-photo/ImageUploader";
 import TextEditor from "@/components/text-on-photo/TextEditor";
+import TextControls from "@/components/text-on-photo/TextControls";
+import TextAlignmentControls from "@/components/text-on-photo/TextAlignmentControls";
 import { fabric } from "fabric";
 
 const TextOnPhoto = () => {
@@ -22,10 +24,28 @@ const TextOnPhoto = () => {
         </p>
       </div>
 
-      <Card className="p-6">
-        <ImageUploader onImageUploaded={handleImageUploaded} />
-        {hasImage && canvas && <TextEditor canvas={canvas} />}
-      </Card>
+      {!hasImage ? (
+        <Card className="p-6 max-w-xl mx-auto">
+          <ImageUploader onImageUploaded={handleImageUploaded} />
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="p-6">
+            <ImageUploader onImageUploaded={handleImageUploaded} />
+          </Card>
+          <Card className="p-6 space-y-6">
+            <TextEditor canvas={canvas} />
+            <TextControls 
+              canvas={canvas}
+              canUndo={false}
+              canRedo={false}
+              onUndo={() => {}}
+              onRedo={() => {}}
+            />
+            <TextAlignmentControls canvas={canvas} />
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
