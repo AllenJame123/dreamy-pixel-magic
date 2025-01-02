@@ -26,7 +26,7 @@ const SizeSelector = ({
   const [heightError, setHeightError] = useState(false);
 
   const validateDimension = (value: number): boolean => {
-    return !isNaN(value) && value >= 128 && value <= 1024;
+    return !isNaN(value) && value >= 128 && value <= 1200;
   };
 
   const handleSizeChange = (value: string) => {
@@ -72,9 +72,10 @@ const SizeSelector = ({
             <SelectValue placeholder="Select size" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="256">256 × 256 pixels</SelectItem>
             <SelectItem value="512">512 × 512 pixels</SelectItem>
             <SelectItem value="768">768 × 768 pixels</SelectItem>
+            <SelectItem value="1024">1024 × 1024 pixels</SelectItem>
+            <SelectItem value="1200">1200 × 1200 pixels</SelectItem>
             <SelectItem value="custom">Custom size...</SelectItem>
           </SelectContent>
         </Select>
@@ -86,11 +87,11 @@ const SizeSelector = ({
                 <Label className="text-sm text-center block mb-2">Width (px)</Label>
                 <Input
                   type="number"
-                  placeholder="128-1024"
+                  placeholder="128-1200"
                   value={width}
                   onChange={(e) => setWidth(Number(e.target.value))}
                   min={128}
-                  max={1024}
+                  max={1200}
                   className={cn(
                     "bg-white/50 backdrop-blur-sm",
                     widthError && "border-red-500 focus-visible:ring-red-500"
@@ -101,11 +102,11 @@ const SizeSelector = ({
                 <Label className="text-sm text-center block mb-2">Height (px)</Label>
                 <Input
                   type="number"
-                  placeholder="128-1024"
+                  placeholder="128-1200"
                   value={height}
                   onChange={(e) => setHeight(Number(e.target.value))}
                   min={128}
-                  max={1024}
+                  max={1200}
                   className={cn(
                     "bg-white/50 backdrop-blur-sm",
                     heightError && "border-red-500 focus-visible:ring-red-500"
@@ -114,14 +115,9 @@ const SizeSelector = ({
               </div>
             </div>
             <p className="text-sm text-muted-foreground text-center">
-              Enter dimensions between 128 and 1024 pixels
+              Enter dimensions between 128 and 1200 pixels
             </p>
           </div>
-        )}
-        {!isCustomSize && (
-          <p className="text-sm text-muted-foreground text-center">
-            Larger sizes will take longer to generate
-          </p>
         )}
       </div>
     </div>
