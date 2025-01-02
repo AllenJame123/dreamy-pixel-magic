@@ -31,8 +31,11 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
     // Set canvas dimensions to match container
     const updateCanvasSize = () => {
       const containerWidth = container.clientWidth;
-      canvas.setWidth(containerWidth);
-      canvas.setHeight(containerWidth * (canvas.height! / canvas.width!));
+      const containerHeight = container.clientHeight;
+      canvas.setDimensions({
+        width: containerWidth,
+        height: containerHeight
+      });
       canvas.renderAll();
     };
 
@@ -58,10 +61,12 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
   return (
     <div 
       ref={containerRef}
-      className="overflow-hidden bg-transparent w-full"
-      style={{ maxWidth: '100%' }}
+      className="w-full h-full bg-transparent"
     >
-      <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />
+      <canvas 
+        ref={canvasRef} 
+        className="w-full h-full"
+      />
     </div>
   );
 };

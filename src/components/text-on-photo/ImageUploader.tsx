@@ -25,7 +25,8 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
     const canvas = new fabric.Canvas(canvasRef.current, {
       width,
       height,
-      backgroundColor: 'transparent'
+      backgroundColor: 'transparent',
+      preserveObjectStacking: true
     });
 
     setFabricCanvas(canvas);
@@ -42,31 +43,35 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        const maxWidth = 800; // Maximum width for the canvas
-        const maxHeight = 600; // Maximum height for the canvas
+        const maxWidth = 800;
+        const maxHeight = 600;
         
-        let width = img.naturalWidth;
-        let height = img.naturalHeight;
+        let width = img.width;
+        let height = img.height;
         
         // Scale down the image if it's too large
         if (width > maxWidth || height > maxHeight) {
           const ratio = Math.min(maxWidth / width, maxHeight / height);
-          width *= ratio;
-          height *= ratio;
+          width = Math.floor(width * ratio);
+          height = Math.floor(height * ratio);
         }
         
         const canvas = initCanvas(width, height);
         if (!canvas) return;
 
+        // Create fabric image object
         fabric.Image.fromURL(e.target?.result as string, (fabricImg) => {
+          // Set canvas size to match image
           canvas.setDimensions({
             width: width,
             height: height
           });
 
+          // Scale image to fit canvas
           fabricImg.scaleToWidth(width);
           fabricImg.scaleToHeight(height);
           
+          // Position image
           fabricImg.set({
             left: 0,
             top: 0,
@@ -76,9 +81,11 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
             evented: false
           });
 
+          // Clear canvas and add image
           canvas.clear();
           canvas.add(fabricImg);
           canvas.renderAll();
+          
           onImageUploaded(canvas);
           setHasImage(true);
           toast.success('Image uploaded successfully');
