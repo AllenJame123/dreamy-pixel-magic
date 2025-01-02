@@ -62,7 +62,7 @@ const TextOnPhoto = () => {
       },
       {
         crossOrigin: 'anonymous',
-        error: (err) => {
+        onError: (err) => {
           console.error('Error loading image:', err);
           toast.error("Failed to load image");
         }
