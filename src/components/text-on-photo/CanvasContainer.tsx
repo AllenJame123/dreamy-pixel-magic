@@ -29,33 +29,23 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
 
-    // Wait for the next frame to ensure DOM is ready
-    requestAnimationFrame(() => {
-      const container = containerRef.current;
-      if (!container) return;
+    const container = containerRef.current;
+    const initialWidth = container.clientWidth;
+    const initialHeight = Math.min(600, window.innerHeight - 200);
 
-      const initialWidth = container.clientWidth;
-      const initialHeight = Math.min(600, window.innerHeight - 200);
+    // Initialize canvas if it hasn't been initialized yet
+    if (!fabricCanvasRef.current) {
+      const canvas = new fabric.Canvas(canvasRef.current, {
+        width: initialWidth,
+        height: initialHeight,
+        backgroundColor: '#ffffff',
+        preserveObjectStacking: true
+      });
 
-      // Only initialize canvas once
-      if (!fabricCanvasRef.current) {
-        const canvas = new fabric.Canvas(canvasRef.current, {
-          width: initialWidth,
-          height: initialHeight,
-          backgroundColor: '#ffffff',
-          preserveObjectStacking: true
-        });
-
-        fabricCanvasRef.current = canvas;
-        onCanvasInit(canvas);
-
-        // Initial render after setup
-        canvas.renderAll();
-      }
-
-      // Initial size update
-      updateCanvasSize();
-    });
+      fabricCanvasRef.current = canvas;
+      onCanvasInit(canvas);
+      canvas.renderAll();
+    }
 
     // Update canvas size when window resizes
     window.addEventListener('resize', updateCanvasSize);
