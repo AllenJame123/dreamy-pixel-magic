@@ -42,6 +42,7 @@ const TextOnPhoto = () => {
   };
 
   const handleCanvasInit = (fabricCanvas: fabric.Canvas) => {
+    console.log('Canvas initialized');
     setCanvas(fabricCanvas);
   };
 
