@@ -34,6 +34,11 @@ const ImageGenerator = () => {
 
   return (
     <div className="min-h-screen w-full max-w-4xl mx-auto px-4 py-8 space-y-8">
+      <div className="text-center space-y-3 mb-8">
+        <h1 className="text-4xl font-bold tracking-tight">AI Image Generator - Create Images Online Free</h1>
+        <p className="text-xl text-muted-foreground">Generate unlimited AI images from text descriptions</p>
+      </div>
+
       <Card className="p-6 glass-panel">
         <div className="space-y-6">
           <div className="flex flex-col gap-6">
