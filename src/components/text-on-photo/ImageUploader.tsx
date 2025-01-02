@@ -22,12 +22,15 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
     reader.onload = (e) => {
       const imgElement = new Image();
       imgElement.onload = () => {
-        // Create canvas after image is loaded
         const container = document.getElementById('canvas-container');
         if (!container) return;
 
-        const canvas = new fabric.Canvas(document.createElement('canvas'), {
-          container: container,
+        // Create a canvas element
+        const canvasElement = document.createElement('canvas');
+        container.appendChild(canvasElement);
+
+        // Initialize Fabric canvas with the canvas element
+        const canvas = new fabric.Canvas(canvasElement, {
           width: container.clientWidth,
           height: Math.min(600, window.innerHeight - 200),
           backgroundColor: "#ffffff",
@@ -56,7 +59,7 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
         toast.success('Image uploaded successfully!');
       };
 
-      imgElement.src = e.target.result as string;
+      imgElement.src = e.target?.result as string;
     };
 
     reader.readAsDataURL(file);
