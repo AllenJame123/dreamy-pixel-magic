@@ -1,6 +1,5 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
-import { toast } from "sonner";
 import { fabric } from "fabric";
 import { ImageControls } from "@/components/text-on-photo/ImageControls";
 import { TextControls } from "@/components/text-on-photo/TextControls";
@@ -17,32 +16,34 @@ const TextOnPhoto = () => {
   const [redoStack, setRedoStack] = useState<string[]>([]);
   const [showEditor, setShowEditor] = useState(false);
 
-  const saveState = () => {
+  const saveState = useCallback(() => {
     if (!canvas) return;
     setUndoStack(prev => [...prev, JSON.stringify(canvas)]);
     setRedoStack([]);
-  };
+  }, [canvas]);
 
-  const handleImageUpload = (imageUrl: string) => {
+  const handleImageUpload = useCallback((imageUrl: string) => {
     if (!canvas) return;
 
     fabric.Image.fromURL(imageUrl, (img) => {
+      canvas.clear();
       img.set({
         selectable: false,
       });
-      canvas.clear();
+      
       canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
         scaleX: canvas.width! / img.width!,
         scaleY: canvas.height! / img.height!,
       });
+      
       saveState();
       setShowEditor(true);
     });
-  };
+  }, [canvas, saveState]);
 
-  const handleCanvasInit = (fabricCanvas: fabric.Canvas) => {
+  const handleCanvasInit = useCallback((fabricCanvas: fabric.Canvas) => {
     setCanvas(fabricCanvas);
-  };
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8">

@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import { fabric } from "fabric";
 
 interface CanvasContainerProps {
@@ -8,22 +8,32 @@ interface CanvasContainerProps {
 }
 
 const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContainerProps) => {
+  const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
+
+  const updateCanvasSize = useCallback(() => {
+    if (!fabricCanvasRef.current || !containerRef.current) return;
+
+    const container = containerRef.current;
+    const canvas = fabricCanvasRef.current;
+    
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+    
+    canvas.setDimensions({
+      width: containerWidth,
+      height: containerHeight
+    });
+    canvas.renderAll();
+  }, [containerRef]);
+
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
 
-    const container = containerRef.current;
-    const canvas = new fabric.Canvas(canvasRef.current);
-
-    // Set initial dimensions
-    const updateCanvasSize = () => {
-      const containerWidth = container.clientWidth;
-      const containerHeight = container.clientHeight;
-      canvas.setDimensions({
-        width: containerWidth,
-        height: containerHeight
-      });
-      canvas.renderAll();
-    };
+    // Only create canvas if it doesn't exist
+    if (!fabricCanvasRef.current) {
+      fabricCanvasRef.current = new fabric.Canvas(canvasRef.current);
+      onCanvasInit(fabricCanvasRef.current);
+    }
 
     // Initial size update
     updateCanvasSize();
@@ -31,14 +41,14 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
     // Update canvas size when window resizes
     window.addEventListener('resize', updateCanvasSize);
 
-    // Call the initialization callback
-    onCanvasInit(canvas);
-
     return () => {
       window.removeEventListener('resize', updateCanvasSize);
-      canvas.dispose();
+      if (fabricCanvasRef.current) {
+        fabricCanvasRef.current.dispose();
+        fabricCanvasRef.current = null;
+      }
     };
-  }, [canvasRef, containerRef, onCanvasInit]);
+  }, [canvasRef, containerRef, onCanvasInit, updateCanvasSize]);
 
   return (
     <div 
