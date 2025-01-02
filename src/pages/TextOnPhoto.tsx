@@ -114,7 +114,7 @@ const TextOnPhoto = () => {
   }, [canvas]);
 
   // Initialize canvas on mount
-  useState(() => {
+  useEffect(() => {
     initCanvas();
   }, [initCanvas]);
 
