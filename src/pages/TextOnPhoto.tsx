@@ -10,6 +10,7 @@ const TextOnPhoto = () => {
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
+  const [selectedFont, setSelectedFont] = useState("Arial");
 
   // Initialize canvas on component mount
   const initCanvas = () => {
@@ -62,14 +63,13 @@ const TextOnPhoto = () => {
     if (!canvas) return;
     
     const text = (document.getElementById('textInput') as HTMLInputElement)?.value;
-    const font = (document.getElementById('fontSelect') as HTMLSelectElement)?.value;
     const size = parseInt((document.getElementById('fontSize') as HTMLInputElement)?.value || "20", 10);
     const color = (document.getElementById('fontColor') as HTMLInputElement)?.value;
 
     const textBox = new fabric.Textbox(text, {
       left: 100,
       top: 100,
-      fontFamily: font,
+      fontFamily: selectedFont,
       fontSize: size,
       fill: color,
       editable: true,
@@ -134,7 +134,7 @@ const TextOnPhoto = () => {
           className="max-w-[200px]"
         />
         
-        <Select id="fontSelect" defaultValue="Arial">
+        <Select value={selectedFont} onValueChange={setSelectedFont}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Select font" />
           </SelectTrigger>
