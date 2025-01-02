@@ -30,65 +30,81 @@ const ImageUploader = ({ canvas }: ImageUploaderProps) => {
     reader.onload = (e) => {
       console.log('FileReader loaded successfully');
       
-      const img = new Image();
-      img.crossOrigin = "anonymous";
+      const imgElement = new Image();
+      imgElement.crossOrigin = "anonymous";
       
-      img.onload = () => {
-        console.log('Image loaded successfully, dimensions:', img.width, 'x', img.height);
+      imgElement.onload = () => {
+        console.log('Image loaded successfully, dimensions:', imgElement.width, 'x', imgElement.height);
         
         try {
-          const fabricImage = new fabric.Image(img);
-          
-          // Calculate dimensions to fit the canvas while maintaining aspect ratio
-          const canvasWidth = canvas.width!;
-          const canvasHeight = canvas.height!;
-          const imgAspectRatio = img.width / img.height;
-          const canvasAspectRatio = canvasWidth / canvasHeight;
-          
-          let scaledWidth, scaledHeight;
-          
-          if (imgAspectRatio > canvasAspectRatio) {
-            // Image is wider than canvas (relative to height)
-            scaledWidth = canvasWidth;
-            scaledHeight = canvasWidth / imgAspectRatio;
-          } else {
-            // Image is taller than canvas (relative to width)
-            scaledHeight = canvasHeight;
-            scaledWidth = canvasHeight * imgAspectRatio;
+          // Create a temporary canvas to handle the image
+          const tempCanvas = document.createElement('canvas');
+          const ctx = tempCanvas.getContext('2d');
+          if (!ctx) {
+            throw new Error('Could not get canvas context');
           }
-          
-          console.log('Scaling image to:', scaledWidth, 'x', scaledHeight);
-          
-          // Set the image dimensions
-          fabricImage.scaleToWidth(scaledWidth);
-          fabricImage.scaleToHeight(scaledHeight);
-          
-          // Center the image on canvas
-          fabricImage.set({
-            left: (canvasWidth - scaledWidth) / 2,
-            top: (canvasHeight - scaledHeight) / 2,
-            selectable: true,
-            hasControls: true
-          });
 
-          canvas.clear();
-          canvas.add(fabricImage);
-          canvas.renderAll();
-          
-          console.log('Image added to canvas successfully');
-          toast.success('Image uploaded successfully!');
+          // Set dimensions
+          tempCanvas.width = imgElement.width;
+          tempCanvas.height = imgElement.height;
+
+          // Draw image to temp canvas
+          ctx.drawImage(imgElement, 0, 0);
+
+          // Create fabric image from temp canvas
+          fabric.Image.fromURL(tempCanvas.toDataURL('image/png'), (fabricImage) => {
+            // Calculate dimensions to fit the canvas while maintaining aspect ratio
+            const canvasWidth = canvas.width!;
+            const canvasHeight = canvas.height!;
+            const imgAspectRatio = imgElement.width / imgElement.height;
+            const canvasAspectRatio = canvasWidth / canvasHeight;
+            
+            let scaledWidth, scaledHeight;
+            
+            if (imgAspectRatio > canvasAspectRatio) {
+              // Image is wider than canvas (relative to height)
+              scaledWidth = canvasWidth;
+              scaledHeight = canvasWidth / imgAspectRatio;
+            } else {
+              // Image is taller than canvas (relative to width)
+              scaledHeight = canvasHeight;
+              scaledWidth = canvasHeight * imgAspectRatio;
+            }
+            
+            console.log('Scaling image to:', scaledWidth, 'x', scaledHeight);
+            
+            // Set the image dimensions
+            fabricImage.scaleToWidth(scaledWidth);
+            fabricImage.scaleToHeight(scaledHeight);
+            
+            // Center the image on canvas
+            fabricImage.set({
+              left: (canvasWidth - scaledWidth) / 2,
+              top: (canvasHeight - scaledHeight) / 2,
+              selectable: true,
+              hasControls: true,
+              backgroundColor: undefined // Remove any background color
+            });
+
+            canvas.clear();
+            canvas.add(fabricImage);
+            canvas.renderAll();
+            
+            console.log('Image added to canvas successfully');
+            toast.success('Image uploaded successfully!');
+          }, { crossOrigin: 'anonymous' });
         } catch (error) {
           console.error('Error creating fabric image:', error);
           toast.error('Failed to process image. Please try again.');
         }
       };
 
-      img.onerror = (error) => {
+      imgElement.onerror = (error) => {
         console.error('Error loading image:', error);
         toast.error('Failed to load image. Please try again.');
       };
 
-      img.src = e.target?.result as string;
+      imgElement.src = e.target?.result as string;
     };
 
     reader.onerror = (error) => {
