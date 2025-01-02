@@ -29,9 +29,17 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
 
-    // Only create canvas if it doesn't exist
+    // Initialize canvas with specific dimensions
+    const container = containerRef.current;
+    const initialWidth = container.clientWidth;
+    const initialHeight = Math.min(600, window.innerHeight - 200); // Reasonable max height
+
     if (!fabricCanvasRef.current) {
-      fabricCanvasRef.current = new fabric.Canvas(canvasRef.current);
+      fabricCanvasRef.current = new fabric.Canvas(canvasRef.current, {
+        width: initialWidth,
+        height: initialHeight,
+        backgroundColor: '#ffffff'
+      });
       onCanvasInit(fabricCanvasRef.current);
     }
 

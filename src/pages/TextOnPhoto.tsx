@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback } from "react";
 import { Card } from "@/components/ui/card";
 import { fabric } from "fabric";
+import { toast } from "sonner";
 import { ImageControls } from "@/components/text-on-photo/ImageControls";
 import { TextControls } from "@/components/text-on-photo/TextControls";
 import { UndoRedoControls } from "@/components/text-on-photo/UndoRedoControls";
@@ -23,21 +24,42 @@ const TextOnPhoto = () => {
   }, [canvas]);
 
   const handleImageUpload = useCallback((imageUrl: string) => {
-    if (!canvas) return;
+    if (!canvas) {
+      toast.error("Canvas not initialized");
+      return;
+    }
 
     fabric.Image.fromURL(imageUrl, (img) => {
       canvas.clear();
+      
+      // Calculate scaling to fit the canvas while maintaining aspect ratio
+      const canvasWidth = canvas.width || 800;
+      const canvasHeight = canvas.height || 600;
+      const scale = Math.min(
+        canvasWidth / img.width!,
+        canvasHeight / img.height!
+      );
+
       img.set({
+        scaleX: scale,
+        scaleY: scale,
         selectable: false,
       });
-      
+
+      // Center the image
       canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-        scaleX: canvas.width! / img.width!,
-        scaleY: canvas.height! / img.height!,
+        originX: 'center',
+        originY: 'center',
+        left: canvasWidth / 2,
+        top: canvasHeight / 2
       });
       
       saveState();
       setShowEditor(true);
+      toast.success("Image uploaded successfully");
+    }, (error) => {
+      console.error('Error loading image:', error);
+      toast.error("Failed to load image");
     });
   }, [canvas, saveState]);
 
