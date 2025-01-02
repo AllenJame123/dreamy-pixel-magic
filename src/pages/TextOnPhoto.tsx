@@ -2,6 +2,8 @@ import { useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import ImageUploader from "@/components/text-on-photo/ImageUploader";
 import TextEditor from "@/components/text-on-photo/TextEditor";
+import TextControls from "@/components/text-on-photo/TextControls";
+import TextAlignmentControls from "@/components/text-on-photo/TextAlignmentControls";
 import FontControls from "@/components/text-on-photo/FontControls";
 import CanvasContainer from "@/components/text-on-photo/CanvasContainer";
 import { fabric } from "fabric";
@@ -61,6 +63,18 @@ const TextOnPhoto = () => {
               </Card>
               <Card className="p-6">
                 <FontControls canvas={canvas} />
+              </Card>
+              <Card className="p-6">
+                <TextAlignmentControls canvas={canvas} />
+              </Card>
+              <Card className="p-6">
+                <TextControls 
+                  canvas={canvas}
+                  canUndo={false}
+                  canRedo={false}
+                  onUndo={() => {}}
+                  onRedo={() => {}}
+                />
               </Card>
             </div>
             
