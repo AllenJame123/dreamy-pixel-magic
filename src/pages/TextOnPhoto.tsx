@@ -29,8 +29,7 @@ const TextOnPhoto = () => {
           <div className="space-y-6">
             <div 
               id="canvas-container" 
-              className="border rounded-lg overflow-hidden bg-[#f8f9fa] w-full flex justify-center items-center"
-              style={{ minHeight: '600px' }}
+              className="border rounded-lg overflow-hidden bg-[#f8f9fa] w-full flex justify-center items-center min-h-[600px]"
             />
             <TextEditor canvas={canvas} />
           </div>
