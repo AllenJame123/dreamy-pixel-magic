@@ -17,6 +17,7 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
   const initCanvas = (width: number, height: number) => {
     if (!canvasRef.current) return null;
     
+    // Dispose of existing canvas if it exists
     if (fabricCanvas) {
       fabricCanvas.dispose();
     }
@@ -41,21 +42,38 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
     reader.onload = (e) => {
       const img = new Image();
       img.onload = () => {
-        const naturalWidth = img.naturalWidth;
-        const naturalHeight = img.naturalHeight;
+        const maxWidth = 800; // Maximum width for the canvas
+        const maxHeight = 600; // Maximum height for the canvas
         
-        const canvas = initCanvas(naturalWidth, naturalHeight);
+        let width = img.naturalWidth;
+        let height = img.naturalHeight;
+        
+        // Scale down the image if it's too large
+        if (width > maxWidth || height > maxHeight) {
+          const ratio = Math.min(maxWidth / width, maxHeight / height);
+          width *= ratio;
+          height *= ratio;
+        }
+        
+        const canvas = initCanvas(width, height);
         if (!canvas) return;
 
         fabric.Image.fromURL(e.target?.result as string, (fabricImg) => {
-          fabricImg.scaleToWidth(canvas.width!);
-          fabricImg.scaleToHeight(canvas.height!);
+          canvas.setDimensions({
+            width: width,
+            height: height
+          });
+
+          fabricImg.scaleToWidth(width);
+          fabricImg.scaleToHeight(height);
           
           fabricImg.set({
             left: 0,
             top: 0,
             originX: 'left',
-            originY: 'top'
+            originY: 'top',
+            selectable: false,
+            evented: false
           });
 
           canvas.clear();
@@ -64,7 +82,7 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
           onImageUploaded(canvas);
           setHasImage(true);
           toast.success('Image uploaded successfully');
-        }, { crossOrigin: 'anonymous' });
+        });
       };
       img.src = e.target?.result as string;
     };
@@ -100,7 +118,7 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
         <div className="border rounded-lg overflow-hidden bg-transparent">
           <canvas
             ref={canvasRef}
-            style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
+            style={{ width: '100%', height: 'auto', display: 'block' }}
           />
         </div>
       )}
