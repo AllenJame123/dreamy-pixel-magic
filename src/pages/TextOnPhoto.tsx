@@ -10,6 +10,7 @@ const TextOnPhoto = () => {
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -133,16 +134,29 @@ const TextOnPhoto = () => {
     canvas.on('mouse:down', saveState);
   }, [canvas]);
 
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <div className="flex flex-col items-center gap-4 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold">Online Image Text Editor</h1>
+      <h1 className="text-2xl font-bold mb-4">Online Image Text Editor</h1>
       
-      <Input 
-        type="file" 
-        accept="image/*" 
-        onChange={handleImageUpload}
-        className="max-w-sm"
-      />
+      <div className="w-full max-w-sm flex flex-col items-center gap-4">
+        <input 
+          ref={fileInputRef}
+          type="file" 
+          accept="image/*" 
+          onChange={handleImageUpload}
+          className="hidden"
+        />
+        <Button 
+          onClick={triggerFileInput}
+          className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-4 text-lg"
+        >
+          Choose an Image
+        </Button>
+      </div>
 
       <canvas ref={canvasRef} className="border border-gray-200 rounded-lg max-w-full" />
 
