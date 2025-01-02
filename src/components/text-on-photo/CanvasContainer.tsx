@@ -28,11 +28,26 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
       preserveObjectStacking: true,
     });
 
+    // Set canvas dimensions to match container
+    const updateCanvasSize = () => {
+      const containerWidth = container.clientWidth;
+      canvas.setWidth(containerWidth);
+      canvas.setHeight(containerWidth * (canvas.height! / canvas.width!));
+      canvas.renderAll();
+    };
+
+    // Initial size update
+    updateCanvasSize();
+
+    // Update canvas size when window resizes
+    window.addEventListener('resize', updateCanvasSize);
+
     canvasInstanceRef.current = canvas;
     onCanvasInit(canvas);
 
     return () => {
       console.log('Cleaning up canvas');
+      window.removeEventListener('resize', updateCanvasSize);
       if (canvasInstanceRef.current) {
         canvasInstanceRef.current.dispose();
         canvasInstanceRef.current = null;
@@ -44,8 +59,9 @@ const CanvasContainer = ({ canvasRef, containerRef, onCanvasInit }: CanvasContai
     <div 
       ref={containerRef}
       className="overflow-hidden bg-transparent w-full"
+      style={{ maxWidth: '100%' }}
     >
-      <canvas ref={canvasRef} />
+      <canvas ref={canvasRef} style={{ maxWidth: '100%', height: 'auto' }} />
     </div>
   );
 };

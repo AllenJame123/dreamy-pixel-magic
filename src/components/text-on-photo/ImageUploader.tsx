@@ -21,7 +21,7 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
       fabricCanvas.dispose();
     }
 
-    const canvas = new fabric.Canvas(canvasRef.current, {
+    const canvas = new FabricCanvas(canvasRef.current, {
       width,
       height,
       backgroundColor: 'transparent'
@@ -39,7 +39,6 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      // Create a temporary image to get the natural dimensions
       const img = new Image();
       img.onload = () => {
         const naturalWidth = img.naturalWidth;
@@ -50,9 +49,11 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
         if (!canvas) return;
 
         fabric.Image.fromURL(e.target?.result as string, (fabricImg) => {
+          // Set image dimensions to match canvas
+          fabricImg.scaleToWidth(canvas.width!);
+          fabricImg.scaleToHeight(canvas.height!);
+          
           fabricImg.set({
-            scaleX: 1,
-            scaleY: 1,
             left: 0,
             top: 0,
             originX: 'left',
@@ -97,7 +98,7 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
       <div className="border rounded-lg overflow-hidden bg-gray-50">
         <canvas
           ref={canvasRef}
-          className="max-w-full h-auto"
+          style={{ maxWidth: '100%', height: 'auto', display: 'block' }}
         />
       </div>
 
