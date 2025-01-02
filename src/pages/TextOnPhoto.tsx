@@ -31,7 +31,13 @@ const TextOnPhoto = () => {
 
     fabric.Image.fromURL(
       imageUrl, 
-      (img) => {
+      (img, error) => {
+        if (error) {
+          console.error('Error loading image:', error);
+          toast.error("Failed to load image");
+          return;
+        }
+
         canvas.clear();
         
         // Calculate scaling to fit the canvas while maintaining aspect ratio
@@ -61,11 +67,7 @@ const TextOnPhoto = () => {
         toast.success("Image uploaded successfully");
       },
       {
-        crossOrigin: 'anonymous',
-        onError: (err) => {
-          console.error('Error loading image:', err);
-          toast.error("Failed to load image");
-        }
+        crossOrigin: 'anonymous'
       }
     );
   }, [canvas, saveState]);
