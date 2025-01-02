@@ -29,38 +29,45 @@ const TextOnPhoto = () => {
       return;
     }
 
-    fabric.Image.fromURL(imageUrl, (img) => {
-      canvas.clear();
-      
-      // Calculate scaling to fit the canvas while maintaining aspect ratio
-      const canvasWidth = canvas.width || 800;
-      const canvasHeight = canvas.height || 600;
-      const scale = Math.min(
-        canvasWidth / img.width!,
-        canvasHeight / img.height!
-      );
+    fabric.Image.fromURL(
+      imageUrl, 
+      (img) => {
+        canvas.clear();
+        
+        // Calculate scaling to fit the canvas while maintaining aspect ratio
+        const canvasWidth = canvas.width || 800;
+        const canvasHeight = canvas.height || 600;
+        const scale = Math.min(
+          canvasWidth / img.width!,
+          canvasHeight / img.height!
+        );
 
-      img.set({
-        scaleX: scale,
-        scaleY: scale,
-        selectable: false,
-      });
+        img.set({
+          scaleX: scale,
+          scaleY: scale,
+          selectable: false,
+        });
 
-      // Center the image
-      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-        originX: 'center',
-        originY: 'center',
-        left: canvasWidth / 2,
-        top: canvasHeight / 2
-      });
-      
-      saveState();
-      setShowEditor(true);
-      toast.success("Image uploaded successfully");
-    }, (error) => {
-      console.error('Error loading image:', error);
-      toast.error("Failed to load image");
-    });
+        // Center the image
+        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+          originX: 'center',
+          originY: 'center',
+          left: canvasWidth / 2,
+          top: canvasHeight / 2
+        });
+        
+        saveState();
+        setShowEditor(true);
+        toast.success("Image uploaded successfully");
+      },
+      {
+        crossOrigin: 'anonymous',
+        error: (err) => {
+          console.error('Error loading image:', err);
+          toast.error("Failed to load image");
+        }
+      }
+    );
   }, [canvas, saveState]);
 
   const handleCanvasInit = useCallback((fabricCanvas: fabric.Canvas) => {
