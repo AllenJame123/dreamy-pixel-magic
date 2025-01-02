@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { fabric } from "fabric";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import TextStyleControls from "./TextStyleControls";
 
 const Editor = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -124,6 +123,26 @@ const Editor = () => {
     fileInputRef.current?.click();
   };
 
+  const handleFontChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    if (!canvas) return;
+    const activeObject = canvas.getActiveObject() as fabric.Textbox;
+    if (activeObject && activeObject.type === 'textbox') {
+      activeObject.set('fontFamily', event.target.value);
+      canvas.renderAll();
+      saveState();
+    }
+  };
+
+  const handleSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!canvas) return;
+    const activeObject = canvas.getActiveObject() as fabric.Textbox;
+    if (activeObject && activeObject.type === 'textbox') {
+      activeObject.set('fontSize', parseInt(event.target.value || "20", 10));
+      canvas.renderAll();
+      saveState();
+    }
+  };
+
   return (
     <div className="flex flex-col items-center gap-4">
       <div className="w-full max-w-sm flex flex-col items-center gap-4">
@@ -144,49 +163,11 @@ const Editor = () => {
 
       <canvas ref={canvasRef} className="border border-gray-200 rounded-lg max-w-full" />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-        <div className="space-y-2">
-          <Label htmlFor="textInput">Text</Label>
-          <Input id="textInput" placeholder="Enter text" />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="fontSelect">Font Style</Label>
-          <select 
-            id="fontSelect" 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          >
-            <option value="Arial">Arial</option>
-            <option value="Courier New">Courier New</option>
-            <option value="Times New Roman">Times New Roman</option>
-          </select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="fontSize">Font Size</Label>
-          <Input 
-            type="number" 
-            id="fontSize" 
-            placeholder="Font Size" 
-            defaultValue="20"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Text Style</Label>
-          <div className="flex gap-2">
-            <Button onClick={() => toggleStyle('bold')} variant="outline" size="sm">B</Button>
-            <Button onClick={() => toggleStyle('italic')} variant="outline" size="sm">I</Button>
-            <Button onClick={() => toggleStyle('underline')} variant="outline" size="sm">U</Button>
-            <Input 
-              type="color" 
-              id="fontColor" 
-              defaultValue="#000000"
-              className="w-12 h-10 p-1"
-            />
-          </div>
-        </div>
-      </div>
+      <TextStyleControls
+        onStyleToggle={toggleStyle}
+        onFontChange={handleFontChange}
+        onSizeChange={handleSizeChange}
+      />
 
       <div className="flex flex-wrap gap-2 justify-center">
         <Button 
