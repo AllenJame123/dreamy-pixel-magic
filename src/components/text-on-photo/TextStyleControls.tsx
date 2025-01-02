@@ -13,7 +13,7 @@ const TextStyleControls = ({
   onStyleToggle,
   onFontChange,
   onSizeChange,
-  defaultFontSize = "20"
+  defaultFontSize = "85"
 }: TextStyleControlsProps) => {
   return (
     <div className="flex items-center gap-4 p-4 bg-white/50 rounded-lg">
