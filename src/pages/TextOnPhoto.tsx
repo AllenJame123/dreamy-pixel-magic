@@ -50,7 +50,7 @@ const TextOnPhoto = () => {
 
   return (
     <div className="min-h-screen py-8 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="container mx-auto px-4">
         <h1 className="text-4xl font-bold mb-8 text-center">Add Text to Photos</h1>
         
         {!imageUploaded ? (
@@ -58,29 +58,18 @@ const TextOnPhoto = () => {
             <ImageUploader onImageUploaded={handleImageUploaded} />
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Left Sidebar - Text Controls */}
-            <div className="space-y-4">
-              <Card className="p-4">
-                <TextEditor canvas={canvas} />
-              </Card>
-              <Card className="p-4">
-                <FontControls canvas={canvas} />
-              </Card>
-            </div>
+          <div className="flex flex-col gap-6">
+            {/* Text Editor Controls - Always Visible at Top */}
+            <Card className="p-4">
+              <TextEditor canvas={canvas} />
+            </Card>
 
-            {/* Main Canvas Area */}
-            <div className="md:col-span-2">
-              <Card className="aspect-[4/3] relative">
-                <CanvasContainer
-                  canvasRef={canvasRef}
-                  containerRef={containerRef}
-                  onCanvasInit={handleCanvasInit}
-                />
-              </Card>
-              
-              {/* Bottom Controls */}
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Left Side Controls */}
+              <div className="lg:col-span-3 space-y-4">
+                <Card className="p-4">
+                  <FontControls canvas={canvas} />
+                </Card>
                 <Card className="p-4">
                   <TextAlignmentControls canvas={canvas} />
                 </Card>
@@ -99,6 +88,17 @@ const TextOnPhoto = () => {
                         setHistoryIndex(historyIndex + 1);
                       }
                     }}
+                  />
+                </Card>
+              </div>
+
+              {/* Canvas Area - Larger and More Prominent */}
+              <div className="lg:col-span-9">
+                <Card className="w-full aspect-[4/3] relative">
+                  <CanvasContainer
+                    canvasRef={canvasRef}
+                    containerRef={containerRef}
+                    onCanvasInit={handleCanvasInit}
                   />
                 </Card>
               </div>
