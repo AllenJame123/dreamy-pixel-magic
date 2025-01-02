@@ -2,9 +2,9 @@ import { useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import ImageUploader from "@/components/text-on-photo/ImageUploader";
 import TextEditor from "@/components/text-on-photo/TextEditor";
-import TextControls from "@/components/text-on-photo/TextControls";
-import TextAlignmentControls from "@/components/text-on-photo/TextAlignmentControls";
 import FontControls from "@/components/text-on-photo/FontControls";
+import TextAlignmentControls from "@/components/text-on-photo/TextAlignmentControls";
+import TextControls from "@/components/text-on-photo/TextControls";
 import CanvasContainer from "@/components/text-on-photo/CanvasContainer";
 import { fabric } from "fabric";
 
