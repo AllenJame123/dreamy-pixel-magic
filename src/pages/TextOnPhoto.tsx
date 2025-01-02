@@ -9,7 +9,6 @@ const TextOnPhoto = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [undoStack, setUndoStack] = useState<string[]>([]);
-  const [redoStack, setRedoStack] = useState<string[]>([]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -30,7 +29,6 @@ const TextOnPhoto = () => {
   const saveState = () => {
     if (!canvas) return;
     setUndoStack(prev => [...prev, JSON.stringify(canvas)]);
-    setRedoStack([]);
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,19 +101,8 @@ const TextOnPhoto = () => {
 
   const undo = () => {
     if (!canvas || undoStack.length === 0) return;
-
-    setRedoStack(prev => [...prev, JSON.stringify(canvas)]);
     const state = undoStack[undoStack.length - 1];
     setUndoStack(prev => prev.slice(0, -1));
-    canvas.loadFromJSON(state, canvas.renderAll.bind(canvas));
-  };
-
-  const redo = () => {
-    if (!canvas || redoStack.length === 0) return;
-
-    setUndoStack(prev => [...prev, JSON.stringify(canvas)]);
-    const state = redoStack[redoStack.length - 1];
-    setRedoStack(prev => prev.slice(0, -1));
     canvas.loadFromJSON(state, canvas.renderAll.bind(canvas));
   };
 
@@ -190,7 +177,6 @@ const TextOnPhoto = () => {
         <Button onClick={() => toggleStyle('underline')}>Underline</Button>
         <Button onClick={addText}>Add Text</Button>
         <Button onClick={undo} variant="outline">Undo</Button>
-        <Button onClick={redo} variant="outline">Redo</Button>
         <Button onClick={downloadImage} variant="default" className="bg-green-600 hover:bg-green-700">
           Download Image
         </Button>
