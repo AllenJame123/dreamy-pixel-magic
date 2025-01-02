@@ -9,71 +9,68 @@ interface ImageUploaderProps {
 
 const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const handleImageUpload = (file: File) => {
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
     if (!file.type.startsWith('image/')) {
       toast.error('Please upload an image file');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const imageDataUrl = e.target?.result as string;
-      setImageUrl(imageDataUrl);
-      onImageUploaded(imageDataUrl);
-      toast.success('Image uploaded successfully');
-    };
-    reader.readAsDataURL(file);
+    // Create a local preview URL
+    const url = URL.createObjectURL(file);
+    setPreviewUrl(url);
+    onImageUploaded(url);
+    toast.success('Image uploaded successfully');
   };
 
   return (
     <div className="space-y-4">
-      {!imageUrl ? (
-        <div 
-          className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <div className="space-y-4">
-            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <Upload className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm font-medium">Click to upload an image</p>
-              <Button
-                variant="link"
-                className="text-primary"
-              >
-                Browse files
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Supports: JPG, PNG
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div className="border rounded-lg overflow-hidden">
-          <img 
-            src={imageUrl} 
-            alt="Uploaded image"
-            className="w-full h-auto object-contain"
-          />
-        </div>
-      )}
-
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) {
-            handleImageUpload(file);
-          }
-        }}
+        onChange={handleImageUpload}
         className="hidden"
       />
+
+      {!previewUrl ? (
+        <Button 
+          variant="outline" 
+          className="w-full h-64 flex flex-col items-center justify-center gap-4 border-2 border-dashed"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <Upload className="h-8 w-8" />
+          <div className="text-center">
+            <p className="font-medium">Click to upload an image</p>
+            <p className="text-sm text-muted-foreground">Supports: JPG, PNG</p>
+          </div>
+        </Button>
+      ) : (
+        <div className="relative border rounded-lg overflow-hidden bg-white">
+          <img
+            src={previewUrl}
+            alt="Preview"
+            className="w-full h-auto max-h-[500px] object-contain"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            className="absolute top-2 right-2"
+            onClick={() => {
+              setPreviewUrl(null);
+              if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+              }
+            }}
+          >
+            Change Image
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

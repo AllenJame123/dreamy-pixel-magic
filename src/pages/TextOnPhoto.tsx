@@ -9,10 +9,12 @@ import { fabric } from "fabric";
 const TextOnPhoto = () => {
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [hasImage, setHasImage] = useState(false);
+  const [currentImage, setCurrentImage] = useState<string | null>(null);
 
   const handleImageUploaded = (imageUrl: string) => {
+    setCurrentImage(imageUrl);
     setHasImage(true);
-    // We'll implement Fabric.js functionality here later
+    console.log("Image URL received:", imageUrl); // Debug log
   };
 
   return (
@@ -24,15 +26,11 @@ const TextOnPhoto = () => {
         </p>
       </div>
 
-      {!hasImage ? (
-        <Card className="p-6 max-w-xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="p-6">
           <ImageUploader onImageUploaded={handleImageUploaded} />
         </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="p-6">
-            <ImageUploader onImageUploaded={handleImageUploaded} />
-          </Card>
+        {hasImage && (
           <Card className="p-6 space-y-6">
             <TextEditor canvas={canvas} />
             <TextControls 
@@ -44,8 +42,8 @@ const TextOnPhoto = () => {
             />
             <TextAlignmentControls canvas={canvas} />
           </Card>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
