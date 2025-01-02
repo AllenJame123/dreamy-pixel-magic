@@ -23,7 +23,9 @@ const ImageUploader = ({ canvas, saveState }: ImageUploaderProps) => {
           return;
         }
 
-        canvas.clear();
+        // Clear existing objects but keep the canvas instance
+        canvas.remove(...canvas.getObjects());
+        
         canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
           scaleX: canvas.width! / img.width!,
           scaleY: canvas.height! / img.height!,

@@ -20,20 +20,26 @@ const CanvasControls = ({
   const handleUndo = () => {
     if (!canvas || undoStack.length === 0) return;
     
-    setRedoStack(prev => [...prev, JSON.stringify(canvas)]);
+    const newRedoStack = [...redoStack, JSON.stringify(canvas)];
     const state = undoStack[undoStack.length - 1];
-    setUndoStack(prev => prev.slice(0, -1));
+    const newUndoStack = undoStack.slice(0, -1);
+    
     canvas.loadFromJSON(state, canvas.renderAll.bind(canvas));
+    setRedoStack(newRedoStack);
+    setUndoStack(newUndoStack);
     toast.info("Undo successful");
   };
 
   const handleRedo = () => {
     if (!canvas || redoStack.length === 0) return;
     
-    setUndoStack(prev => [...prev, JSON.stringify(canvas)]);
+    const newUndoStack = [...undoStack, JSON.stringify(canvas)];
     const state = redoStack[redoStack.length - 1];
-    setRedoStack(prev => prev.slice(0, -1));
+    const newRedoStack = redoStack.slice(0, -1);
+    
     canvas.loadFromJSON(state, canvas.renderAll.bind(canvas));
+    setUndoStack(newUndoStack);
+    setRedoStack(newRedoStack);
     toast.info("Redo successful");
   };
 
