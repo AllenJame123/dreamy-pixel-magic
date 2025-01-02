@@ -1,8 +1,7 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/select";
 import { fabric } from "fabric";
 import { toast } from "sonner";
 
@@ -108,7 +107,6 @@ const TextOnPhoto = () => {
     
     const link = document.createElement('a');
     link.download = 'edited-image.png';
-    // Fix: Pass an object with format property
     link.href = canvas.toDataURL({ format: 'png' });
     link.click();
   }, [canvas]);
