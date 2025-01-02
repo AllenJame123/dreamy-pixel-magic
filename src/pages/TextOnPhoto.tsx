@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { fabric } from "fabric";
 import { toast } from "sonner";
+import ImageUploader from "@/components/text-on-photo/ImageUploader";
+import CanvasControls from "@/components/text-on-photo/CanvasControls";
 
 const TextOnPhoto = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -11,57 +13,11 @@ const TextOnPhoto = () => {
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
 
-  // Initialize canvas on component mount
-  const initCanvas = useCallback(() => {
-    if (!canvasRef.current) return;
-    
-    const fabricCanvas = new fabric.Canvas(canvasRef.current, {
-      width: 800,
-      height: 500,
-      preserveObjectStacking: true
-    });
-    
-    setCanvas(fabricCanvas);
-    
-    // Save state on mouse down
-    fabricCanvas.on('mouse:down', () => {
-      saveState();
-    });
-  }, []);
-
   const saveState = useCallback(() => {
     if (!canvas) return;
     setUndoStack(prev => [...prev, JSON.stringify(canvas)]);
     setRedoStack([]);
   }, [canvas]);
-
-  const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !canvas) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (!e.target?.result) return;
-      
-      fabric.Image.fromURL(e.target.result.toString(), (img) => {
-        if (!img) {
-          toast.error("Failed to load image");
-          return;
-        }
-
-        canvas.clear();
-        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-          scaleX: canvas.width! / img.width!,
-          scaleY: canvas.height! / img.height!,
-          selectable: false
-        });
-        
-        saveState();
-        toast.success("Image uploaded successfully");
-      });
-    };
-    reader.readAsDataURL(file);
-  }, [canvas, saveState]);
 
   const handleAddText = useCallback(() => {
     if (!canvas) return;
@@ -82,39 +38,28 @@ const TextOnPhoto = () => {
 
     canvas.add(textBox);
     saveState();
+    toast.success("Text added successfully!");
   }, [canvas, saveState]);
 
-  const handleUndo = useCallback(() => {
-    if (!canvas || undoStack.length === 0) return;
-    
-    setRedoStack(prev => [...prev, JSON.stringify(canvas)]);
-    const state = undoStack[undoStack.length - 1];
-    setUndoStack(prev => prev.slice(0, -1));
-    canvas.loadFromJSON(state, canvas.renderAll.bind(canvas));
-  }, [canvas, undoStack]);
-
-  const handleRedo = useCallback(() => {
-    if (!canvas || redoStack.length === 0) return;
-    
-    setUndoStack(prev => [...prev, JSON.stringify(canvas)]);
-    const state = redoStack[redoStack.length - 1];
-    setRedoStack(prev => prev.slice(0, -1));
-    canvas.loadFromJSON(state, canvas.renderAll.bind(canvas));
-  }, [canvas, redoStack]);
-
-  const handleDownload = useCallback(() => {
-    if (!canvas) return;
-    
-    const link = document.createElement('a');
-    link.download = 'edited-image.png';
-    link.href = canvas.toDataURL({ format: 'png' });
-    link.click();
-  }, [canvas]);
-
-  // Initialize canvas on mount
   useEffect(() => {
-    initCanvas();
-  }, [initCanvas]);
+    if (!canvasRef.current) return;
+    
+    const fabricCanvas = new fabric.Canvas(canvasRef.current, {
+      width: 800,
+      height: 500,
+      preserveObjectStacking: true
+    });
+    
+    setCanvas(fabricCanvas);
+    
+    fabricCanvas.on('mouse:down', () => {
+      saveState();
+    });
+
+    return () => {
+      fabricCanvas.dispose();
+    };
+  }, [saveState]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -123,12 +68,7 @@ const TextOnPhoto = () => {
           <h1 className="text-2xl font-bold mb-6 text-center">Online Image Text Editor</h1>
           
           <div className="space-y-4">
-            <Input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="w-full"
-            />
+            <ImageUploader canvas={canvas} saveState={saveState} />
 
             <canvas ref={canvasRef} className="border border-gray-200 rounded-lg w-full" />
 
@@ -167,9 +107,13 @@ const TextOnPhoto = () => {
 
             <div className="flex flex-wrap gap-2">
               <Button onClick={handleAddText}>Add Text</Button>
-              <Button onClick={handleUndo} variant="outline">Undo</Button>
-              <Button onClick={handleRedo} variant="outline">Redo</Button>
-              <Button onClick={handleDownload} variant="secondary">Download Image</Button>
+              <CanvasControls
+                canvas={canvas}
+                undoStack={undoStack}
+                redoStack={redoStack}
+                setUndoStack={setUndoStack}
+                setRedoStack={setRedoStack}
+              />
             </div>
           </div>
         </Card>
