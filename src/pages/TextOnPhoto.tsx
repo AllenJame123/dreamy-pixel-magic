@@ -1,29 +1,66 @@
-import { useRef, useState, useCallback } from "react";
-import { Card } from "@/components/ui/card";
+import { useRef, useState } from "react";
+import { fabric } from "fabric";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { fabric } from "fabric";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import ImageUploader from "@/components/text-on-photo/ImageUploader";
-import CanvasControls from "@/components/text-on-photo/CanvasControls";
-import CanvasContainer from "@/components/text-on-photo/CanvasContainer";
 
 const TextOnPhoto = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
 
-  const saveState = useCallback(() => {
+  // Initialize canvas on component mount
+  const initCanvas = () => {
+    if (!canvasRef.current || canvas) return;
+    
+    const newCanvas = new fabric.Canvas(canvasRef.current, {
+      width: 800,
+      height: 500,
+      preserveObjectStacking: true,
+    });
+    
+    setCanvas(newCanvas);
+    return newCanvas;
+  };
+
+  // Save current state
+  const saveState = () => {
     if (!canvas) return;
-    setUndoStack(prev => [...prev, JSON.stringify(canvas)]);
+    setUndoStack([...undoStack, JSON.stringify(canvas)]);
     setRedoStack([]);
-  }, [canvas]);
+  };
 
-  const handleAddText = useCallback(() => {
+  // Handle image upload
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const fabricCanvas = canvas || initCanvas();
+    if (!fabricCanvas) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (!e.target?.result) return;
+      
+      fabric.Image.fromURL(e.target.result.toString(), (img) => {
+        fabricCanvas.clear();
+        fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas), {
+          scaleX: fabricCanvas.width! / img.width!,
+          scaleY: fabricCanvas.height! / img.height!,
+        });
+        saveState();
+        toast.success("Image uploaded successfully");
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Add text to canvas
+  const handleAddText = () => {
     if (!canvas) return;
-
+    
     const text = (document.getElementById('textInput') as HTMLInputElement)?.value;
     const font = (document.getElementById('fontSelect') as HTMLSelectElement)?.value;
     const size = parseInt((document.getElementById('fontSize') as HTMLInputElement)?.value || "20", 10);
@@ -40,75 +77,99 @@ const TextOnPhoto = () => {
 
     canvas.add(textBox);
     saveState();
-    toast.success("Text added successfully!");
-  }, [canvas, saveState]);
+    toast.success("Text added successfully");
+  };
 
-  const handleCanvasInit = useCallback((fabricCanvas: fabric.Canvas) => {
-    setCanvas(fabricCanvas);
-    fabricCanvas.on('object:modified', saveState);
-    fabricCanvas.on('object:added', saveState);
-  }, [saveState]);
+  // Handle undo
+  const handleUndo = () => {
+    if (!canvas || undoStack.length === 0) return;
+    
+    setRedoStack([...redoStack, JSON.stringify(canvas)]);
+    const state = undoStack[undoStack.length - 1];
+    setUndoStack(undoStack.slice(0, -1));
+    canvas.loadFromJSON(state, canvas.renderAll.bind(canvas));
+    toast.info("Undo successful");
+  };
+
+  // Handle redo
+  const handleRedo = () => {
+    if (!canvas || redoStack.length === 0) return;
+    
+    setUndoStack([...undoStack, JSON.stringify(canvas)]);
+    const state = redoStack[redoStack.length - 1];
+    setRedoStack(redoStack.slice(0, -1));
+    canvas.loadFromJSON(state, canvas.renderAll.bind(canvas));
+    toast.info("Redo successful");
+  };
+
+  // Handle download
+  const handleDownload = () => {
+    if (!canvas) return;
+    const link = document.createElement('a');
+    link.download = 'edited-image.png';
+    link.href = canvas.toDataURL();
+    link.click();
+    toast.success("Image downloaded successfully!");
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <Card className="p-6">
-          <h1 className="text-2xl font-bold mb-6 text-center">Online Image Text Editor</h1>
-          
-          <div className="space-y-4">
-            <ImageUploader canvas={canvas} saveState={saveState} />
+    <div className="flex flex-col items-center gap-4 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Online Image Text Editor</h1>
+      
+      <Input
+        type="file"
+        accept="image/*"
+        onChange={handleImageUpload}
+        className="w-full max-w-md"
+      />
 
-            <CanvasContainer 
-              canvasRef={canvasRef}
-              containerRef={containerRef}
-              onCanvasInit={handleCanvasInit}
-            />
+      <div className="w-full overflow-hidden border border-gray-200 rounded-lg">
+        <canvas ref={canvasRef} className="max-w-full" />
+      </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                id="textInput"
-                type="text"
-                placeholder="Enter text"
-                className="w-full"
-              />
-              
-              <select
-                id="fontSelect"
-                className="w-full border rounded-md p-2"
-              >
-                <option value="Arial">Arial</option>
-                <option value="Courier New">Courier New</option>
-                <option value="Times New Roman">Times New Roman</option>
-              </select>
+      <div className="flex flex-wrap gap-2 items-center justify-center w-full">
+        <Input
+          id="textInput"
+          placeholder="Enter text"
+          className="max-w-[200px]"
+        />
+        
+        <Select id="fontSelect" defaultValue="Arial">
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select font" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Arial">Arial</SelectItem>
+            <SelectItem value="Courier New">Courier New</SelectItem>
+            <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+          </SelectContent>
+        </Select>
 
-              <Input
-                id="fontSize"
-                type="number"
-                placeholder="Font Size"
-                defaultValue="20"
-                className="w-full"
-              />
+        <Input
+          id="fontSize"
+          type="number"
+          placeholder="Font Size"
+          defaultValue="20"
+          className="w-24"
+        />
+        
+        <Input
+          id="fontColor"
+          type="color"
+          defaultValue="#000000"
+          className="w-24 h-10"
+        />
 
-              <Input
-                id="fontColor"
-                type="color"
-                defaultValue="#000000"
-                className="w-full h-10"
-              />
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <Button onClick={handleAddText}>Add Text</Button>
-              <CanvasControls
-                canvas={canvas}
-                undoStack={undoStack}
-                redoStack={redoStack}
-                setUndoStack={setUndoStack}
-                setRedoStack={setRedoStack}
-              />
-            </div>
-          </div>
-        </Card>
+        <Button onClick={handleAddText}>Add Text</Button>
+        <Button variant="outline" onClick={handleUndo} disabled={undoStack.length === 0}>
+          Undo
+        </Button>
+        <Button variant="outline" onClick={handleRedo} disabled={redoStack.length === 0}>
+          Redo
+        </Button>
+        <Button variant="secondary" onClick={handleDownload}>
+          Download Image
+        </Button>
       </div>
     </div>
   );
