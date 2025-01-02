@@ -1,14 +1,15 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import ImageUploader from "@/components/text-on-photo/ImageUploader";
 import TextEditor from "@/components/text-on-photo/TextEditor";
+import { fabric } from "fabric";
 
 const TextOnPhoto = () => {
-  const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
+  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [hasImage, setHasImage] = useState(false);
 
-  const handleImageUploaded = (newCanvas: HTMLCanvasElement) => {
-    setCanvas(newCanvas);
+  const handleImageUploaded = (fabricCanvas: fabric.Canvas) => {
+    setCanvas(fabricCanvas);
     setHasImage(true);
   };
 

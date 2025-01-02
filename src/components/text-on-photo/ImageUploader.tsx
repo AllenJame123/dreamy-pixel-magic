@@ -1,57 +1,35 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
+import { fabric } from "fabric";
 
 interface ImageUploaderProps {
-  onImageUploaded: (canvas: HTMLCanvasElement) => void;
+  onImageUploaded: (canvas: fabric.Canvas) => void;
 }
 
 const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [image, setImage] = useState<HTMLImageElement | null>(null);
+  const [fabricCanvas, setFabricCanvas] = useState<fabric.Canvas | null>(null);
 
-  useEffect(() => {
-    if (image && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      // Set canvas dimensions based on image size while maintaining aspect ratio
-      const maxWidth = 800;
-      const maxHeight = 600;
-      let width = image.width;
-      let height = image.height;
-
-      if (width > maxWidth) {
-        const ratio = maxWidth / width;
-        width = maxWidth;
-        height = height * ratio;
-      }
-
-      if (height > maxHeight) {
-        const ratio = maxHeight / height;
-        height = maxHeight;
-        width = width * ratio;
-      }
-
-      canvas.width = width;
-      canvas.height = height;
-
-      // Clear canvas
-      ctx.clearRect(0, 0, width, height);
-      
-      // Draw white background
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, width, height);
-      
-      // Draw image
-      ctx.drawImage(image, 0, 0, width, height);
-      
-      onImageUploaded(canvas);
+  const initCanvas = () => {
+    if (!canvasRef.current) return null;
+    
+    // Clean up existing canvas if it exists
+    if (fabricCanvas) {
+      fabricCanvas.dispose();
     }
-  }, [image, onImageUploaded]);
+
+    const canvas = new fabric.Canvas(canvasRef.current, {
+      width: 800,
+      height: 600,
+      backgroundColor: '#ffffff'
+    });
+
+    setFabricCanvas(canvas);
+    return canvas;
+  };
 
   const handleImageUpload = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -61,17 +39,43 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        console.log('Image loaded successfully:', img.width, 'x', img.height);
-        setImage(img);
+      const canvas = initCanvas();
+      if (!canvas) return;
+
+      fabric.Image.fromURL(e.target?.result as string, (img) => {
+        // Scale image to fit canvas while maintaining aspect ratio
+        const maxWidth = 800;
+        const maxHeight = 600;
+        let width = img.width || 0;
+        let height = img.height || 0;
+
+        if (width > maxWidth) {
+          const ratio = maxWidth / width;
+          width = maxWidth;
+          height = height * ratio;
+        }
+
+        if (height > maxHeight) {
+          const ratio = maxHeight / height;
+          height = maxHeight;
+          width = width * ratio;
+        }
+
+        img.set({
+          scaleX: width / (img.width || 1),
+          scaleY: height / (img.height || 1),
+          left: (canvas.width || 0) / 2,
+          top: (canvas.height || 0) / 2,
+          originX: 'center',
+          originY: 'center'
+        });
+
+        canvas.clear();
+        canvas.add(img);
+        canvas.renderAll();
+        onImageUploaded(canvas);
         toast.success('Image uploaded successfully');
-      };
-      img.onerror = () => {
-        console.error('Error loading image');
-        toast.error('Error loading image');
-      };
-      img.src = e.target?.result as string;
+      }, { crossOrigin: 'anonymous' });
     };
     reader.readAsDataURL(file);
   };
