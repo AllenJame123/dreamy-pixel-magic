@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
+import { fabric } from "fabric";
 
 interface ImageUploaderProps {
   onImageUploaded: (canvas: fabric.Canvas) => void;
@@ -10,6 +11,7 @@ interface ImageUploaderProps {
 const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const canvasRef = useRef<fabric.Canvas | null>(null);
 
   const handleImageUpload = (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -17,59 +19,60 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
       return;
     }
 
-    // Create a local preview URL
-    const objectUrl = URL.createObjectURL(file);
-    setPreviewUrl(objectUrl);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const imgUrl = e.target?.result as string;
+      setPreviewUrl(imgUrl);
 
-    const img = new Image();
-    img.onload = () => {
-      // Create canvas element
-      const canvas = document.createElement('canvas');
-      const containerWidth = window.innerWidth > 800 ? 800 : window.innerWidth - 40;
-      const containerHeight = 600;
+      // Create a new image object
+      const img = new Image();
+      img.onload = () => {
+        // Calculate container dimensions
+        const containerWidth = window.innerWidth > 800 ? 800 : window.innerWidth - 40;
+        const containerHeight = 600;
 
-      canvas.width = containerWidth;
-      canvas.height = containerHeight;
-
-      // Initialize fabric canvas
-      const fabricCanvas = new fabric.Canvas(canvas, {
-        width: containerWidth,
-        height: containerHeight,
-        backgroundColor: '#ffffff'
-      });
-
-      // Create fabric image
-      fabric.Image.fromURL(objectUrl, (fabricImage) => {
-        // Scale image to fit canvas
-        const scaleX = (containerWidth - 40) / fabricImage.width!;
-        const scaleY = (containerHeight - 40) / fabricImage.height!;
-        const scale = Math.min(scaleX, scaleY);
-        
-        fabricImage.scale(scale);
-        
-        // Center the image
-        fabricImage.set({
-          left: (containerWidth - fabricImage.width! * scale) / 2,
-          top: (containerHeight - fabricImage.height! * scale) / 2
-        });
-
-        // Add to canvas
-        fabricCanvas.add(fabricImage);
-        fabricCanvas.renderAll();
-        
-        // Clear previous canvas
-        const container = document.getElementById('canvas-container');
-        if (container) {
-          container.innerHTML = '';
-          container.appendChild(canvas);
+        // If there's an existing canvas, dispose of it
+        if (canvasRef.current) {
+          canvasRef.current.dispose();
         }
 
-        onImageUploaded(fabricCanvas);
-        toast.success('Image uploaded successfully');
-      });
+        // Create new canvas
+        const canvas = new fabric.Canvas('canvas-container', {
+          width: containerWidth,
+          height: containerHeight,
+          backgroundColor: '#ffffff'
+        });
+
+        canvasRef.current = canvas;
+
+        // Create fabric image
+        fabric.Image.fromURL(imgUrl, (fabricImg) => {
+          // Scale image to fit canvas while maintaining aspect ratio
+          const scaleX = (containerWidth - 40) / fabricImg.width!;
+          const scaleY = (containerHeight - 40) / fabricImg.height!;
+          const scale = Math.min(scaleX, scaleY);
+
+          fabricImg.scale(scale);
+
+          // Center the image
+          fabricImg.set({
+            left: (containerWidth - fabricImg.width! * scale) / 2,
+            top: (containerHeight - fabricImg.height! * scale) / 2
+          });
+
+          // Clear canvas and add image
+          canvas.clear();
+          canvas.add(fabricImg);
+          canvas.renderAll();
+
+          onImageUploaded(canvas);
+          toast.success('Image uploaded successfully');
+        });
+      };
+      img.src = imgUrl;
     };
 
-    img.src = objectUrl;
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -116,6 +119,7 @@ const ImageUploader = ({ onImageUploaded }: ImageUploaderProps) => {
         }}
         className="hidden"
       />
+      <canvas id="canvas-container" className="hidden" />
     </div>
   );
 };
