@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { fabric } from "fabric";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { TextControls } from "@/components/text-editor/TextControls";
 
 const TextOnPhoto = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -55,50 +53,6 @@ const TextOnPhoto = () => {
     reader.readAsDataURL(file);
   };
 
-  const addText = () => {
-    if (!canvas) return;
-
-    const text = (document.getElementById('textInput') as HTMLInputElement)?.value;
-    const font = (document.getElementById('fontSelect') as HTMLSelectElement)?.value;
-    const size = parseInt((document.getElementById('fontSize') as HTMLInputElement)?.value || "20", 10);
-    const color = (document.getElementById('fontColor') as HTMLInputElement)?.value;
-
-    const textBox = new fabric.Textbox(text, {
-      left: 100,
-      top: 100,
-      fontFamily: font,
-      fontSize: size,
-      fill: color,
-      editable: true,
-    });
-
-    canvas.add(textBox);
-    canvas.setActiveObject(textBox);
-    saveState();
-  };
-
-  const toggleStyle = (style: 'bold' | 'italic' | 'underline') => {
-    if (!canvas) return;
-
-    const activeObject = canvas.getActiveObject() as fabric.Textbox;
-    if (!activeObject || activeObject.type !== 'textbox') return;
-
-    switch (style) {
-      case 'bold':
-        activeObject.set('fontWeight', activeObject.fontWeight === 'bold' ? 'normal' : 'bold');
-        break;
-      case 'italic':
-        activeObject.set('fontStyle', activeObject.fontStyle === 'italic' ? 'normal' : 'italic');
-        break;
-      case 'underline':
-        activeObject.set('underline', !activeObject.underline);
-        break;
-    }
-
-    canvas.renderAll();
-    saveState();
-  };
-
   const undo = () => {
     if (!canvas || undoStack.length === 0) return;
     const state = undoStack[undoStack.length - 1];
@@ -108,10 +62,8 @@ const TextOnPhoto = () => {
 
   const downloadImage = () => {
     if (!canvas) return;
-
     const link = document.createElement('a');
     link.download = 'edited-image.png';
-    // Fix: Pass the correct options object for toDataURL
     link.href = canvas.toDataURL({ format: 'png' });
     link.click();
   };
@@ -122,61 +74,31 @@ const TextOnPhoto = () => {
   }, [canvas]);
 
   return (
-    <div className="flex flex-col items-center gap-4 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold">Online Image Text Editor</h1>
+    <div className="flex flex-col items-center gap-4 max-w-4xl mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Online Image Text Editor</h1>
       
-      <Input 
-        type="file" 
-        accept="image/*" 
-        onChange={handleImageUpload}
-        className="max-w-sm"
-      />
+      <div className="w-full max-w-sm">
+        <Button 
+          variant="default" 
+          className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-6"
+          onClick={() => document.getElementById('imageUpload')?.click()}
+        >
+          Choose Image
+        </Button>
+        <input 
+          id="imageUpload"
+          type="file" 
+          accept="image/*" 
+          onChange={handleImageUpload}
+          className="hidden"
+        />
+      </div>
 
       <canvas ref={canvasRef} className="border border-gray-200 rounded-lg max-w-full" />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
-        <div className="space-y-2">
-          <Label htmlFor="textInput">Text</Label>
-          <Input id="textInput" placeholder="Enter text" />
-        </div>
+      <TextControls canvas={canvas} saveState={saveState} />
 
-        <div className="space-y-2">
-          <Label htmlFor="fontSelect">Font Style</Label>
-          <select 
-            id="fontSelect" 
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          >
-            <option value="Arial">Arial</option>
-            <option value="Courier New">Courier New</option>
-            <option value="Times New Roman">Times New Roman</option>
-          </select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="fontSize">Font Size</Label>
-          <Input 
-            type="number" 
-            id="fontSize" 
-            placeholder="Font Size" 
-            defaultValue="20"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="fontColor">Font Color</Label>
-          <Input 
-            type="color" 
-            id="fontColor" 
-            defaultValue="#000000"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-wrap gap-2 justify-center">
-        <Button onClick={() => toggleStyle('bold')}>Bold</Button>
-        <Button onClick={() => toggleStyle('italic')}>Italic</Button>
-        <Button onClick={() => toggleStyle('underline')}>Underline</Button>
-        <Button onClick={addText}>Add Text</Button>
+      <div className="flex gap-2 mt-4">
         <Button onClick={undo} variant="outline">Undo</Button>
         <Button onClick={downloadImage} variant="default" className="bg-green-600 hover:bg-green-700">
           Download Image
