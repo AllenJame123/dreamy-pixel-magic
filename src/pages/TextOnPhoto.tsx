@@ -31,9 +31,8 @@ const TextOnPhoto = () => {
 
     fabric.Image.fromURL(
       imageUrl, 
-      (img, error) => {
-        if (error) {
-          console.error('Error loading image:', error);
+      (img) => {
+        if (!img) {
           toast.error("Failed to load image");
           return;
         }
