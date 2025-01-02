@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { fabric } from "fabric";
@@ -6,6 +6,7 @@ import { ImageControls } from "@/components/text-on-photo/ImageControls";
 import { TextControls } from "@/components/text-on-photo/TextControls";
 import { UndoRedoControls } from "@/components/text-on-photo/UndoRedoControls";
 import CanvasContainer from "@/components/text-on-photo/CanvasContainer";
+import ImageUploader from "@/components/text-on-photo/ImageUploader";
 
 const TextOnPhoto = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -14,6 +15,7 @@ const TextOnPhoto = () => {
   const [selectedFont, setSelectedFont] = useState("Arial");
   const [undoStack, setUndoStack] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
+  const [showEditor, setShowEditor] = useState(false);
 
   const saveState = () => {
     if (!canvas) return;
@@ -21,26 +23,21 @@ const TextOnPhoto = () => {
     setRedoStack([]);
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file || !canvas) return;
+  const handleImageUpload = (imageUrl: string) => {
+    if (!canvas) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      fabric.Image.fromURL(e.target.result as string, (img) => {
-        img.set({
-          selectable: false,
-        });
-        canvas.clear();
-        canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
-          scaleX: canvas.width! / img.width!,
-          scaleY: canvas.height! / img.height!,
-        });
-        saveState();
-        toast.success("Image uploaded successfully!");
+    fabric.Image.fromURL(imageUrl, (img) => {
+      img.set({
+        selectable: false,
       });
-    };
-    reader.readAsDataURL(file);
+      canvas.clear();
+      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+        scaleX: canvas.width! / img.width!,
+        scaleY: canvas.height! / img.height!,
+      });
+      saveState();
+      setShowEditor(true);
+    });
   };
 
   const handleCanvasInit = (fabricCanvas: fabric.Canvas) => {
@@ -53,30 +50,46 @@ const TextOnPhoto = () => {
         <Card className="p-6">
           <h1 className="text-2xl font-bold mb-6 text-center">Add Text to Photo</h1>
           
-          <div className="space-y-6">
-            <ImageControls 
-              canvas={canvas}
-              onImageUpload={handleImageUpload}
-            />
+          {!showEditor ? (
+            <ImageUploader onImageUploaded={handleImageUpload} />
+          ) : (
+            <div className="space-y-6">
+              <ImageControls 
+                canvas={canvas}
+                onImageUpload={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const url = URL.createObjectURL(file);
+                    handleImageUpload(url);
+                  }
+                }}
+              />
 
-            <TextControls
-              canvas={canvas}
-              selectedFont={selectedFont}
-              onFontChange={setSelectedFont}
-              saveState={saveState}
-            />
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold">Text Options</h2>
+                <TextControls
+                  canvas={canvas}
+                  selectedFont={selectedFont}
+                  onFontChange={setSelectedFont}
+                  saveState={saveState}
+                />
+              </div>
 
-            <UndoRedoControls
-              canvas={canvas}
-              undoStack={undoStack}
-              redoStack={redoStack}
-              setUndoStack={setUndoStack}
-              setRedoStack={setRedoStack}
-            />
-          </div>
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold">History</h2>
+                <UndoRedoControls
+                  canvas={canvas}
+                  undoStack={undoStack}
+                  redoStack={redoStack}
+                  setUndoStack={setUndoStack}
+                  setRedoStack={setRedoStack}
+                />
+              </div>
+            </div>
+          )}
         </Card>
 
-        <Card className="p-6 bg-white">
+        <Card className={`p-6 bg-white ${!showEditor ? 'hidden' : ''}`}>
           <CanvasContainer
             canvasRef={canvasRef}
             containerRef={containerRef}

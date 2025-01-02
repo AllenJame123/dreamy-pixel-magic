@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { fabric } from "fabric";
 import { toast } from "sonner";
@@ -36,39 +37,50 @@ export const TextControls = ({ canvas, selectedFont, onFontChange, saveState }: 
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input
-          id="textInput"
-          type="text"
-          placeholder="Enter text"
-          className="w-full"
-        />
+      <div className="grid gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="textInput">Text</Label>
+          <Input
+            id="textInput"
+            type="text"
+            placeholder="Enter text"
+          />
+        </div>
 
-        <Select value={selectedFont} onValueChange={onFontChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select font" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Arial">Arial</SelectItem>
-            <SelectItem value="Courier New">Courier New</SelectItem>
-            <SelectItem value="Times New Roman">Times New Roman</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="space-y-2">
+          <Label htmlFor="fontSelect">Font Style</Label>
+          <Select value={selectedFont} onValueChange={onFontChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select font" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Arial">Arial</SelectItem>
+              <SelectItem value="Courier New">Courier New</SelectItem>
+              <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Input
-          id="fontSize"
-          type="number"
-          defaultValue="20"
-          placeholder="Font Size"
-          className="w-full"
-        />
+        <div className="space-y-2">
+          <Label htmlFor="fontSize">Font Size</Label>
+          <Input
+            id="fontSize"
+            type="number"
+            defaultValue="20"
+            min="8"
+            max="200"
+          />
+        </div>
 
-        <Input
-          id="fontColor"
-          type="color"
-          defaultValue="#000000"
-          className="w-full h-10"
-        />
+        <div className="space-y-2">
+          <Label htmlFor="fontColor">Font Color</Label>
+          <Input
+            id="fontColor"
+            type="color"
+            defaultValue="#000000"
+            className="h-10 p-1"
+          />
+        </div>
       </div>
 
       <Button onClick={addText} className="w-full">
