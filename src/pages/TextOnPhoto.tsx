@@ -53,25 +53,38 @@ const TextOnPhoto = () => {
       <div className="max-w-7xl mx-auto px-4">
         <h1 className="text-4xl font-bold mb-8 text-center">Add Text to Photos</h1>
         
-        <div className={imageUploaded ? "grid grid-cols-1 lg:grid-cols-12 gap-6" : "max-w-xl mx-auto"}>
-          {!imageUploaded ? (
-            <Card className="p-6 col-span-full">
-              <ImageUploader onImageUploaded={handleImageUploaded} />
-            </Card>
-          ) : (
-            <>
-              {/* Controls Panel */}
-              <div className="lg:col-span-4 space-y-6">
-                <Card className="p-6">
-                  <TextEditor canvas={canvas} />
-                </Card>
-                <Card className="p-6">
-                  <FontControls canvas={canvas} />
-                </Card>
-                <Card className="p-6">
+        {!imageUploaded ? (
+          <Card className="max-w-xl mx-auto p-6">
+            <ImageUploader onImageUploaded={handleImageUploaded} />
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Left Sidebar - Text Controls */}
+            <div className="space-y-4">
+              <Card className="p-4">
+                <TextEditor canvas={canvas} />
+              </Card>
+              <Card className="p-4">
+                <FontControls canvas={canvas} />
+              </Card>
+            </div>
+
+            {/* Main Canvas Area */}
+            <div className="md:col-span-2">
+              <Card className="aspect-[4/3] relative">
+                <CanvasContainer
+                  canvasRef={canvasRef}
+                  containerRef={containerRef}
+                  onCanvasInit={handleCanvasInit}
+                />
+              </Card>
+              
+              {/* Bottom Controls */}
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card className="p-4">
                   <TextAlignmentControls canvas={canvas} />
                 </Card>
-                <Card className="p-6">
+                <Card className="p-4">
                   <TextControls 
                     canvas={canvas}
                     canUndo={historyIndex > 0}
@@ -89,20 +102,9 @@ const TextOnPhoto = () => {
                   />
                 </Card>
               </div>
-              
-              {/* Canvas Area */}
-              <div className="lg:col-span-8">
-                <Card className="aspect-[4/3] relative">
-                  <CanvasContainer
-                    canvasRef={canvasRef}
-                    containerRef={containerRef}
-                    onCanvasInit={handleCanvasInit}
-                  />
-                </Card>
-              </div>
-            </>
-          )}
-        </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
