@@ -17,35 +17,51 @@ const TextStyleControls = ({
 }: TextStyleControlsProps) => {
   return (
     <div className="flex items-center gap-4 p-4 bg-white/50 rounded-lg">
-      <Input
-        id="textInput"
-        placeholder="Enter text"
-        className="max-w-[200px]"
-      />
+      <div className="flex items-center gap-2">
+        <Label htmlFor="textInput" className="text-sm font-medium">Text:</Label>
+        <Input
+          id="textInput"
+          placeholder="Enter text"
+          className="max-w-[200px]"
+        />
+      </div>
       
-      <select 
-        id="fontSelect" 
-        onChange={onFontChange}
-        className="h-10 px-3 rounded-md border border-input bg-background"
-      >
-        <option value="Arial">Arial</option>
-        <option value="Courier New">Courier New</option>
-        <option value="Times New Roman">Times New Roman</option>
-      </select>
+      <div className="flex items-center gap-2">
+        <Label htmlFor="fontSelect" className="text-sm font-medium">Font:</Label>
+        <select 
+          id="fontSelect" 
+          onChange={onFontChange}
+          className="h-10 px-3 rounded-md border border-input bg-background"
+        >
+          <option value="Arial">Arial</option>
+          <option value="Courier New">Courier New</option>
+          <option value="Times New Roman">Times New Roman</option>
+        </select>
+      </div>
 
-      <Input 
-        type="number" 
-        id="fontSize" 
-        placeholder="Size" 
-        defaultValue={defaultFontSize}
-        onChange={onSizeChange}
-        className="w-20"
-      />
+      <div className="flex items-center gap-2">
+        <Label htmlFor="fontSize" className="text-sm font-medium">Size:</Label>
+        <Input 
+          type="number" 
+          id="fontSize" 
+          placeholder="Size" 
+          defaultValue={defaultFontSize}
+          onChange={onSizeChange}
+          className="w-20"
+        />
+      </div>
 
-      <div className="flex gap-2">
-        <Button onClick={() => onStyleToggle('bold')} variant="outline" size="sm">B</Button>
-        <Button onClick={() => onStyleToggle('italic')} variant="outline" size="sm">I</Button>
-        <Button onClick={() => onStyleToggle('underline')} variant="outline" size="sm">U</Button>
+      <div className="flex items-center gap-2">
+        <Label className="text-sm font-medium">Style:</Label>
+        <div className="flex gap-1">
+          <Button onClick={() => onStyleToggle('bold')} variant="outline" size="sm" className="font-bold">B</Button>
+          <Button onClick={() => onStyleToggle('italic')} variant="outline" size="sm" className="italic">I</Button>
+          <Button onClick={() => onStyleToggle('underline')} variant="outline" size="sm" className="uppercase underline">U</Button>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Label htmlFor="fontColor" className="text-sm font-medium">Color:</Label>
         <Input 
           type="color" 
           id="fontColor" 
