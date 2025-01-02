@@ -173,19 +173,22 @@ const Editor = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="fontColor">Font Color</Label>
-          <Input 
-            type="color" 
-            id="fontColor" 
-            defaultValue="#000000"
-          />
+          <Label>Text Style</Label>
+          <div className="flex gap-2">
+            <Button onClick={() => toggleStyle('bold')} variant="outline" size="sm">B</Button>
+            <Button onClick={() => toggleStyle('italic')} variant="outline" size="sm">I</Button>
+            <Button onClick={() => toggleStyle('underline')} variant="outline" size="sm">U</Button>
+            <Input 
+              type="color" 
+              id="fontColor" 
+              defaultValue="#000000"
+              className="w-12 h-10 p-1"
+            />
+          </div>
         </div>
       </div>
 
       <div className="flex flex-wrap gap-2 justify-center">
-        <Button onClick={() => toggleStyle('bold')}>Bold</Button>
-        <Button onClick={() => toggleStyle('italic')}>Italic</Button>
-        <Button onClick={() => toggleStyle('underline')}>Underline</Button>
         <Button 
           onClick={addText} 
           className="bg-primary hover:bg-primary/90 text-white font-semibold py-6 px-8 text-lg"
