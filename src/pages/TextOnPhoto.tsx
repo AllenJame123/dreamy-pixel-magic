@@ -27,7 +27,7 @@ const TextOnPhoto = () => {
           <ImageUploader onImageUploaded={handleImageUploaded} />
         ) : (
           <div className="space-y-6">
-            <div id="canvas-container" />
+            <div id="canvas-container" className="border rounded-lg overflow-hidden bg-[#f8f9fa] w-full" />
             <TextEditor canvas={canvas} />
           </div>
         )}
