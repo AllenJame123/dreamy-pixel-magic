@@ -1,39 +1,21 @@
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
-import { Button } from "@/components/ui/button";
 import { ColorPicker } from "./ColorPicker";
-import { Bold, Italic, Underline } from "lucide-react";
 import { fabric } from "fabric";
 
 interface FontControlsProps {
   canvas: fabric.Canvas | null;
+  selectedFont: string;
+  onFontChange: (value: string) => void;
 }
 
-const FontControls = ({ canvas }: FontControlsProps) => {
-  const fonts = [
-    "Arial",
-    "Times New Roman",
-    "Roboto",
-    "Helvetica",
-    "Georgia",
-    "Verdana",
-    "Courier New"
-  ];
-
-  const handleFontChange = (value: string) => {
+const FontControls = ({ canvas, selectedFont, onFontChange }: FontControlsProps) => {
+  const handleFontSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!canvas) return;
     const activeObject = canvas.getActiveObject() as fabric.IText;
     if (activeObject && activeObject.type === 'i-text') {
-      activeObject.set('fontFamily', value);
-      canvas.renderAll();
-    }
-  };
-
-  const handleFontSize = (value: number[]) => {
-    if (!canvas) return;
-    const activeObject = canvas.getActiveObject() as fabric.IText;
-    if (activeObject && activeObject.type === 'i-text') {
-      activeObject.set('fontSize', value[0]);
+      activeObject.set('fontSize', parseInt(event.target.value, 10));
       canvas.renderAll();
     }
   };
@@ -47,91 +29,42 @@ const FontControls = ({ canvas }: FontControlsProps) => {
     }
   };
 
-  const toggleStyle = (style: 'bold' | 'italic' | 'underline') => {
-    if (!canvas) return;
-    const activeObject = canvas.getActiveObject() as fabric.IText;
-    if (activeObject && activeObject.type === 'i-text') {
-      switch (style) {
-        case 'bold':
-          activeObject.set('fontWeight', activeObject.fontWeight === 'bold' ? 'normal' : 'bold');
-          break;
-        case 'italic':
-          activeObject.set('fontStyle', activeObject.fontStyle === 'italic' ? 'normal' : 'italic');
-          break;
-        case 'underline':
-          activeObject.set('underline', !activeObject.underline);
-          break;
-      }
-      canvas.renderAll();
-    }
-  };
-
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <h3 className="text-sm font-medium">Font Style</h3>
-        <Select onValueChange={handleFontChange}>
+        <Label htmlFor="fontSize">Font Size</Label>
+        <Input
+          id="fontSize"
+          type="number"
+          defaultValue="40"
+          min="8"
+          max="200"
+          onChange={handleFontSizeChange}
+          className="w-full"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="fontFamily">Font Family</Label>
+        <Select value={selectedFont} onValueChange={onFontChange}>
           <SelectTrigger>
             <SelectValue placeholder="Select font" />
           </SelectTrigger>
           <SelectContent>
-            {fonts.map((font) => (
-              <SelectItem key={font} value={font}>
-                {font}
-              </SelectItem>
-            ))}
+            <SelectItem value="Arial">Arial</SelectItem>
+            <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+            <SelectItem value="Courier New">Courier New</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       <div className="space-y-2">
-        <h3 className="text-sm font-medium">Font Size</h3>
-        <Slider
-          defaultValue={[40]}
-          max={100}
-          min={8}
-          step={1}
-          onValueChange={handleFontSize}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <h3 className="text-sm font-medium">Text Color</h3>
+        <Label>Text Color</Label>
         <ColorPicker
           color="#000000"
           onChange={handleColorChange}
-          allowTransparent
+          allowTransparent={false}
         />
-      </div>
-
-      <div className="space-y-2">
-        <h3 className="text-sm font-medium">Text Style</h3>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => toggleStyle('bold')}
-            title="Bold"
-          >
-            <Bold className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => toggleStyle('italic')}
-            title="Italic"
-          >
-            <Italic className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => toggleStyle('underline')}
-            title="Underline"
-          >
-            <Underline className="h-4 w-4" />
-          </Button>
-        </div>
       </div>
     </div>
   );

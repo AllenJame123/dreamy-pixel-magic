@@ -1,5 +1,6 @@
 import { useCallback } from "react";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Upload } from "lucide-react";
 import { fabric } from "fabric";
 import { toast } from "sonner";
 
@@ -17,21 +18,21 @@ const ImageUploader = ({ canvas, saveState }: ImageUploaderProps) => {
     reader.onload = (e) => {
       if (!e.target?.result) return;
       
-      // Create a new image object
       const img = new Image();
       img.onload = () => {
         if (!canvas) return;
-
-        // Remove existing objects but keep the canvas instance
-        canvas.getObjects().forEach(obj => canvas.remove(obj));
         
-        // Create fabric image
+        canvas.getObjects().forEach(obj => {
+          if (!(obj instanceof fabric.IText)) {
+            canvas.remove(obj);
+          }
+        });
+        
         const fabricImage = new fabric.Image(img, {
           selectable: false,
           evented: false
         });
 
-        // Calculate scaling to fit the image within the canvas
         const scaleX = canvas.width! / fabricImage.width!;
         const scaleY = canvas.height! / fabricImage.height!;
         const scale = Math.min(scaleX, scaleY);
@@ -43,6 +44,7 @@ const ImageUploader = ({ canvas, saveState }: ImageUploaderProps) => {
         });
         
         canvas.add(fabricImage);
+        canvas.sendToBack(fabricImage);
         canvas.requestRenderAll();
         saveState();
         toast.success("Image uploaded successfully");
@@ -53,12 +55,18 @@ const ImageUploader = ({ canvas, saveState }: ImageUploaderProps) => {
   }, [canvas, saveState]);
 
   return (
-    <Input
-      type="file"
-      accept="image/*"
-      onChange={handleImageUpload}
-      className="w-full"
-    />
+    <div className="relative">
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleImageUpload}
+        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+      />
+      <Button className="w-full bg-primary hover:bg-primary/90" size="lg">
+        <Upload className="mr-2 h-5 w-5" />
+        Choose Image
+      </Button>
+    </div>
   );
 };
 
