@@ -32,8 +32,8 @@ export const useImageGeneration = () => {
       return;
     }
 
-    if (width < 128 || width > 1024 || height < 128 || height > 1024) {
-      toast.error('Image dimensions must be between 128 and 1024 pixels');
+    if (width < 128 || width > 1200 || height < 128 || height > 1200) {
+      toast.error('Image dimensions must be between 128 and 1200 pixels');
       return;
     }
 
